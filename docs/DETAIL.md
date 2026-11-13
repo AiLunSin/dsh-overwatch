@@ -93,7 +93,7 @@ $DSH_HOME/overwatch/
 ## 验证
 
 ```powershell
-npm test     # 98 个测试
+npm test     # 99 个测试
 npm run m0   # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1   # M1 web 端到端（25/25）
 npm run m2   # M2 值班员 headless 端到端（12/12）

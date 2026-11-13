@@ -120,7 +120,7 @@ S/R token、超时和子会话，并区分 guard-only / supervised 横幅。
 ## 4. 验证
 
 ```powershell
-npm test        # 98 个测试：链/锁/信号/事件单/Guard/Watch/卡/执行器/HTTP/服务/面板
+npm test        # 99 个测试：链/锁/信号/事件单/Guard/Watch/卡/执行器/HTTP/服务/面板
 npm run lint    # node --check 48 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1 硬闸门 web 端到端（25/25）
