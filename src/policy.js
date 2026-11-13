@@ -79,6 +79,11 @@ export function validateDecision(raw, context = {}) {
   else if (Buffer.byteLength(decision.reason, 'utf8') > (context.maxReasonBytes ?? 2_048)) errors.push('reason is too large')
   if (decision.confidence !== undefined && (typeof decision.confidence !== 'number' || decision.confidence < 0 || decision.confidence > 1)) {
     errors.push('confidence must be a number between 0 and 1')
+  } else if (typeof decision.confidence === 'number'
+    && decision.confidence < 0.6
+    && decision.action !== 'notice'
+    && decision.action !== 'escalate') {
+    errors.push('confidence below 0.6 requires notice or escalate')
   }
 
   if (errors.length === 0) {

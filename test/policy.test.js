@@ -130,6 +130,14 @@ test('pause is human-only by default and abort needs a hard limit', () => {
   assert.equal(authorizeDecision(abort, { mode: 'supervised', autopilot: { abortOnHardLimit: true }, hardLimit: true }).allowed, true)
 })
 
+test('low confidence cannot buy a mutating action', () => {
+  const low = validateDecision(decision({ confidence: 0.5 }))
+  assert.equal(low.ok, false)
+  if (!low.ok) assert.match(low.errors.join(' '), /confidence below 0.6/)
+  assert.equal(validateDecision(decision({ confidence: 0.5, action: 'escalate', params: {} })).ok, true)
+  assert.equal(validateDecision(decision({ confidence: 0.6 })).ok, true)
+})
+
 test('idempotency ignores reason text but not evidence or params', () => {
   const first = validateDecision(decision()).decision
   const same = validateDecision(decision({ reason: 'a different sentence' })).decision

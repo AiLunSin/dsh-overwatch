@@ -1,0 +1,15 @@
+{
+  "name": "dsh-overwatch-m2-harness",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "In-process fake swarm HTTP surface for the dsh-overwatch M2 headless probe. Test only.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

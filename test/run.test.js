@@ -45,8 +45,8 @@ function fakePorts(initialRatio = 0) {
           goal: 'M1 test run',
           status: state.status,
           round: 1,
-          createdAt: Date.parse('2026-11-14T00:00:00.000Z'),
-          updatedAt: Date.parse('2026-11-14T00:00:05.000Z'),
+          createdAt: Date.parse('2026-11-14T02:00:00.000Z'),
+          updatedAt: Date.parse('2026-11-14T02:00:00.500Z'),
           budget: {
             limits: { runTokens: LIMIT, runUsd: 0, runWallMs: 0, taskTokens: 100_000, memberTokens: 100_000 },
             run: { tokens: state.spent, reservedTokens: 0, calls: 3, usd: 0, reservedUsd: 0, wallMs: 0 },
@@ -141,7 +141,7 @@ function testConfig(overrides = {}) {
   })
 }
 
-async function harness(ratio = 0, config = testConfig()) {
+async function harness(ratio = 0, config = testConfig(), extra = {}) {
   const dir = tempDir()
   let now = Date.parse('2026-11-14T02:00:00.000Z')
   const ports = fakePorts(ratio)
@@ -151,6 +151,8 @@ async function harness(ratio = 0, config = testConfig()) {
     ports,
     dir,
     clock: () => now,
+    ctx: extra.ctx,
+    watchFactory: extra.watchFactory,
   })
   await supervisor.open()
   return {
@@ -245,6 +247,104 @@ test('a member failure streak opens one L2 case without a guard action', async (
   await h.supervisor.tick()
   assert.equal(h.supervisor.cases({ state: 'open' }).filter(record => record.code === 'failure_streak').length, 1)
   await h.supervisor.disarm('test over')
+})
+
+function fakeSubagents(capacity = 8) {
+  return {
+    config: { maxActiveSubagents: { get: () => capacity } },
+    namesOf: agent => ({ self: String(agent?.id ?? ''), parent: 'lead' }),
+  }
+}
+
+function fakeWatch(behaviour = 'decided') {
+  const calls = []
+  const watch = {
+    name: 'ow-test',
+    childId: null,
+    pending: null,
+    wakes: 0,
+    timeouts: 0,
+    calls,
+    handleAgentCreated() {
+      return false
+    },
+    status() {
+      return { state: 'idle', name: this.name, childId: this.childId, wakes: this.wakes, timeouts: this.timeouts, errors: 0 }
+    },
+    async wake(input) {
+      calls.push({ ...input, stack: new Error().stack })
+      this.wakes += 1
+      if (behaviour === 'timeout') {
+        this.timeouts += 1
+        return { status: 'timeout' }
+      }
+      return {
+        status: 'decided',
+        decision: { action: 'coach', reason: 'watch officer coached the stalled member', confidence: 0.8 },
+        outcome: { ok: true, actionId: 'act_watch_1', verified: true },
+      }
+    },
+    async dispose() {},
+  }
+  return watch
+}
+
+test('supervised arm requires the live root agent and a real capacity check', async () => {
+  const config = testConfig({ http: { token: 'test-token' } })
+  const noAgent = await harness(0.1, config)
+  await assert.rejects(() => noAgent.supervisor.arm({ mode: 'supervised' }), error => error.code === 'AGENT_REQUIRED')
+  await noAgent.supervisor.disarm('test over')
+
+  const tight = await harness(0.1, config, { ctx: { get: name => (name === 'subagents' ? fakeSubagents(1) : undefined) } })
+  await assert.rejects(
+    () => tight.supervisor.arm({ mode: 'supervised', parentAgent: { id: 'root' } }),
+    error => error.code === 'CAPACITY_CONFLICT',
+  )
+  await tight.supervisor.disarm('test over')
+})
+
+test('a supervised run wakes the officer on an L2 case and applies its decision', async () => {
+  const config = testConfig({ policy: { twoSignalRule: false, cooldownMs: 0, autopilot: { throttle: false, pause: false, pauseOnHardLimit: true, abortOnHardLimit: true } } })
+  const watch = fakeWatch('decided')
+  const { supervisor } = await harness(0.81, config, {
+    ctx: { get: name => (name === 'subagents' ? fakeSubagents(8) : undefined) },
+    watchFactory: () => watch,
+  })
+  const armed = await supervisor.arm({ mode: 'supervised', parentAgent: { id: 'root' } })
+  assert.equal(armed.mode, 'supervised')
+  await new Promise(resolve => setTimeout(resolve, 5))
+  assert.equal(watch.calls.length, 1)
+  assert.match(watch.calls[0].card.caseId, /^case_/)
+  const caseId = watch.calls[0].caseId
+  assert.match(caseId, /^case_/)
+  const view = supervisor.snapshot()
+  assert.equal(view.watch.enabled, true)
+  assert.equal(view.watch.wakes, 1)
+  assert.equal(view.watch.reserve > 0, true)
+  const closed = supervisor.cases({ state: 'all' }).find(record => record.id === caseId)
+  assert.equal(closed.state, 'closed')
+  assert.equal(closed.closeReason, 'mitigated')
+  assert.ok(supervisor.store.read().some(event => event.type === 'watch/decision' && event.payload.action === 'coach'))
+  await supervisor.disarm('test over')
+})
+
+test('a watch timeout is recorded, the case stays open, and the guard remains in charge', async () => {
+  const config = testConfig({ policy: { twoSignalRule: false, cooldownMs: 0, autopilot: { throttle: false, pause: false, pauseOnHardLimit: true, abortOnHardLimit: true } } })
+  const watch = fakeWatch('timeout')
+  const { supervisor } = await harness(0.81, config, {
+    ctx: { get: name => (name === 'subagents' ? fakeSubagents(8) : undefined) },
+    watchFactory: () => watch,
+  })
+  await supervisor.arm({ mode: 'supervised', parentAgent: { id: 'root' } })
+  await new Promise(resolve => setTimeout(resolve, 5))
+  assert.ok(supervisor.store.read().some(event => event.type === 'watch/wake/timeout'))
+  const record = supervisor.cases({ state: 'all' }).find(candidate => candidate.code === 'budget_pressure')
+  assert.equal(record.state, 'open')
+  assert.ok(record.decisions.some(decision => decision.verdict === 'timeout'))
+  await supervisor.disarm('test over')
+  const shift = supervisor.lastShift
+  assert.ok(shift !== null)
+  assert.match(shift.id, /^shift-/)
 })
 
 test('a missing write token downgrades the arm and the guard never acts', async () => {

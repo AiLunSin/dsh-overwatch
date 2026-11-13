@@ -1,0 +1,52 @@
+{
+  "calls": [
+    {
+      "action": "steer",
+      "body": {
+        "action": "steer",
+        "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+        "actor": "overwatch",
+        "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
+      },
+      "at": "2026-11-13T18:09:20.025Z",
+      "status": "running"
+    }
+  ],
+  "status": "running",
+  "events": [
+    {
+      "seq": 1,
+      "id": "evt_1",
+      "type": "swarm/created",
+      "at": "2026-11-13T18:09:19.363Z",
+      "actor": "system",
+      "payload": {
+        "runId": "swarm_m2"
+      }
+    },
+    {
+      "seq": 2,
+      "id": "evt_2",
+      "type": "swarm/dispatch/started",
+      "at": "2026-11-13T18:09:19.363Z",
+      "actor": "system",
+      "payload": {
+        "memberId": "member_worker",
+        "childId": "sess_worker",
+        "taskId": "task_1"
+      }
+    },
+    {
+      "seq": 3,
+      "id": "evt_3",
+      "type": "swarm/intervened",
+      "at": "2026-11-13T18:09:20.025Z",
+      "actor": "system",
+      "payload": {
+        "action": "steer",
+        "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes.",
+        "target": null
+      }
+    }
+  ]
+}

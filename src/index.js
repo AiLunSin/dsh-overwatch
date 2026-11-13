@@ -51,6 +51,18 @@ export async function apply(ctx, rawConfig) {
   await service.open()
   ctx.effect(() => () => service.close())
 
+  // The watch officer's restriction must run in the serial agent/created
+  // listener, before the child's first model request. session/event feeds its
+  // token ledger.
+  if (typeof ctx.on === 'function') {
+    ctx.effect(() => ctx.on('agent/created', payload => {
+      service.handleAgentCreated(payload?.agent)
+    }))
+    ctx.effect(() => ctx.on('session/event', (session, event) => {
+      service.recordSessionEvent(session, event)
+    }))
+  }
+
   if (typeof ctx.tools?.register === 'function') {
     registerTools(ctx, service, config)
   } else {

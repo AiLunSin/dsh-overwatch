@@ -92,6 +92,7 @@ function fakeWebServer(origin) {
 function fakeCtx(webServer) {
   const registered = []
   const disposers = []
+  const listeners = new Map()
   const ctx = {
     logger: { info() {}, warn() {} },
     tools: {
@@ -101,6 +102,10 @@ function fakeCtx(webServer) {
     },
     get(name) {
       return name === 'webServer' ? webServer : undefined
+    },
+    on(event, handler) {
+      listeners.set(event, handler)
+      return () => {}
     },
     effect(fn) {
       const disposer = fn()
@@ -114,6 +119,7 @@ function fakeCtx(webServer) {
   return {
     ctx,
     registered,
+    listeners,
     dispose() {
       for (const dispose of disposers.reverse()) dispose()
     },
@@ -170,5 +176,10 @@ test('apply registers tools and the HTTP route, then disposes cleanly', async ()
   assert.equal(webServer.route.kind, 'prefix')
   assert.equal(typeof webServer.route.handler, 'function')
   assert.deepEqual(inject, ['tools'])
+  assert.equal(typeof fake.listeners.get('agent/created'), 'function')
+  assert.equal(typeof fake.listeners.get('session/event'), 'function')
+  // A listener call with no live run must be a no-op, not a throw.
+  assert.doesNotThrow(() => fake.listeners.get('agent/created')({ agent: { id: 'sess_x' } }))
+  assert.doesNotThrow(() => fake.listeners.get('session/event')({ id: 'sess_x' }, { type: 'assistant/message' }))
   fake.dispose()
 })

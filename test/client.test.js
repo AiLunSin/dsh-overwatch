@@ -192,9 +192,9 @@ test('covers panel, table, button, empty, error, and write-state copy', () => {
   ]
   for (const key of required) assert.ok(keysOf('zh').has(key), `missing i18n key ${key}`)
   assert.match(dictionary.zh.guardOnlyBanner, /guard-only/)
-  assert.match(dictionary.zh.guardOnlyBanner, /M2/)
+  assert.match(dictionary.zh.supervisedHint, /M2/)
   assert.match(dictionary.en.guardOnlyBanner, /guard-only/)
-  assert.match(dictionary.en.guardOnlyBanner, /M2/)
+  assert.match(dictionary.en.supervisedHint, /M2/)
   assert.match(dictionary.zh.emptyToolBody, /watch_arm/)
   assert.match(dictionary.zh.emptyHttpBody, /x-overwatch-token/)
 })
@@ -243,12 +243,15 @@ test('renders through translated labels and does not invent unknown event times'
   assert.ok(SOURCE.includes('Intl.RelativeTimeFormat'))
 })
 
-test('only exposes the guard-only M1 panel surface', () => {
-  assert.match(dictionary.zh.guardOnlyHint, /M1/)
-  assert.match(dictionary.en.guardOnlyHint, /M1/)
-  assert.ok(!SOURCE.includes('/decide'), 'M1 must not expose watch_decide')
-  assert.ok(!SOURCE.includes('/purge'), 'M1 must not expose purge')
-  assert.ok(!SOURCE.includes('/shift/latest'), 'M1 must not depend on the shift route')
+test('exposes both the guard-only and the supervised M2 surface', () => {
+  assert.match(dictionary.zh.supervisedBanner, /supervised/)
+  assert.match(dictionary.en.supervisedBanner, /supervised/)
+  assert.ok(SOURCE.includes("value: 'supervised'"), 'arm mode select must offer supervised')
+  assert.ok(SOURCE.includes("armSupervised"), 'supervised mode label must be translated')
+  assert.ok(SOURCE.includes("watchStateLabel"), 'watch officer state must be rendered')
+  assert.ok(!SOURCE.includes('/decide'), 'the panel must not expose the agent decision tool as an HTTP route')
+  assert.ok(!SOURCE.includes('/purge'), 'the panel must not expose purge')
+  assert.ok(!SOURCE.includes('/shift/latest'), 'the panel must not depend on the shift route')
 })
 
 function makeFixture() {

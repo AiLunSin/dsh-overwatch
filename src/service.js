@@ -66,6 +66,16 @@ export class OverwatchService {
     }
   }
 
+  /**
+   * Upstream origin for the three ports: an explicit `ports.origin` wins, then
+   * the Host web server (the same process normally serves swarm/pressure/fish).
+   * @returns {string | null}
+   */
+  upstreamOrigin() {
+    if (this.config.ports.origin !== '') return this.config.ports.origin.replace(/\/$/, '')
+    return this.origin()
+  }
+
   async open() {
     ensureDir(this.dataDir)
     ensureDir(this.runsDir)
@@ -84,14 +94,14 @@ export class OverwatchService {
       payload: { version: this.version, mode: this.config.mode, instanceId: this.instanceId },
     })
     this.openedAt = event.at
-    const origin = this.origin()
+    const origin = this.upstreamOrigin()
     if (origin !== null) this.attachPorts(origin)
     this.#writeIndex()
   }
 
   /** @param {string} origin */
   attachPorts(origin) {
-    this.ports = this.portsFactory(origin)
+    this.ports = this.portsFactory(this.config.ports.origin !== '' ? this.config.ports.origin.replace(/\/$/, '') : origin)
     return this.ports
   }
 
@@ -101,7 +111,7 @@ export class OverwatchService {
       http: this.origin() !== null && this.config.http.enabled,
       write: this.config.http.token !== '',
       guard: true,
-      supervisor: false,
+      supervisor: true,
       watchOfficer: 'm2',
       ports: {
         swarm: this.ports !== null,
@@ -113,36 +123,76 @@ export class OverwatchService {
 
   /**
    * Start supervising a live swarm run.
-   * @param {{ runId: string, mode?: 'observe'|'guard'|'supervised', agentId?: string }} input
+   * @param {{ runId: string, mode?: 'observe'|'guard'|'supervised', parentAgent?: any, agentId?: string }} input
    */
   async arm(input) {
     const runId = String(input?.runId ?? '')
     if (!RUN_ID_PATTERN.test(runId)) throw fail('INVALID_RUN_ID', 'runId must match [A-Za-z0-9_-]{1,200}')
     if (this.runs.has(runId)) throw fail('ALREADY_ARMED', `run ${runId} is already supervised by this process`)
-    let origin = this.origin()
-    if (origin === null && this.config.http.enabled) {
-      throw fail('WEB_UNAVAILABLE', 'the Host web server is not ready; retry when /overwatch/api/health answers')
+    let origin = this.upstreamOrigin()
+    if (origin === null) {
+      throw fail('WEB_UNAVAILABLE', 'no upstream origin: the Host web server is not ready and ports.origin is empty')
     }
-    if (origin === null) origin = 'http://127.0.0.1'
     if (this.ports === null) this.attachPorts(origin)
     const supervisor = new RunSupervisor({
       runId,
       config: this.config,
       ports: this.ports,
+      ctx: this.ctx,
       dir: path.join(this.runsDir, runId),
       clock: this.clock,
       logger: this.logger,
     })
     try {
       await supervisor.open()
-      const result = await supervisor.arm({ mode: input.mode, agentId: input.agentId })
-      this.runs.set(runId, supervisor)
+    } catch (error) {
+      supervisor.close()
+      throw error
+    }
+    // Publish before arm: the watch child is created inside `arm()`, and its
+    // serial agent/created listener must find this supervisor in the registry to
+    // apply the tool restriction.
+    this.runs.set(runId, supervisor)
+    try {
+      const result = await supervisor.arm({ mode: input.mode, parentAgent: input.parentAgent })
       this.#writeIndex()
       this.logger?.info?.(`[overwatch] armed ${runId} mode=${result.mode}`)
       return result
     } catch (error) {
+      this.runs.delete(runId)
       supervisor.close()
       throw error
+    }
+  }
+
+  /**
+   * Serial `agent/created` fan-out. Must not throw: a listener error would fail
+   * child creation. The watch officer restricts the child synchronously.
+   * @param {any} agent
+   */
+  handleAgentCreated(agent) {
+    for (const supervisor of this.runs.values()) {
+      try {
+        supervisor.handleAgentCreated(agent)
+      } catch (error) {
+        this.logger?.warn?.(`[overwatch] agent/created handler failed: ${error instanceof Error ? error.message : String(error)}`)
+      }
+    }
+  }
+
+  /**
+   * @param {any} session
+   * @param {any} event
+   */
+  recordSessionEvent(session, event) {
+    const id = String(session?.id ?? '')
+    if (id === '') return
+    for (const supervisor of this.runs.values()) {
+      try {
+        supervisor.recordUsage(id, event)
+      } catch {
+        // Usage accounting must never break the child's turn.
+      }
     }
   }
 
@@ -277,7 +327,7 @@ export class OverwatchService {
     const runs = []
     for (const [runId, supervisor] of this.runs) {
       const health = supervisor.health()
-      runs.push({ runId, state: health.state, armed: true, freshness: health.freshness, log: health.log })
+      runs.push({ runId, state: health.state, armed: true, freshness: health.freshness, log: health.log, watch: health.watch })
     }
     let names = []
     try {
@@ -484,6 +534,7 @@ function readArchiveView(dir, runId, clock) {
     throttle: archive.snapshot?.throttle ?? null,
     interventions: archive.snapshot?.interventions ?? 0,
     lock: { held: false },
+    watch: archive.snapshot?.watch ?? { enabled: false, state: 'unavailable', spent: 0, reserve: 0 },
     lastEventAt: archive.updatedAt,
     armedAt: archive.armed?.at ?? null,
     disarmedAt: archive.disarmed?.at ?? null,

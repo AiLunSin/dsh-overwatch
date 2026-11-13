@@ -1,0 +1,4 @@
+# M2 test-only bundle: in-process fake swarm server.
+- insert:
+    - id: dsh-overwatch-m2-harness
+      name: dsh-overwatch-m2-harness

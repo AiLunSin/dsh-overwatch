@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Overwatch",
-    "description": "Guard-only supervision for controlled swarms (M1): a model-free hard budget/log guard, incident cases, a hash-chained watch log, and a panel. The tool-restricted watch officer arrives in M2.",
+    "description": "Supervised swarms for DeepSeek Harness: a model-free hard guard, a tool-restricted watch officer (M2), incident cases, a hash-chained watch log, and a panel.",
     "detail": "docs/DETAIL.md"
   }
 }

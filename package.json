@@ -40,7 +40,8 @@
     "lint": "node scripts/check-syntax.mjs",
     "check": "npm run lint && npm test",
     "m0": "node e2e/m0/run.mjs",
-    "m1": "node e2e/m1/run.mjs"
+    "m1": "node e2e/m1/run.mjs",
+    "m2": "node e2e/m2/run.mjs"
   },
   "engines": {
     "node": ">=22",

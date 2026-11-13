@@ -1,17 +1,17 @@
 {
   "version": "0.2.2-rc.3",
-  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY",
+  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M",
   "headless": {
     "exit": 0,
     "report": {
       "schemaVersion": 1,
       "stage": "headless",
-      "startedAt": "2026-11-13T17:17:24.582Z",
-      "finishedAt": "2026-11-13T17:17:26.353Z",
+      "startedAt": "2026-11-13T18:08:35.408Z",
+      "finishedAt": "2026-11-13T18:08:37.204Z",
       "env": {
         "node": "v24.21.0",
         "platform": "win32",
-        "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home",
+        "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home",
         "profile": null
       },
       "checks": {
@@ -26,6 +26,10 @@
               "web_fetch",
               "todo_write",
               "exit_plan_mode",
+              "watch_arm",
+              "watch_disarm",
+              "watch_status",
+              "watch_report",
               "get_goal",
               "create_goal",
               "update_goal",
@@ -73,7 +77,7 @@
             "globalToolsStillVisible": [],
             "llmRequests": 2
           },
-          "at": "2026-11-13T17:17:24.905Z"
+          "at": "2026-11-13T18:08:35.759Z"
         },
         "A-3": {
           "status": "pass",
@@ -85,7 +89,7 @@
             },
             "assistantMessages": 2
           },
-          "at": "2026-11-13T17:17:24.906Z"
+          "at": "2026-11-13T18:08:35.760Z"
         },
         "LOOP": {
           "status": "pass",
@@ -119,7 +123,7 @@
             "chainOk": true,
             "ok": true
           },
-          "at": "2026-11-13T17:17:24.907Z"
+          "at": "2026-11-13T18:08:35.762Z"
         },
         "A-9": {
           "status": "pass",
@@ -135,7 +139,7 @@
             ],
             "interpretation": "the anchor child occupies one slot; the root is not counted, so capacity 3 admits two capacity-probe children"
           },
-          "at": "2026-11-13T17:17:26.158Z"
+          "at": "2026-11-13T18:08:37.019Z"
         },
         "A-7": {
           "status": "pass",
@@ -143,7 +147,7 @@
             "preset": "m0-watch",
             "stopReason": "completed"
           },
-          "at": "2026-11-13T17:17:26.183Z"
+          "at": "2026-11-13T18:08:37.047Z"
         },
         "A-2": {
           "status": "pass",
@@ -162,28 +166,28 @@
               }
             ]
           },
-          "at": "2026-11-13T17:17:26.323Z"
+          "at": "2026-11-13T18:08:37.185Z"
         },
         "A-4": {
           "status": "blocked",
           "evidence": {
             "reason": "headless stage has no Host web server; see the web-stage report"
           },
-          "at": "2026-11-13T17:17:26.351Z"
+          "at": "2026-11-13T18:08:37.202Z"
         },
         "A-5": {
           "status": "blocked",
           "evidence": {
             "reason": "headless stage has no Host web server; see the web-stage report"
           },
-          "at": "2026-11-13T17:17:26.352Z"
+          "at": "2026-11-13T18:08:37.202Z"
         },
         "A-8": {
           "status": "blocked",
           "evidence": {
             "reason": "headless stage has no Host web server; see the web-stage report"
           },
-          "at": "2026-11-13T17:17:26.353Z"
+          "at": "2026-11-13T18:08:37.203Z"
         }
       },
       "loop": {
@@ -217,7 +221,7 @@
         "ok": true
       },
       "watch": {
-        "childId": "4fdb0864-29e1-4973-a62c-281581049ae9",
+        "childId": "c4d73625-d14a-4b33-9851-1b88e9ce4874",
         "name": "m0-watch",
         "stopReason": "completed"
       },
@@ -230,39 +234,39 @@
     "report": {
       "schemaVersion": 1,
       "stage": "web",
-      "startedAt": "2026-11-13T17:17:28.494Z",
-      "finishedAt": "2026-11-13T17:17:30.930Z",
+      "startedAt": "2026-11-13T18:08:39.473Z",
+      "finishedAt": "2026-11-13T18:08:41.939Z",
       "env": {
         "node": "v24.21.0",
         "platform": "win32",
-        "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home",
+        "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home",
         "profile": null
       },
       "checks": {
         "A-4": {
           "status": "pass",
           "evidence": {
-            "url": "http://127.0.0.1:54213/swarm/api/health",
+            "url": "http://127.0.0.1:53848/swarm/api/health",
             "httpStatus": 200,
             "error": null,
             "body": {
               "ok": true,
               "runs": 0,
-              "baseDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home\\swarm"
+              "baseDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home\\swarm"
             }
           },
-          "at": "2026-11-13T17:17:30.916Z"
+          "at": "2026-11-13T18:08:41.922Z"
         },
         "A-5": {
           "status": "pass",
           "evidence": {
-            "url": "http://127.0.0.1:54213/api/fishkeeper/overview",
+            "url": "http://127.0.0.1:53848/api/fishkeeper/overview",
             "httpStatus": 401,
             "reachableFromHost": false,
             "interpretation": "host fetch was rejected; automatic fishkeeper writes need the browser credential or a new host route",
             "body": "unauthorized"
           },
-          "at": "2026-11-13T17:17:30.919Z"
+          "at": "2026-11-13T18:08:41.926Z"
         },
         "A-8": {
           "status": "pass",
@@ -281,7 +285,7 @@
             },
             "interpretation": "the Host web server applies no origin/token policy of its own; the route owner must (overwatch does)"
           },
-          "at": "2026-11-13T17:17:30.925Z"
+          "at": "2026-11-13T18:08:41.931Z"
         },
         "A-8-OVERWATCH": {
           "status": "pass",
@@ -291,16 +295,16 @@
             "postWithWrongToken": 403,
             "expected": "GET 200; POST 403 WRITE_DISABLED with an empty token"
           },
-          "at": "2026-11-13T17:17:30.930Z"
+          "at": "2026-11-13T18:08:41.937Z"
         }
       },
       "loop": null,
       "watch": null,
       "errors": []
     },
-    "stdout": "dsh web: http://127.0.0.1:54213/?token=<redacted>",
+    "stdout": "dsh web: http://127.0.0.1:53848/?token=<redacted>",
     "stderr": ""
   },
   "error": null,
-  "durationMs": 9721
+  "durationMs": 9804
 }

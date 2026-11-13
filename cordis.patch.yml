@@ -10,6 +10,7 @@
           enabled: true
           provider: spawn
           model: inherit
+          agentPreset: ''
           reserveRatio: 0.05
           maxReserveTokens: 200000
           maxWakes: 30

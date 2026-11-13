@@ -1,0 +1,779 @@
+{
+  "schemaVersion": 1,
+  "stage": "headless-m2",
+  "startedAt": "2026-11-13T18:09:23.055Z",
+  "dshVersion": "0.2.2-rc.3",
+  "port": 53906,
+  "checks": {
+    "run-exit": {
+      "status": "pass",
+      "evidence": {
+        "exit": 0,
+        "stderr": ""
+      }
+    },
+    "chain-ok": {
+      "status": "pass",
+      "evidence": {
+        "ok": true,
+        "count": 13,
+        "error": null
+      }
+    },
+    "armed-supervised": {
+      "status": "pass",
+      "evidence": {
+        "armed": {
+          "mode": "supervised",
+          "requestedMode": "supervised",
+          "runId": "swarm_m2",
+          "reserve": 50000,
+          "supervisor": "lazy",
+          "watchName": "ow-a1f6e9f0ab8b",
+          "sampling": {
+            "swarmEventMs": 500,
+            "swarmSnapshotMs": 500,
+            "pressureMs": 500,
+            "fishMs": 500,
+            "staleMs": 5000,
+            "requestTimeoutMs": 2000,
+            "maxInflight": 2
+          },
+          "capabilities": {
+            "guard": true,
+            "supervisor": true,
+            "write": true
+          }
+        }
+      }
+    },
+    "case-opened": {
+      "status": "pass",
+      "evidence": {
+        "opened": 1
+      }
+    },
+    "wake-recorded": {
+      "status": "pass",
+      "evidence": {
+        "wakes": 1
+      }
+    },
+    "watch-decision": {
+      "status": "pass",
+      "evidence": {
+        "decision": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "generation": 1,
+          "action": "coach",
+          "confidence": 0.82,
+          "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+          "accepted": true,
+          "code": null,
+          "requiresHuman": false,
+          "actionId": "act_cebcac438f86"
+        }
+      }
+    },
+    "action-chain": {
+      "status": "pass",
+      "evidence": {
+        "intended": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "target": {
+            "kind": "swarm_run",
+            "id": "swarm_m2"
+          },
+          "evidenceRefs": [
+            "ev_swarm_budget_run:[object Object]:pressure"
+          ]
+        },
+        "executed": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "ok": true,
+          "result": {
+            "ok": true,
+            "kind": "steer",
+            "httpStatus": 200,
+            "error": null,
+            "data": {
+              "swarmId": "swarm_m2",
+              "runId": "swarm_m2",
+              "goal": "M2 supervised probe",
+              "repo": "C:/tmp/repo",
+              "topology": "mesh",
+              "mode": "swarm",
+              "status": "running",
+              "round": 1,
+              "concurrencyLimit": 2,
+              "createdAt": 1794593359200,
+              "updatedAt": 1794593360026,
+              "endedAt": null,
+              "recovered": false,
+              "convergedReason": null,
+              "baseCommit": "",
+              "gateCommands": [],
+              "workspace": {
+                "enabled": false,
+                "integrationBranch": null,
+                "degraded": 0,
+                "conflicts": 0
+              },
+              "dispatch": {
+                "auto": false,
+                "active": 1,
+                "parentBound": true
+              },
+              "preflight": null,
+              "convergence": {
+                "converged": false,
+                "openTasks": 1,
+                "budgetRatio": 0.81,
+                "budgetExhausted": false
+              },
+              "stats": {
+                "members": 2,
+                "tasks": 1,
+                "merged": 0,
+                "failed": 0,
+                "active": 1,
+                "boardEntries": 0,
+                "events": 3
+              },
+              "budget": {
+                "limits": {
+                  "runTokens": 1000000,
+                  "runUsd": 0,
+                  "runWallMs": 0,
+                  "taskTokens": 400000,
+                  "memberTokens": 800000
+                },
+                "run": {
+                  "tokens": 810000,
+                  "reservedTokens": 0,
+                  "calls": 3,
+                  "usd": 0,
+                  "reservedUsd": 0,
+                  "wallMs": 0
+                },
+                "tasks": {},
+                "members": {},
+                "reservations": 0
+              },
+              "members": [
+                {
+                  "id": "member_queen",
+                  "name": "queen",
+                  "role": "queen",
+                  "model": "inherit",
+                  "status": "busy",
+                  "load": 0,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794593359200,
+                  "lastWinRound": 0,
+                  "skills": []
+                },
+                {
+                  "id": "member_worker",
+                  "name": "worker-1",
+                  "role": "worker",
+                  "model": "fast",
+                  "status": "busy",
+                  "load": 1,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794593359200,
+                  "lastWinRound": 0,
+                  "skills": [
+                    ".js"
+                  ]
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "task_1",
+                  "title": "probe task",
+                  "state": "working",
+                  "assignee": "member_worker"
+                }
+              ]
+            }
+          }
+        },
+        "verified": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "ok": true,
+          "detail": {
+            "status": "running"
+          }
+        }
+      }
+    },
+    "swarm-steer": {
+      "status": "pass",
+      "evidence": {
+        "steer": {
+          "action": "steer",
+          "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+          "actor": "overwatch",
+          "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
+        }
+      }
+    },
+    "watch-tools-only": {
+      "status": "pass",
+      "evidence": {
+        "firstWatchTools": [
+          "watch_case",
+          "watch_decide",
+          "watch_evidence"
+        ],
+        "leaked": [],
+        "requests": 4
+      }
+    },
+    "usage-accounted": {
+      "status": "pass",
+      "evidence": {
+        "usage": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "spent": 18720,
+          "reserve": 50000,
+          "calls": 3
+        }
+      }
+    },
+    "case-closed": {
+      "status": "pass",
+      "evidence": {
+        "closed": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "reason": "mitigated",
+          "note": "watch officer issued coach",
+          "actions": 1
+        }
+      }
+    },
+    "shift-written": {
+      "status": "pass",
+      "evidence": {
+        "shift": {
+          "shiftId": "shift-0001",
+          "reason": "M2 e2e complete",
+          "window": {
+            "from": "2026-11-13T18:09:19.442Z",
+            "to": "2026-11-13T18:09:22.986Z"
+          },
+          "summary": {
+            "mode": "supervised",
+            "budget": {
+              "limit": 1000000,
+              "spent": 810000,
+              "ratio": 0.81,
+              "reserve": 50000,
+              "supervisorUsed": 26160
+            },
+            "supervisorSpent": 26160,
+            "cases": {
+              "total": 1,
+              "open": 0
+            },
+            "wakes": 1,
+            "timeouts": 0
+          }
+        }
+      }
+    }
+  },
+  "watch": {
+    "summary": {
+      "ok": true,
+      "count": 13,
+      "types": [
+        "watch/armed",
+        "watch/sample",
+        "watch/case/opened",
+        "watch/wake",
+        "watch/attach",
+        "watch/action/intended",
+        "watch/action/executed",
+        "watch/action/verified",
+        "watch/decision",
+        "watch/usage",
+        "watch/case/closed",
+        "watch/shift",
+        "watch/disarmed"
+      ],
+      "armed": {
+        "mode": "supervised",
+        "requestedMode": "supervised",
+        "runId": "swarm_m2",
+        "reserve": 50000,
+        "supervisor": "lazy",
+        "watchName": "ow-a1f6e9f0ab8b",
+        "sampling": {
+          "swarmEventMs": 500,
+          "swarmSnapshotMs": 500,
+          "pressureMs": 500,
+          "fishMs": 500,
+          "staleMs": 5000,
+          "requestTimeoutMs": 2000,
+          "maxInflight": 2
+        },
+        "capabilities": {
+          "guard": true,
+          "supervisor": true,
+          "write": true
+        }
+      },
+      "decision": {
+        "caseId": "case_0bcd7c808d6c4dd6",
+        "generation": 1,
+        "action": "coach",
+        "confidence": 0.82,
+        "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+        "accepted": true,
+        "code": null,
+        "requiresHuman": false,
+        "actionId": "act_cebcac438f86"
+      }
+    },
+    "events": [
+      {
+        "seq": 1,
+        "type": "watch/armed",
+        "at": "2026-11-13T18:09:19.442Z",
+        "actor": "human",
+        "payload": {
+          "mode": "supervised",
+          "requestedMode": "supervised",
+          "runId": "swarm_m2",
+          "reserve": 50000,
+          "supervisor": "lazy",
+          "watchName": "ow-a1f6e9f0ab8b",
+          "sampling": {
+            "swarmEventMs": 500,
+            "swarmSnapshotMs": 500,
+            "pressureMs": 500,
+            "fishMs": 500,
+            "staleMs": 5000,
+            "requestTimeoutMs": 2000,
+            "maxInflight": 2
+          },
+          "capabilities": {
+            "guard": true,
+            "supervisor": true,
+            "write": true
+          }
+        }
+      },
+      {
+        "seq": 2,
+        "type": "watch/sample",
+        "at": "2026-11-13T18:09:19.445Z",
+        "actor": "guard",
+        "payload": {
+          "status": "running",
+          "round": 1,
+          "budget": {
+            "limit": 1000000,
+            "spent": 810000,
+            "ratio": 0.81
+          },
+          "cases": {
+            "open": 0
+          },
+          "freshness": {
+            "swarm": {
+              "ok": true,
+              "at": "2026-11-13T18:09:19.437Z",
+              "ageMs": 7,
+              "error": null
+            },
+            "pressure": {
+              "ok": false,
+              "at": "2026-11-13T18:09:19.437Z",
+              "ageMs": 7,
+              "error": "HTTP 404"
+            },
+            "fish": {
+              "ok": false,
+              "at": "2026-11-13T18:09:19.437Z",
+              "ageMs": 7,
+              "error": "HTTP 404"
+            }
+          }
+        }
+      },
+      {
+        "seq": 3,
+        "type": "watch/case/opened",
+        "at": "2026-11-13T18:09:19.954Z",
+        "actor": "guard",
+        "payload": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "severity": "L2",
+          "code": "budget_pressure",
+          "title": "run budget at 81.0% — pressure threshold",
+          "scope": {
+            "kind": "run",
+            "id": "run"
+          },
+          "evidenceIds": [
+            "ev_swarm_budget_run:[object Object]:pressure"
+          ],
+          "reopens": null
+        }
+      },
+      {
+        "seq": 4,
+        "type": "watch/wake",
+        "at": "2026-11-13T18:09:19.954Z",
+        "actor": "system",
+        "payload": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "generation": 1,
+          "wakeIndex": 1,
+          "budgetLeft": 50000,
+          "severity": "L2",
+          "code": "budget_pressure"
+        }
+      },
+      {
+        "seq": 5,
+        "type": "watch/attach",
+        "at": "2026-11-13T18:09:19.963Z",
+        "actor": "watch",
+        "payload": {
+          "agentId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+          "name": "ow-a1f6e9f0ab8b",
+          "inherited": 33,
+          "registered": [
+            "watch_case",
+            "watch_evidence",
+            "watch_decide"
+          ]
+        }
+      },
+      {
+        "seq": 6,
+        "type": "watch/action/intended",
+        "at": "2026-11-13T18:09:20.022Z",
+        "actor": "watch",
+        "payload": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "target": {
+            "kind": "swarm_run",
+            "id": "swarm_m2"
+          },
+          "evidenceRefs": [
+            "ev_swarm_budget_run:[object Object]:pressure"
+          ]
+        }
+      },
+      {
+        "seq": 7,
+        "type": "watch/action/executed",
+        "at": "2026-11-13T18:09:20.026Z",
+        "actor": "executor",
+        "payload": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "ok": true,
+          "result": {
+            "ok": true,
+            "kind": "steer",
+            "httpStatus": 200,
+            "error": null,
+            "data": {
+              "swarmId": "swarm_m2",
+              "runId": "swarm_m2",
+              "goal": "M2 supervised probe",
+              "repo": "C:/tmp/repo",
+              "topology": "mesh",
+              "mode": "swarm",
+              "status": "running",
+              "round": 1,
+              "concurrencyLimit": 2,
+              "createdAt": 1794593359200,
+              "updatedAt": 1794593360026,
+              "endedAt": null,
+              "recovered": false,
+              "convergedReason": null,
+              "baseCommit": "",
+              "gateCommands": [],
+              "workspace": {
+                "enabled": false,
+                "integrationBranch": null,
+                "degraded": 0,
+                "conflicts": 0
+              },
+              "dispatch": {
+                "auto": false,
+                "active": 1,
+                "parentBound": true
+              },
+              "preflight": null,
+              "convergence": {
+                "converged": false,
+                "openTasks": 1,
+                "budgetRatio": 0.81,
+                "budgetExhausted": false
+              },
+              "stats": {
+                "members": 2,
+                "tasks": 1,
+                "merged": 0,
+                "failed": 0,
+                "active": 1,
+                "boardEntries": 0,
+                "events": 3
+              },
+              "budget": {
+                "limits": {
+                  "runTokens": 1000000,
+                  "runUsd": 0,
+                  "runWallMs": 0,
+                  "taskTokens": 400000,
+                  "memberTokens": 800000
+                },
+                "run": {
+                  "tokens": 810000,
+                  "reservedTokens": 0,
+                  "calls": 3,
+                  "usd": 0,
+                  "reservedUsd": 0,
+                  "wallMs": 0
+                },
+                "tasks": {},
+                "members": {},
+                "reservations": 0
+              },
+              "members": [
+                {
+                  "id": "member_queen",
+                  "name": "queen",
+                  "role": "queen",
+                  "model": "inherit",
+                  "status": "busy",
+                  "load": 0,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794593359200,
+                  "lastWinRound": 0,
+                  "skills": []
+                },
+                {
+                  "id": "member_worker",
+                  "name": "worker-1",
+                  "role": "worker",
+                  "model": "fast",
+                  "status": "busy",
+                  "load": 1,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794593359200,
+                  "lastWinRound": 0,
+                  "skills": [
+                    ".js"
+                  ]
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "task_1",
+                  "title": "probe task",
+                  "state": "working",
+                  "assignee": "member_worker"
+                }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "seq": 8,
+        "type": "watch/action/verified",
+        "at": "2026-11-13T18:09:20.028Z",
+        "actor": "executor",
+        "payload": {
+          "key": "cebcac438f86db132af10c01d603f8ef",
+          "actionId": "act_cebcac438f86",
+          "kind": "coach",
+          "ok": true,
+          "detail": {
+            "status": "running"
+          }
+        }
+      },
+      {
+        "seq": 9,
+        "type": "watch/decision",
+        "at": "2026-11-13T18:09:20.030Z",
+        "actor": "watch",
+        "payload": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "generation": 1,
+          "action": "coach",
+          "confidence": 0.82,
+          "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+          "accepted": true,
+          "code": null,
+          "requiresHuman": false,
+          "actionId": "act_cebcac438f86"
+        }
+      },
+      {
+        "seq": 10,
+        "type": "watch/usage",
+        "at": "2026-11-13T18:09:20.031Z",
+        "actor": "system",
+        "payload": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "spent": 18720,
+          "reserve": 50000,
+          "calls": 3
+        }
+      },
+      {
+        "seq": 11,
+        "type": "watch/case/closed",
+        "at": "2026-11-13T18:09:20.032Z",
+        "actor": "guard",
+        "payload": {
+          "caseId": "case_0bcd7c808d6c4dd6",
+          "reason": "mitigated",
+          "note": "watch officer issued coach",
+          "actions": 1
+        }
+      },
+      {
+        "seq": 12,
+        "type": "watch/shift",
+        "at": "2026-11-13T18:09:22.987Z",
+        "actor": "system",
+        "payload": {
+          "shiftId": "shift-0001",
+          "reason": "M2 e2e complete",
+          "window": {
+            "from": "2026-11-13T18:09:19.442Z",
+            "to": "2026-11-13T18:09:22.986Z"
+          },
+          "summary": {
+            "mode": "supervised",
+            "budget": {
+              "limit": 1000000,
+              "spent": 810000,
+              "ratio": 0.81,
+              "reserve": 50000,
+              "supervisorUsed": 26160
+            },
+            "supervisorSpent": 26160,
+            "cases": {
+              "total": 1,
+              "open": 0
+            },
+            "wakes": 1,
+            "timeouts": 0
+          }
+        }
+      },
+      {
+        "seq": 13,
+        "type": "watch/disarmed",
+        "at": "2026-11-13T18:09:22.988Z",
+        "actor": "human",
+        "payload": {
+          "reason": "M2 e2e complete",
+          "closedCases": [],
+          "shiftId": "shift-0001",
+          "supervisorSpent": 26160
+        }
+      }
+    ]
+  },
+  "actions": {
+    "calls": [
+      {
+        "action": "steer",
+        "body": {
+          "action": "steer",
+          "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
+          "actor": "overwatch",
+          "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
+        },
+        "at": "2026-11-13T18:09:20.025Z",
+        "status": "running"
+      }
+    ]
+  },
+  "tools": {
+    "firstWatchTools": [
+      "watch_case",
+      "watch_decide",
+      "watch_evidence"
+    ],
+    "leaked": [],
+    "requests": [
+      {
+        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "call": 1,
+        "toolNames": [
+          "watch_case",
+          "watch_decide",
+          "watch_evidence"
+        ]
+      },
+      {
+        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "call": 2,
+        "toolNames": [
+          "watch_case",
+          "watch_decide",
+          "watch_evidence"
+        ]
+      },
+      {
+        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "call": 3,
+        "toolNames": [
+          "watch_case",
+          "watch_decide",
+          "watch_evidence"
+        ]
+      },
+      {
+        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "call": 4,
+        "toolNames": [
+          "watch_case",
+          "watch_decide",
+          "watch_evidence"
+        ]
+      }
+    ]
+  },
+  "errors": []
+}

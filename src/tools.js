@@ -63,11 +63,14 @@ export function registerTools(ctx, service, config) {
       try {
         if (isSubagent(exec)) return { ok: false, code: 'ROOT_ONLY', message: 'only the root agent may arm supervision' }
         if (args?.mode === 'supervised') {
-          return { ok: false, code: 'SUPERVISOR_UNAVAILABLE', message: 'M1 is guard-only; supervised mode arrives in M2' }
+          // Service/RunSupervisor still enforce the real preconditions; this only
+          // gives the model a clearer error before any upstream call.
+          if (!exec?.agent) return { ok: false, code: 'AGENT_REQUIRED', message: 'supervised arm needs the root agent as parent' }
         }
         const result = await service.arm({
           runId: String(args?.runId ?? ''),
           mode: args?.mode,
+          parentAgent: exec?.agent,
           agentId: exec?.agent?.id === undefined ? undefined : String(exec.agent.id),
         })
         return { ok: true, ...result }

@@ -1,0 +1,4 @@
+# M2 test-only bundle: scripted provider.
+- insert:
+    - id: dsh-fake-llm-m2
+      name: dsh-fake-llm-m2

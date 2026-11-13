@@ -5,6 +5,27 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — M2 watch officer (experimental)
+
+- `WatchOfficer`: lazy `delivery:'caller'` child at the first L2+ case, reserved
+  child id so serial `agent/created` can restrict before the first model request,
+  idempotent re-attach on cold resume, three scoped tools only.
+- `card.js`: bounded case card (≤8KB) and by-reference evidence (≤8KB, ≤3 calls).
+- Run supervisor: supervised arm preconditions (root agent, write token, capacity),
+  wake queue, decision/generation gating, timeout/error degradation, supervisor
+  token ledger, `watch/usage`, `watch/degraded`, shift handover.
+- Policy: confidence below 0.6 only allows notice/escalate.
+- Panel: supervised banner, arm mode, watch officer card.
+- `ports.origin` for headless/external upstream origin.
+- `e2e/m2`: real DSH headless probe with a scripted provider and in-process fake
+  swarm; 12/12 checks, 13-event hash chain, tool table restricted to three tools.
+
+### Fixed
+
+- The supervisor is registered before `arm()` so the watch child's serial
+  `agent/created` listener can find it (otherwise the child was never restricted).
+- Shift handover records the disposed officer's wakes/timeouts.
+
 ### Added — M1 hard guard (guard-only)
 
 - `Probe`: one timer per run, swarm event cursor with gap latching and one

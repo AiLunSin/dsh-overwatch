@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "stage": "headless",
-  "startedAt": "2026-11-13T17:17:24.582Z",
-  "finishedAt": "2026-11-13T17:17:26.353Z",
+  "startedAt": "2026-11-13T18:08:35.408Z",
+  "finishedAt": "2026-11-13T18:08:37.204Z",
   "env": {
     "node": "v24.21.0",
     "platform": "win32",
-    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home",
+    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home",
     "profile": null
   },
   "checks": {
@@ -21,6 +21,10 @@
           "web_fetch",
           "todo_write",
           "exit_plan_mode",
+          "watch_arm",
+          "watch_disarm",
+          "watch_status",
+          "watch_report",
           "get_goal",
           "create_goal",
           "update_goal",
@@ -68,7 +72,7 @@
         "globalToolsStillVisible": [],
         "llmRequests": 2
       },
-      "at": "2026-11-13T17:17:24.905Z"
+      "at": "2026-11-13T18:08:35.759Z"
     },
     "A-3": {
       "status": "pass",
@@ -80,7 +84,7 @@
         },
         "assistantMessages": 2
       },
-      "at": "2026-11-13T17:17:24.906Z"
+      "at": "2026-11-13T18:08:35.760Z"
     },
     "LOOP": {
       "status": "pass",
@@ -114,7 +118,7 @@
         "chainOk": true,
         "ok": true
       },
-      "at": "2026-11-13T17:17:24.907Z"
+      "at": "2026-11-13T18:08:35.762Z"
     },
     "A-9": {
       "status": "pass",
@@ -130,7 +134,7 @@
         ],
         "interpretation": "the anchor child occupies one slot; the root is not counted, so capacity 3 admits two capacity-probe children"
       },
-      "at": "2026-11-13T17:17:26.158Z"
+      "at": "2026-11-13T18:08:37.019Z"
     },
     "A-7": {
       "status": "pass",
@@ -138,7 +142,7 @@
         "preset": "m0-watch",
         "stopReason": "completed"
       },
-      "at": "2026-11-13T17:17:26.183Z"
+      "at": "2026-11-13T18:08:37.047Z"
     },
     "A-2": {
       "status": "pass",
@@ -157,28 +161,28 @@
           }
         ]
       },
-      "at": "2026-11-13T17:17:26.323Z"
+      "at": "2026-11-13T18:08:37.185Z"
     },
     "A-4": {
       "status": "blocked",
       "evidence": {
         "reason": "headless stage has no Host web server; see the web-stage report"
       },
-      "at": "2026-11-13T17:17:26.351Z"
+      "at": "2026-11-13T18:08:37.202Z"
     },
     "A-5": {
       "status": "blocked",
       "evidence": {
         "reason": "headless stage has no Host web server; see the web-stage report"
       },
-      "at": "2026-11-13T17:17:26.352Z"
+      "at": "2026-11-13T18:08:37.202Z"
     },
     "A-8": {
       "status": "blocked",
       "evidence": {
         "reason": "headless stage has no Host web server; see the web-stage report"
       },
-      "at": "2026-11-13T17:17:26.353Z"
+      "at": "2026-11-13T18:08:37.203Z"
     }
   },
   "loop": {
@@ -212,7 +216,7 @@
     "ok": true
   },
   "watch": {
-    "childId": "4fdb0864-29e1-4973-a62c-281581049ae9",
+    "childId": "c4d73625-d14a-4b33-9851-1b88e9ce4874",
     "name": "m0-watch",
     "stopReason": "completed"
   },

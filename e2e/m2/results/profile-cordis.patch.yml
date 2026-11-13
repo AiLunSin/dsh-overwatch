@@ -1,0 +1,44 @@
+# M2 headless probe overrides. Test values only: these tokens are not secrets.
+- id: agent-default-model
+  name: '@deepseek-ai/dsh-agent-default-model'
+  config:
+    provider: fake
+    model: fake-1
+- id: subagent
+  config:
+    maxActiveSubagents: 4
+- id: dsh-overwatch
+  config:
+    enabled: true
+    mode: guard
+    http:
+      token: m2-token
+    ports:
+      origin: http://127.0.0.1:53906
+      swarmToken: m2-swarm-token
+    sampling:
+      swarmEventMs: 500
+      swarmSnapshotMs: 500
+      pressureMs: 500
+      fishMs: 500
+      staleMs: 5000
+      requestTimeoutMs: 2000
+      maxInflight: 2
+    supervisor:
+      maxWakes: 3
+      maxWakesPerHour: 3
+      wakeTimeoutMs: 5000
+      maxEvidenceCalls: 2
+      maxTokensPerWake: 20000
+    policy:
+      twoSignalRule: true
+      throttleMinutes: 1
+      autopilot:
+        throttle: false
+        pause: false
+        pauseOnHardLimit: true
+        abortOnHardLimit: true
+- id: dsh-overwatch-m2-harness
+  config:
+    port: 53906
+    token: m2-swarm-token

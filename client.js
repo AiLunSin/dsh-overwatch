@@ -21,8 +21,10 @@ window.__ModuleLoader__.load({
         navLabel: 'Overwatch',
         pageTitle: 'Overwatch',
         pageSubtitle: 'A hard-guard observatory for controlled swarms. Every read-only view comes from the loopback HTTP API.',
-        guardOnlyBanner: 'guard-only · Watch officer (M2) is not enabled',
-        guardOnlyHint: 'M1 exposes the hard guard only. Supervised mode and watch-officer decisions are not available yet.',
+        guardOnlyBanner: 'guard-only · no watch officer on this run',
+        guardOnlyHint: 'The deterministic guard is supervising. Arm with mode supervised (root agent) to enable the M2 watch officer.',
+        supervisedBanner: 'supervised · M2 watch officer armed',
+        supervisedHint: 'The M2 tool-restricted watch officer may judge L2+ cases; the deterministic guard still owns every hard limit.',
         tabRoom: 'Watch room',
         tabCases: 'Cases',
         refresh: 'Refresh',
@@ -43,7 +45,7 @@ window.__ModuleLoader__.load({
         tokenMemoryOnly: 'sessionStorage is unavailable; the token is kept in memory for this page only.',
         tokenRequired: 'Enter and save the overwatch token first.',
         writeDisabledHint: 'If the server has no write token, writes are rejected (403 WRITE_DISABLED).',
-        writeGuardOnly: 'M1 write operations are arm, disarm, and case acknowledgement only.',
+        writeGuardOnly: 'Writes: arm, disarm, and case acknowledgement.',
         loading: 'Loading…',
         noData: 'No data',
         unknown: 'unknown',
@@ -144,6 +146,20 @@ window.__ModuleLoader__.load({
         unknownTime: 'unknown time',
         integrity: 'Lock and log chain',
         watchLog: 'watch.jsonl hash chain',
+        watchOfficer: 'Watch officer (M2)',
+        watchState: 'Watch state',
+        watchWakes: 'Wakes',
+        watchTimeouts: 'Timeouts',
+        watchTokens: 'Supervisor tokens',
+        watchChild: 'Child session',
+        watchDisabled: 'Not enabled in this arm mode.',
+        'watchState.absent': 'absent',
+        'watchState.starting': 'starting',
+        'watchState.waking': 'waking',
+        'watchState.idle': 'idle',
+        'watchState.failed': 'failed',
+        'watchState.stopped': 'stopped',
+        'watchState.disabled': 'disabled',
         watchLogOk: 'Verified',
         watchLogBad: 'Not verified',
         watchLogCount: '{count} events',
@@ -215,6 +231,7 @@ window.__ModuleLoader__.load({
         armMode: 'Mode',
         armGuard: 'guard (hard guard)',
         armObserve: 'observe (read-only)',
+        armSupervised: 'supervised (M2 watch officer)',
         armConfirm: 'Arm this run in {mode} mode?',
         armSuccess: 'Run armed.',
         disarm: 'Disarm',
@@ -229,7 +246,7 @@ window.__ModuleLoader__.load({
         writeError: 'Write failed',
         'mode.guard': 'guard · hard guard',
         'mode.observe': 'observe · read-only',
-        'mode.supervised': 'supervised · M2 not enabled',
+        'mode.supervised': 'supervised · M2 watch officer',
         'runState.running': 'running',
         'runState.paused': 'paused',
         'runState.arming': 'arming',
@@ -304,8 +321,10 @@ window.__ModuleLoader__.load({
         navLabel: '瞭望塔',
         pageTitle: '瞭望塔',
         pageSubtitle: '受控蜂群的硬闸门观测台；所有只读视图都来自本机回环 HTTP 接口。',
-        guardOnlyBanner: 'guard-only · 值班员 M2 未启用',
-        guardOnlyHint: 'M1 只提供硬闸门。supervised 模式与值班员决策尚不可用。',
+        guardOnlyBanner: 'guard-only · 当前运行没有值班员',
+        guardOnlyHint: '确定性硬闸门在监管。根 agent 用 supervised 模式编队后才会启用 M2 值班员。',
+        supervisedBanner: 'supervised · M2 值班员已编队',
+        supervisedHint: 'M2 值班员（受工具限制）可以判断 L2+ 事件单；所有硬限仍然由确定性硬闸门执行。',
         tabRoom: '值班室',
         tabCases: '事件单',
         refresh: '刷新',
@@ -326,7 +345,7 @@ window.__ModuleLoader__.load({
         tokenMemoryOnly: 'sessionStorage 不可用；token 只保留在本页内存中。',
         tokenRequired: '请先输入并保存 overwatch token。',
         writeDisabledHint: '服务端未配置写 token 时，写操作会被拒绝（403 WRITE_DISABLED）。',
-        writeGuardOnly: 'M1 的写操作只有编队、解散与确认接管。',
+        writeGuardOnly: '写操作：编队、解散与确认接管。',
         loading: '加载中…',
         noData: '没有数据',
         unknown: '未知',
@@ -427,6 +446,20 @@ window.__ModuleLoader__.load({
         unknownTime: '时间未知',
         integrity: '锁与日志链',
         watchLog: 'watch.jsonl 哈希链',
+        watchOfficer: '值班员（M2）',
+        watchState: '值班员状态',
+        watchWakes: '唤醒次数',
+        watchTimeouts: '超时',
+        watchTokens: '值班员 token',
+        watchChild: '子会话',
+        watchDisabled: '当前编队模式未启用值班员。',
+        'watchState.absent': '未启动',
+        'watchState.starting': '启动中',
+        'watchState.waking': '唤醒中',
+        'watchState.idle': '空闲',
+        'watchState.failed': '失败降级',
+        'watchState.stopped': '已停止',
+        'watchState.disabled': '未启用',
         watchLogOk: '校验通过',
         watchLogBad: '校验失败或不可用',
         watchLogCount: '{count} 条事件',
@@ -498,6 +531,7 @@ window.__ModuleLoader__.load({
         armMode: '模式',
         armGuard: 'guard（硬闸门）',
         armObserve: 'observe（只读）',
+        armSupervised: 'supervised（M2 值班员）',
         armConfirm: '以 {mode} 模式编队？',
         armSuccess: '运行已编队。',
         disarm: '解散',
@@ -512,7 +546,7 @@ window.__ModuleLoader__.load({
         writeError: '写操作失败',
         'mode.guard': 'guard · 硬闸门',
         'mode.observe': 'observe · 只读',
-        'mode.supervised': 'supervised · M2 未启用',
+        'mode.supervised': 'supervised · M2 值班员',
         'runState.running': '运行中',
         'runState.paused': '已暂停',
         'runState.arming': '编队中',
@@ -769,6 +803,17 @@ window.__ModuleLoader__.load({
     function closeReasonText(t, value) {
       if (value === null || value === undefined || value === '') return t('notProvided')
       return translateCode(t, 'closeReason', value)
+    }
+
+    function armModeLabel(t, mode) {
+      if (mode === 'supervised') return t('armSupervised')
+      if (mode === 'observe') return t('armObserve')
+      return t('armGuard')
+    }
+
+    function watchStateLabel(t, state) {
+      if (typeof state !== 'string' || state === '') return t('unknown')
+      return translateCode(t, 'watchState', state)
     }
 
     function severityText(t, severity) {
@@ -1259,7 +1304,7 @@ window.__ModuleLoader__.load({
           ),
           h('div', { className: 'ow-overview-badges' },
             h(Badge, { tone: stateTone }, stateLabel),
-            h(Badge, { tone: data.mode === 'guard' ? 'brand' : 'idle' }, translateCode(t, 'mode', data.mode)),
+            h(Badge, { tone: data.mode === 'guard' || data.mode === 'supervised' ? 'brand' : 'idle' }, translateCode(t, 'mode', data.mode)),
             h(Badge, { tone: data.status === 'error' ? 'error' : data.status === 'paused' ? 'warn' : 'idle' }, translateCode(t, 'runState', data.status)),
           ),
         ),
@@ -1295,6 +1340,7 @@ window.__ModuleLoader__.load({
               dtDd(t('disarmedAt'), formatTime(detail?.disarmedAt)),
               dtDd(t('lastEventAt'), formatTime(detail?.lastEventAt)),
             ),
+            watchBlock(detail, t),
           ),
         ),
       )
@@ -1308,6 +1354,33 @@ window.__ModuleLoader__.load({
         )
       }
       return h(FreshnessChips, { freshness: detail.freshness, t })
+    }
+
+    function watchBlock(detail, t) {
+      const watch = detail?.watch ?? null
+      if (watch === null) return null
+      const state = typeof watch.state === 'string' && watch.state !== ''
+        ? watch.state
+        : watch.enabled === true ? 'absent' : 'disabled'
+      const tone = state === 'failed'
+        ? 'error'
+        : state === 'waking' || state === 'starting'
+          ? 'warn'
+          : watch.enabled === true ? 'ok' : 'muted'
+      return h('div', { className: 'ow-subcard' },
+        h('div', { className: 'ow-card-head' },
+          h('h3', null, t('watchOfficer')),
+          h(Badge, { tone }, watchStateLabel(t, state)),
+        ),
+        watch.enabled === true
+          ? h('dl', { className: 'ow-dl' },
+              dtDd(t('watchWakes'), formatNumber(watch.wakes ?? 0)),
+              dtDd(t('watchTimeouts'), formatNumber(watch.timeouts ?? 0)),
+              dtDd(t('watchTokens'), `${formatNumber(watch.spent ?? 0)} / ${formatNumber(watch.reserve ?? 0)}`),
+              dtDd(t('watchChild'), watch.childId ? `${String(watch.childId).slice(0, 8)}…${String(watch.childId).slice(-4)}` : '—'),
+            )
+          : h('p', { className: 'ow-muted ow-small' }, t('watchDisabled')),
+      )
     }
 
     function IntegrityCard({ health, detail, error, selectedRunId, onRetry, t }) {
@@ -1773,6 +1846,7 @@ window.__ModuleLoader__.load({
                           },
                             h('option', { value: 'guard' }, t('armGuard')),
                             h('option', { value: 'observe' }, t('armObserve')),
+                            h('option', { value: 'supervised' }, t('armSupervised')),
                           ),
                         ),
                         h('button', {
@@ -1786,7 +1860,7 @@ window.__ModuleLoader__.load({
           confirmAction !== null
             ? h('div', { className: 'ow-confirm', role: 'group', 'aria-label': t('confirm') },
                 h('span', null, confirmAction.kind === 'arm'
-                  ? t('armConfirm', { mode: confirmAction.mode === 'observe' ? t('armObserve') : t('armGuard') })
+                  ? t('armConfirm', { mode: armModeLabel(t, confirmAction.mode) })
                   : t('disarmConfirm')),
                 h('button', { type: 'button', className: 'ow-btn ow-btn-primary ow-btn-small', disabled: busy, onClick: onConfirm }, t('confirm')),
                 h('button', { type: 'button', className: 'ow-btn ow-btn-small', disabled: busy, onClick: onCancelConfirm }, t('cancel')),
@@ -2240,6 +2314,9 @@ window.__ModuleLoader__.load({
       }
 
       const runArmed = selectedDetail !== null ? selectedDetail.armed === true : selectedRun?.armed === true
+      const supervisedRun = selectedDetail?.watch?.enabled === true
+        || selectedDetail?.mode === 'supervised'
+        || selectedRun?.mode === 'supervised'
       const asOfText = hasTime(runsAsOf)
         ? formatTime(runsAsOf)
         : lastRunsAt !== null
@@ -2324,11 +2401,11 @@ window.__ModuleLoader__.load({
             }, writeOpen ? t('writeOpsHide') : t('writeOpsShow')),
           ),
         ),
-        h('section', { className: 'ow-guard-banner', 'aria-label': t('guardOnlyBanner') },
+        h('section', { className: `ow-guard-banner ${supervisedRun ? 'ow-supervised-banner' : ''}`, 'aria-label': supervisedRun ? t('supervisedBanner') : t('guardOnlyBanner') },
           h('span', { className: 'ow-guard-dot', 'aria-hidden': true }),
           h('div', null,
-            h('strong', null, t('guardOnlyBanner')),
-            h('p', null, t('guardOnlyHint')),
+            h('strong', null, supervisedRun ? t('supervisedBanner') : t('guardOnlyBanner')),
+            h('p', null, supervisedRun ? t('supervisedHint') : t('guardOnlyHint')),
           ),
         ),
         writeOpen
@@ -2348,7 +2425,7 @@ window.__ModuleLoader__.load({
               selectedRun,
               runArmed,
               armMode,
-              onArmMode: (value) => setArmMode(value === 'observe' ? 'observe' : 'guard'),
+              onArmMode: (value) => setArmMode(value === 'observe' ? 'observe' : value === 'supervised' ? 'supervised' : 'guard'),
               disarmReason,
               onDisarmReason: setDisarmReason,
               confirmAction,
@@ -2433,6 +2510,8 @@ window.__ModuleLoader__.load({
 .ow-meta { color: var(--dsw-alias-label-secondary); font-size: 11px; white-space: nowrap; }
 .ow-guard-banner { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--dsw-alias-state-warn-secondary, var(--dsw-alias-state-warn-primary)); background: var(--dsw-alias-state-warn-tertiary, color-mix(in srgb, var(--dsw-alias-state-warn-primary) 10%, transparent)); color: var(--dsw-alias-state-warn-label, var(--dsw-alias-state-warn-primary)); font-size: 12px; line-height: 1.5; }
 .ow-guard-banner strong { font-weight: 650; }
+.ow-supervised-banner { border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 40%, var(--dsw-alias-border-l1)); background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent); }
+.ow-supervised-banner .ow-guard-dot { background: var(--dsw-alias-brand-primary); }
 .ow-guard-banner p { margin: 2px 0 0; color: var(--dsw-alias-label-secondary); }
 .ow-guard-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 4px; flex: none; background: var(--dsw-alias-state-warn-primary); }
 .ow-btn { display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--dsw-alias-border-l1); background: var(--dsw-alias-bg-layer-1); color: var(--dsw-alias-label-primary); font: inherit; font-size: 12px; line-height: 18px; cursor: pointer; text-decoration: none; }

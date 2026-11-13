@@ -8,14 +8,17 @@
  * @module dsh-overwatch/run
  */
 
+import { writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { buildCaseCard, buildEvidence } from './card.js'
 import { CaseManager } from './cases.js'
 import { Executor } from './executor.js'
 import { evaluateGuard } from './guard.js'
 import { Probe } from './probe.js'
 import { evaluateSnapshot, contextPressureSignal, failureStreakSignal, stallSignal } from './signals.js'
 import { WatchStore } from './store.js'
-import { atomicWriteJson, clamp, ensureDir } from './util.js'
+import { atomicWriteJson, clamp, ensureDir, sha256 } from './util.js'
+import { WatchOfficer } from './watch.js'
 
 const RUN_ID_PATTERN = /^[A-Za-z0-9_-]{1,200}$/
 
@@ -42,6 +45,7 @@ export class RunSupervisor {
     this.config = options.config
     this.ports = options.ports
     this.dir = options.dir
+    this.ctx = options.ctx ?? { get: () => undefined }
     this.clock = options.clock ?? Date.now
     this.logger = options.logger
     this.state = /** @type {'arming'|'watching'|'degraded'|'disarming'|'disarmed'|'failed'} */ ('arming')
@@ -83,6 +87,30 @@ export class RunSupervisor {
       clock: this.clock,
       logger: this.logger,
     })
+    /** Test seam: the real factory builds a WatchOfficer over ctx.subagents. */
+    this.watchFactory = options.watchFactory ?? (watchOptions => new WatchOfficer(watchOptions))
+    /** @type {any} */
+    this.parentAgent = null
+    this.reserve = 0
+    /** @type {WatchOfficer | null} */
+    this.watch = null
+    /** @type {string[]} */
+    this.watchQueue = []
+    /** @type {Set<string>} */
+    this.watchedCases = new Set()
+    /** @type {Set<string>} */
+    this.seenAgents = new Set()
+    this.watchFailed = false
+    this.watchErrors = 0
+    this.lastWakeAt = 0
+    /** @type {number[]} */
+    this.wakeTimes = []
+    this.usage = { input: 0, output: 0, total: 0, calls: 0 }
+    /** @type {Set<string>} */
+    this.usageKeys = new Set()
+    this.shiftSeq = 0
+    /** @type {{ id: string, path: string, at: string } | null} */
+    this.lastShift = null
   }
 
   /** Acquire the run lock, validate the chain, load cases and recover the executor. */
@@ -104,15 +132,20 @@ export class RunSupervisor {
 
   /**
    * Arm supervision of a live run.
-   * @param {{ mode?: 'observe'|'guard', supervisor?: boolean }} [options]
+   * @param {{ mode?: 'observe'|'guard'|'supervised', parentAgent?: any }} [options]
    */
   async arm(options = {}) {
     if (this.state !== 'arming') throw fail('ALREADY_ARMED', `run ${this.runId} is already armed`)
     const requestedMode = options.mode ?? this.config.mode
+    if (!['observe', 'guard', 'supervised'].includes(requestedMode)) throw fail('INVALID_MODE', `unknown mode ${String(requestedMode)}`)
     if (requestedMode === 'supervised') {
-      throw fail('SUPERVISOR_UNAVAILABLE', 'M1 is guard-only: the watch officer runtime is not part of this build')
+      if (!this.config.supervisor.enabled) throw fail('SUPERVISOR_DISABLED', 'supervisor.enabled is false')
+      if (this.config.http.token === '') throw fail('WRITE_DISABLED', 'supervised arm needs http.token for executable decisions')
+      if (options.parentAgent === undefined || options.parentAgent === null) throw fail('AGENT_REQUIRED', 'supervised arm needs the live root agent as the watch officer parent')
+      if (this.ctx.get?.('subagents') === undefined || this.ctx.get?.('subagents') === null) {
+        throw fail('SUBAGENTS_UNAVAILABLE', 'the subagents service is not mounted; the watch officer cannot start')
+      }
     }
-    if (requestedMode !== 'observe' && requestedMode !== 'guard') throw fail('INVALID_MODE', `unknown mode ${String(requestedMode)}`)
 
     const health = await this.ports.swarm.health()
     if (health.ok !== true) {
@@ -145,6 +178,27 @@ export class RunSupervisor {
     const reserve = budget > 0
       ? Math.round(clamp(budget * this.config.supervisor.reserveRatio, 0, Math.min(this.config.supervisor.maxReserveTokens, budget * 0.2)))
       : 0
+    this.reserve = reserve
+    this.parentAgent = options.parentAgent ?? null
+    this.executor.policy.mode = this.mode
+    if (this.mode === 'supervised') this.#checkCapacity(primed.snapshot)
+    if (this.mode === 'supervised') {
+      const name = `ow-${sha256(`${this.runId}:${Date.now()}:${Math.random()}`).slice(0, 12)}`
+      this.watch = this.watchFactory({
+        ctx: this.ctx,
+        runId: this.runId,
+        name,
+        parentAgent: this.parentAgent,
+        config: this.config,
+        logger: this.logger,
+        callbacks: {
+          card: caseId => this.#caseCard(caseId),
+          evidence: (caseId, refs) => this.#caseEvidence(caseId, refs),
+          decide: (decision, meta) => this.#handleWatchDecision(decision, meta),
+          record: (type, payload) => this.#recordWatchEvent(type, payload),
+        },
+      })
+    }
     const event = this.store.append({
       type: 'watch/armed',
       actor: 'human',
@@ -154,9 +208,10 @@ export class RunSupervisor {
         requestedMode,
         runId: this.runId,
         reserve,
-        supervisor: 'unavailable-m1',
+        supervisor: this.mode === 'supervised' ? 'lazy' : 'unavailable-m1',
+        watchName: this.watch?.name ?? null,
         sampling: { ...this.config.sampling },
-        capabilities: { guard: this.mode === 'guard', write: this.config.http.token !== '' },
+        capabilities: { guard: this.mode !== 'observe', supervisor: this.mode === 'supervised', write: this.config.http.token !== '' },
       },
     })
     this.armedAt = event.at
@@ -191,6 +246,7 @@ export class RunSupervisor {
       if (reconciled.opened.length > 0) {
         this.logger?.info?.(`[overwatch] opened ${reconciled.opened.length} case(s) for ${this.runId}`)
       }
+      this.#scheduleWatch(snapshot, now)
 
       this.guardState.interventions = this.executor.interventions
       this.guardState.throttle = this.throttle
@@ -295,6 +351,455 @@ export class RunSupervisor {
     }, this.config.thresholds)
     if (stall !== null) signals.push(stall)
     return signals
+  }
+
+  /**
+   * Cheap pre-flight for supervised arm: one watch child plus every non-queen
+   * member must fit in the process-wide subagent capacity.
+   * @param {any} snapshot
+   */
+  #checkCapacity(snapshot) {
+    let capacity
+    try {
+      capacity = this.ctx.get?.('subagents')?.config?.maxActiveSubagents?.get?.()
+    } catch (error) {
+      this.logger?.warn?.(`[overwatch] could not read maxActiveSubagents: ${messageOf(error)}`)
+      return
+    }
+    const members = (snapshot?.members ?? []).filter(member => member.role !== 'queen' && member.status !== 'left' && member.status !== 'lost')
+    if (typeof capacity === 'number' && Number.isFinite(capacity) && members.length + 1 > capacity) {
+      this.state = 'failed'
+      this.failedReason = `run has ${members.length} non-queen member(s); a watch officer needs capacity ${members.length + 1}, but maxActiveSubagents is ${capacity}`
+      throw fail('CAPACITY_CONFLICT', this.failedReason)
+    }
+  }
+
+  /**
+   * Serial `agent/created` hook forwarded by the service. Must stay synchronous:
+   * the child's first model request waits for this listener.
+   * @param {any} agent
+   */
+  handleAgentCreated(agent) {
+    if (this.watch === null) return false
+    try {
+      const claimed = this.watch.handleAgentCreated(agent)
+      if (!claimed && agent !== null && agent !== undefined) {
+        const id = String(agent.id ?? '')
+        if (id !== '' && !this.seenAgents.has(id)) {
+          this.seenAgents.add(id)
+          let names = null
+          try {
+            names = this.ctx.get?.('subagents')?.namesOf?.(agent) ?? null
+          } catch (error) {
+            names = { error: messageOf(error) }
+          }
+          this.store.append({
+            type: 'watch/agent/ignored',
+            actor: 'system',
+            payload: {
+              agentId: id,
+              origin: agent.session?.header?.origin ?? null,
+              keys: Object.keys(agent),
+              options: agent.options ?? null,
+              runtimeContext: summar(agent.runtimeContext),
+              scopeKeys: agent.scope === null || agent.scope === undefined ? null : Object.keys(agent.scope),
+              systemPrompt: typeof agent.systemPrompt === 'string' ? agent.systemPrompt.slice(0, 500) : null,
+              phase: agent.phase ?? null,
+              names,
+              header: agent.session?.header ?? null,
+              watchName: this.watch.name,
+            },
+          })
+        }
+      }
+      return claimed
+    } catch (error) {
+      this.#recordError(error)
+      return false
+    }
+  }
+
+  /**
+   * Fold the watch child's turn usage into the supervisor ledger. Called for
+   * every session event by the service; other sessions are ignored.
+   * @param {string} sessionId
+   * @param {any} event
+   */
+  recordUsage(sessionId, event) {
+    if (this.watch === null || this.watch.childId === null) return
+    if (String(sessionId) !== this.watch.childId) return
+    if (event?.type !== 'assistant/message') return
+    const usage = event.data?.usage
+    if (usage === undefined || usage === null) return
+    const key = event.data?.message?.id ?? `${String(event.data?.turn)}:${String(event.data?.step)}`
+    if (this.usageKeys.has(key)) return
+    this.usageKeys.add(key)
+    const input = Number(usage.inputTokens ?? 0)
+    const output = Number(usage.outputTokens ?? 0)
+    const total = Number(usage.totalTokens ?? input + output)
+    this.usage.input += Number.isFinite(input) ? input : 0
+    this.usage.output += Number.isFinite(output) ? output : 0
+    this.usage.total += Number.isFinite(total) ? total : 0
+    this.usage.calls += 1
+  }
+
+  /**
+   * Enqueue L2+ cases for the watch officer and pump the (serial) wake queue.
+   * @param {any} snapshot
+   * @param {number} now
+   */
+  #scheduleWatch(snapshot, now) {
+    if (this.watch === null || this.watchFailed) return
+    for (const record of this.caseManager.list({ state: 'open' })) {
+      if (record.severity === 'L0' || record.severity === 'L1') continue
+      if (this.watchedCases.has(record.id)) continue
+      if (this.watchQueue.length >= 3) {
+        this.#watchNotice({ code: 'watch_backlog', reason: 'watch wake queue is full; guard keeps handling the run', caseId: record.id }, now)
+        break
+      }
+      this.watchedCases.add(record.id)
+      this.watchQueue.push(record.id)
+    }
+    this.#pumpWatch(now)
+  }
+
+  /** @param {number} now */
+  #pumpWatch(now) {
+    if (this.watch === null || this.watchFailed) return
+    if (this.watch.pending !== null) return
+    if (this.watchQueue.length === 0) return
+    const caseId = this.watchQueue.shift()
+    const record = this.caseManager.get(caseId)
+    if (record === null || record.state === 'closed') {
+      this.#pumpWatch(now)
+      return
+    }
+    const budget = this.#wakeBudget(now)
+    if (!budget.ok) {
+      this.#watchNotice({ code: budget.code, reason: budget.reason, caseId }, now)
+      return
+    }
+    const card = this.#caseCard(caseId)
+    if (card === null) return
+    this.wakeTimes.push(now)
+    this.lastWakeAt = now
+    this.store.append({
+      type: 'watch/wake',
+      actor: 'system',
+      causationRef: { kind: 'case', caseId },
+      payload: {
+        caseId,
+        generation: record.generation,
+        wakeIndex: this.watch.wakes + 1,
+        budgetLeft: budget.left,
+        severity: record.severity,
+        code: record.code,
+      },
+    })
+    void this.watch.wake({ caseId, generation: record.generation, card, timeoutMs: this.config.supervisor.wakeTimeoutMs })
+      .then(outcome => this.#onWake(caseId, record.generation, outcome))
+      .catch(error => {
+        this.watchErrors += 1
+        this.#recordError(error)
+      })
+      .finally(() => {
+        this.#pumpWatch(this.clock())
+      })
+  }
+
+  /** @param {number} now */
+  #wakeBudget(now) {
+    if (this.watch === null) return { ok: false, code: 'supervisor_unavailable', reason: 'watch officer is not started' }
+    if (this.watch.wakes >= this.config.supervisor.maxWakes) {
+      return { ok: false, code: 'supervisor_budget_exhausted', reason: `maxWakes ${this.config.supervisor.maxWakes} reached` }
+    }
+    this.wakeTimes = this.wakeTimes.filter(at => now - at < 3_600_000)
+    if (this.wakeTimes.length >= this.config.supervisor.maxWakesPerHour) {
+      return { ok: false, code: 'supervisor_rate_limited', reason: `maxWakesPerHour ${this.config.supervisor.maxWakesPerHour} reached` }
+    }
+    if (this.reserve <= 0) {
+      return { ok: false, code: 'supervisor_budget_exhausted', reason: 'no supervisor token reserve was established at arm time' }
+    }
+    const left = this.reserve - this.usage.total
+    const estimate = Math.min(this.config.supervisor.maxTokensPerWake, left)
+    if (left <= 0 || estimate < 1_000) {
+      return { ok: false, code: 'supervisor_budget_exhausted', reason: `reserve exhausted (${this.usage.total}/${this.reserve} tokens)` }
+    }
+    return { ok: true, left }
+  }
+
+  /** @param {string} caseId */
+  #caseCard(caseId) {
+    const record = this.caseManager.get(caseId)
+    if (record === null) return null
+    return buildCaseCard({
+      record,
+      snapshot: this.probe.snapshot(this.runId) ?? {},
+      events: this.probe.events(this.runId, { since: 0, limit: 500 }),
+      config: this.config,
+      reserve: this.reserve,
+      spent: this.usage.total,
+    })
+  }
+
+  /** @param {string} caseId @param {string[]} refs */
+  #caseEvidence(caseId, refs) {
+    const record = this.caseManager.get(caseId)
+    if (record === null) return { items: [], bytes: 0, truncated: false }
+    return buildEvidence({
+      record,
+      refs,
+      events: this.probe.events(this.runId, { since: 0, limit: 500 }),
+      maxBytes: this.config.supervisor.maxEvidenceBytes,
+    })
+  }
+
+  /**
+   * Called by watch_decide. Validates/authorizes/executes through the same
+   * executor the guard uses, then records the action on the case.
+   * @param {any} decision
+   * @param {{ caseId: string, generation: number }} meta
+   */
+  async #handleWatchDecision(decision, meta) {
+    const record = this.caseManager.get(meta.caseId)
+    if (record === null) return { ok: false, code: 'CASE_NOT_FOUND', message: 'case not found' }
+    if (record.state === 'closed') return { ok: false, code: 'CASE_CLOSED', message: 'case is already closed' }
+    if (record.generation !== meta.generation) return { ok: false, code: 'STALE_GENERATION', message: 'case generation changed; refusing a stale decision' }
+    const evidenceIds = new Set(record.evidence.map(entry => String(entry.id)))
+    const outcome = await this.executor.execute(decision, {
+      caseId: meta.caseId,
+      evidenceIds,
+      hardLimit: record.severity === 'L4',
+      runId: this.runId,
+    })
+    if (typeof outcome.actionId === 'string') {
+      this.caseManager.recordAction(meta.caseId, {
+        id: outcome.actionId,
+        kind: String(decision.action),
+        state: outcome.ok === true ? 'verified' : (outcome.code ?? 'failed'),
+        detail: outcome.requiresHuman === true ? 'requires_human' : (outcome.reason ?? null),
+      })
+    }
+    return outcome
+  }
+
+  /**
+   * @param {string} caseId
+   * @param {number} generation
+   * @param {any} outcome
+   */
+  #onWake(caseId, generation, outcome) {
+    const now = this.clock()
+    const record = this.caseManager.get(caseId)
+    if (record === null) return
+    if (outcome.status === 'decided') {
+      this.watchErrors = 0
+      const decision = outcome.decision ?? {}
+      const result = outcome.outcome ?? {}
+      this.store.append({
+        type: result.ok === true ? 'watch/decision' : 'watch/decision/rejected',
+        actor: 'watch',
+        causationRef: { kind: 'case', caseId },
+        payload: {
+          caseId,
+          generation,
+          action: decision.action ?? null,
+          confidence: decision.confidence ?? null,
+          reason: typeof decision.reason === 'string' ? decision.reason.slice(0, 300) : null,
+          accepted: result.ok === true,
+          code: result.code ?? null,
+          requiresHuman: result.requiresHuman === true,
+          actionId: result.actionId ?? null,
+        },
+      })
+      this.caseManager.recordDecision(caseId, {
+        generation,
+        actor: 'watch',
+        verdict: String(decision.action ?? 'unknown'),
+        action: decision.action ?? null,
+        confidence: decision.confidence ?? null,
+        reason: typeof decision.reason === 'string' ? decision.reason.slice(0, 300) : null,
+        accepted: result.ok === true,
+        code: result.code ?? null,
+      })
+      this.store.append({
+        type: 'watch/usage',
+        actor: 'system',
+        payload: { caseId, spent: this.usage.total, reserve: this.reserve, calls: this.usage.calls },
+      })
+      if (result.ok === true) {
+        this.#applyWatchOutcome(caseId, decision, result, now)
+      } else if (result.requiresHuman === true) {
+        this.#watchNotice({ code: 'requires_human', reason: String(result.reason ?? 'decision needs a human'), caseId }, now)
+      } else {
+        this.#watchNotice({ code: 'watch_decision_rejected', reason: String(result.code ?? 'rejected'), caseId }, now)
+      }
+      return
+    }
+    if (outcome.status === 'timeout' || outcome.status === 'no_decision') {
+      this.store.append({
+        type: 'watch/wake/timeout',
+        actor: 'system',
+        causationRef: { kind: 'case', caseId },
+        payload: { caseId, generation, status: outcome.status, waitedMs: Math.max(0, now - this.lastWakeAt), stopReason: outcome.stopReason ?? null },
+      })
+      this.caseManager.recordDecision(caseId, { generation, actor: 'watch', verdict: 'timeout', accepted: false, status: outcome.status })
+      this.#watchNotice({ code: 'watch_timeout', reason: `watch officer produced no decision (${outcome.status})`, caseId }, now)
+      if (this.watch !== null && this.watch.timeouts >= 2) {
+        this.watchFailed = true
+        this.store.append({ type: 'watch/degraded', actor: 'system', payload: { reason: 'two wake timeouts; falling back to the deterministic guard' } })
+      }
+      return
+    }
+    this.watchErrors += 1
+    this.store.append({
+      type: 'watch/error',
+      actor: 'system',
+      causationRef: { kind: 'case', caseId },
+      payload: { caseId, status: outcome.status, error: outcome.error ?? null, code: outcome.code ?? null },
+    })
+    if (this.watchErrors >= 2) {
+      this.watchFailed = true
+      this.store.append({ type: 'watch/degraded', actor: 'system', payload: { reason: 'two consecutive watch failures; falling back to the deterministic guard' } })
+    }
+  }
+
+  /**
+   * @param {string} caseId
+   * @param {any} decision
+   * @param {any} result
+   * @param {number} now
+   */
+  #applyWatchOutcome(caseId, decision, result, now) {
+    const action = String(decision.action ?? '')
+    if (action === 'throttle') {
+      const minutes = Math.max(1, Math.trunc(Number(decision.params?.minutes ?? this.config.policy.throttleMinutes)))
+      this.throttle = {
+        active: true,
+        actionId: String(result.actionId ?? ''),
+        caseId,
+        dueAt: now + minutes * 60_000,
+        minutes,
+      }
+      this.caseManager.setState(caseId, 'verifying')
+      this.store.append({ type: 'watch/throttle/started', actor: 'watch', payload: { caseId, actionId: result.actionId ?? null, minutes } })
+      return
+    }
+    if (action === 'pause') {
+      this.caseManager.setState(caseId, 'verifying')
+      return
+    }
+    if (action === 'abort') {
+      this.caseManager.close(caseId, 'escalated', 'watch officer aborted the run')
+      return
+    }
+    if (action === 'escalate') {
+      this.caseManager.close(caseId, 'escalated', 'watch officer escalated to a human')
+      return
+    }
+    if (action === 'coach' || action === 'notice') {
+      this.caseManager.close(caseId, 'mitigated', `watch officer issued ${action}`)
+    }
+  }
+
+  /** @param {string} type @param {any} payload */
+  #recordWatchEvent(type, payload) {
+    try {
+      this.store.append({ type, actor: 'watch', payload })
+    } catch {
+      // The store may be full or closing; health and the wake result still report.
+    }
+  }
+
+  /**
+   * @param {{ code: string, reason: string, caseId?: string }} notice
+   * @param {number} now
+   */
+  #watchNotice(notice, now) {
+    const key = `watch:${notice.code}:${notice.caseId ?? '-'}`
+    const last = this.noticeAt.get(key) ?? 0
+    if (now - last < 60_000) return
+    this.noticeAt.set(key, now)
+    this.store.append({
+      type: 'watch/notice',
+      actor: 'watch',
+      payload: { code: notice.code, reason: notice.reason, caseId: notice.caseId ?? null },
+    })
+  }
+
+  /**
+   * Write the shift handover and its log event. Called on disarm with the watch
+   * officer's last status, because the officer is disposed before the store closes.
+   * @param {string} reason
+   * @param {number} now
+   * @param {any} [officer]
+   */
+  #writeShift(reason, now, officer = null) {
+    const view = this.snapshot()
+    this.shiftSeq += 1
+    const id = `shift-${String(this.shiftSeq).padStart(4, '0')}`
+    const cases = this.caseManager.list({ state: 'all', limit: 100 })
+    const lines = [
+      `# Watch shift ${id} · ${this.runId}`,
+      '',
+      `- window: ${view.armedAt ?? 'unknown'} -> ${new Date(now).toISOString()}`,
+      `- mode: ${view.mode}  state: ${view.state}  reason: ${reason}`,
+      `- swarm: ${view.status}`,
+      `- budget B/W/S/E: ${view.budget.limit} / ${view.budget.spent} / ${this.usage.total} / ${view.budget.spent + this.usage.total}`,
+      `- watch officer: ${officer?.name ?? 'none'}  child: ${officer?.childId ?? 'none'}  wakes: ${officer?.wakes ?? 0}  timeouts: ${officer?.timeouts ?? 0}`,
+      `- cases: ${cases.length} (open ${view.cases.open})`,
+      '',
+      '| case | severity | code | state | close reason |',
+      '| --- | --- | --- | --- | --- |',
+      ...cases.map(record => `| ${record.id} | ${record.severity} | ${record.code} | ${record.state} | ${record.closeReason ?? ''} |`),
+    ]
+    const text = `${lines.join('\n')}\n`
+    const file = path.join(this.dir, 'shifts', `${id}.md`)
+    ensureDir(path.dirname(file))
+    writeFileSync(file, text, 'utf8')
+    this.lastShift = { id, path: file, at: new Date(now).toISOString() }
+    this.store.append({
+      type: 'watch/shift',
+      actor: 'system',
+      payload: {
+        shiftId: id,
+        reason,
+        window: { from: this.armedAt, to: new Date(now).toISOString() },
+        summary: {
+          mode: this.mode,
+          budget: view.budget,
+          supervisorSpent: this.usage.total,
+          cases: { total: cases.length, open: view.cases.open },
+          wakes: officer?.wakes ?? 0,
+          timeouts: officer?.timeouts ?? 0,
+        },
+      },
+    })
+    return this.lastShift
+  }
+
+  watchStatus() {
+    const officer = this.watch === null ? null : this.watch.status()
+    return {
+      enabled: this.mode === 'supervised',
+      state: officer?.state ?? (this.mode === 'supervised' ? 'absent' : 'disabled'),
+      name: officer?.name ?? null,
+      childId: officer?.childId ?? null,
+      wakes: officer?.wakes ?? 0,
+      timeouts: officer?.timeouts ?? 0,
+      errors: officer?.errors ?? this.watchErrors,
+      lastError: officer?.lastError ?? null,
+      activeCaseId: officer?.activeCaseId ?? null,
+      reserve: this.reserve,
+      spent: this.usage.total,
+      remaining: Math.max(0, this.reserve - this.usage.total),
+      input: this.usage.input,
+      output: this.usage.output,
+      calls: this.usage.calls,
+      queue: this.watchQueue.length,
+      failed: this.watchFailed,
+      lastShift: this.lastShift,
+    }
   }
 
   /** @param {import('./guard.js').GuardPlan} plan @param {any} outcome @param {number} now */
@@ -422,16 +927,33 @@ export class RunSupervisor {
   async disarm(reason = 'disarmed') {
     if (this.state === 'disarmed' || this.state === 'disarming') return { runId: this.runId, state: 'disarmed', closedCases: [] }
     this.state = 'disarming'
+    /** @type {any} */
+    let watchStatus = null
     if (this.timer !== null) {
       clearInterval(this.timer)
       this.timer = null
     }
+    if (this.watch !== null) {
+      try {
+        watchStatus = this.watch.status()
+        await this.watch.dispose()
+      } catch (error) {
+        this.#recordError(error)
+      }
+      this.watch = null
+    }
     const closed = this.caseManager.closeAll('abandoned', `supervision disarmed: ${reason}`)
     this.throttle = null
+    const shift = this.#writeShift(String(reason).slice(0, 300), this.clock(), watchStatus)
     this.store.append({
       type: 'watch/disarmed',
       actor: 'human',
-      payload: { reason: String(reason).slice(0, 300), closedCases: closed.map(record => record.id) },
+      payload: {
+        reason: String(reason).slice(0, 300),
+        closedCases: closed.map(record => record.id),
+        shiftId: shift?.id ?? null,
+        supervisorSpent: this.usage.total,
+      },
     })
     this.state = 'disarmed'
     this.disarmedAt = new Date(this.clock()).toISOString()
@@ -519,9 +1041,10 @@ export class RunSupervisor {
     const snapshot = this.probe.snapshot(this.runId)
     const budget = snapshot?.budget ?? { limit: 0, spent: 0, ratio: 0 }
     const limit = Number(budget.limit ?? 0)
-    const reserveLimit = limit > 0
+    const computedReserve = limit > 0
       ? Math.round(clamp(limit * this.config.supervisor.reserveRatio, 0, Math.min(this.config.supervisor.maxReserveTokens, limit * 0.2)))
       : 0
+    const reserveLimit = this.reserve > 0 ? this.reserve : computedReserve
     return {
       runId: this.runId,
       armed: this.state === 'watching' || this.state === 'degraded' || this.state === 'disarming',
@@ -536,8 +1059,9 @@ export class RunSupervisor {
         spent: Number(budget.spent ?? 0),
         ratio: Number((limit > 0 ? Number(budget.spent ?? 0) / limit : 0).toFixed(4)),
         reserve: reserveLimit,
-        supervisorUsed: 0,
+        supervisorUsed: this.usage.total,
       },
+      watch: this.watchStatus(),
       cases: { open: this.caseManager.openCount(), bySeverity: this.#caseCounts(), total: this.caseManager.list({ state: 'all', limit: 500 }).length },
       throttle: this.throttle,
       interventions: this.executor.interventions,
@@ -561,6 +1085,7 @@ export class RunSupervisor {
       freshness: this.probe.freshness(this.runId),
       throttle: this.throttle,
       interventions: this.executor.interventions,
+      watch: this.watchStatus(),
     }
   }
 
@@ -574,9 +1099,11 @@ export class RunSupervisor {
       `- state: ${view.state} (${view.mode})`,
       `- swarm status: ${view.status}`,
       `- budget: ${view.budget.spent}/${view.budget.limit} (${(view.budget.ratio * 100).toFixed(1)}%)`,
+      `- supervisor S: ${view.watch.spent}/${view.watch.reserve} tokens, ${view.watch.wakes} wake(s), ${view.watch.timeouts} timeout(s), state ${view.watch.state}`,
       `- cases: ${cases.length} (open ${view.cases.open})`,
       `- guard interventions: ${view.interventions}`,
       `- watch log: ${view.state === 'disarmed' ? 'closed' : 'live'}`,
+      ...(view.watch.lastShift === null ? [] : [`- last shift: ${view.watch.lastShift.id} (${view.watch.lastShift.path})`]),
       '',
       '| case | severity | code | state | opened | closed |',
       '| --- | --- | --- | --- | --- | --- |',
@@ -590,6 +1117,7 @@ export class RunSupervisor {
     try {
       if (this.timer !== null) clearInterval(this.timer)
       this.timer = null
+      void this.watch?.dispose?.()
       if (this.store.opened) this.store.close()
     } catch {
       // best effort on unload

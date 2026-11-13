@@ -12,23 +12,33 @@ dsh-overwatch 把这三件事拆成 Guard / Watch / Evidence 三层，叠加在
 dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-console（审计）
 之上，不改写三个上游。
 
-## 当前版本（0.1.0，M1：硬闸门）
+## 当前版本（0.1.0，M1+M2）
 
-**已实现（guard-only）**：
+**M1 硬闸门（guard-only 也完整可用）**：
 
-- `watch_arm` / `watch_disarm` / `watch_status` / `watch_report` 四个根 agent 工具
-- 每 run 单写者 + 哈希链 `watch.jsonl`（崩溃尾部修复、篡改检测）
-- 采样器：swarm 事件游标 / 快照（5s）/ pressure 活跃成员（3s）/ 鱼缸概览（15s），
-  失败退避、事件缺口锁存、源新鲜度
-- 事件单：确定性 key、15 分钟冷却、L2 双 tick 规则、升级/重开、物化视图
-- 硬闸门：预算 80% 软暂停（10 分钟自动恢复）、95% 暂停（不自动恢复）、
-  100% 中止；swarm 事件缺口/日志损坏 → 立即中止
-- 执行器：校验 → 授权 → 幂等 → 执行 → 验证 → 记账；重启恢复未完成动作
-- 只读 API（runs / 快照 / 事件单 / 时间轴 / 交接班）+ 受 token 保护的 arm/disarm/ack
-- Web 面板：值班室（运行、预算、新鲜度、事件单计数）+ 事件单（列表/详情/时间线/接管）
+- 四个根 agent 工具：`watch_arm` / `watch_disarm` / `watch_status` / `watch_report`
+- 每 run 单写者 + 哈希链 `watch.jsonl`；崩溃尾部修复、篡改检测、只读归档
+- 采样器：swarm 事件游标 / 快照 / pressure 活跃成员 / 鱼缸概览；缺口锁存、退避、新鲜度
+- 事件单：确定性 key、15 分钟冷却、L2 双 tick、升级/重开、物化视图
+- Guard：80% throttle（到期自动 resume）、95% 硬 pause、100% abort、
+  事件流缺口 abort；无 case / 无 token / 冷却 / 自动干预上限时只记 notice
+- Executor：校验 → 授权 → 幂等 → 执行 → 验证 → 记账；重启恢复
+- 只读 API + token/同源保护的 arm/disarm/ack；Web 面板（值班室 + 事件单）
 
-**未实现（M2+）**：值班员 agent 线程（`mode: supervised` 会被显式拒绝）、
-教练/steer 的成员投递、鱼数据自动检查点、恢复执行、A/B/C 基准。
+**M2 值班员（experimental）**：
+
+- `mode: supervised` 时，第一个 L2+ 事件单懒启动一个 `delivery:'caller'`、
+  `maxDepth:1` 的子代理；同一 run 内用 `sendMessage` 冷恢复，不常驻槽位
+- 串行 `agent/created` 里同步 `restrict` 掉全部全局工具，只注册
+  `watch_case` / `watch_evidence` / `watch_decide`
+- 案情卡 ≤8KB；证据按 ref 取，≤8KB/次、≤3 次/案；决定必须带证据和 confidence
+- Policy/Executor 二次校验：case/generation/childId/action/参数/证据/置信度/预算/冷却
+- 超时、连续失败降级、token 预留 R、maxWakes/每小时限制、交接班 `watch/shift`
+- 面板显示值班员 state/wakes/timeouts/S/R/child，并区分 guard-only / supervised
+- 真实 DSH 端到端：`npm run m2`（12/12），见 `docs/m2.md`
+
+**未实现（M3+）**：鱼缸与合并时间轴、人类 resume HTTP 动作、A/B/C 基准、
+真实模型判断质量评估、鱼数据自动检查点（P1）。
 
 ## 用法（5 分钟）
 
@@ -38,16 +48,18 @@ $env:DSH_HOME = "$env:TEMP\dsh-overwatch-try"
 dsh --profile ow --from-default-profile headless --dump-config
 dsh plugin --profile ow add C:\Users\11403\Desktop\overwatch
 
-# 2. 在 profile 的 cordis.patch.yml 里给行配 write token
+# 2. 在 profile 的 cordis.patch.yml 里配 write token
 #    （见 examples/profile-patch.yml；swarm 的 http.token 要与 ports.swarmToken 一致）
 
-# 3. 在会话里让根 agent 调工具，或走 HTTP：
-#    watch_arm(runId="swarm_xxx", mode="guard")
+# 3. 根 agent 里：
+#    watch_arm(runId="swarm_xxx", mode="supervised")
+#    watch_status(...); watch_report(...); watch_disarm(...)
 ```
 
-`watch_arm` 的拒绝是显式的：`SWARM_UNAVAILABLE` / `RUN_NOT_RUNNING` /
-`ALREADY_ARMED` / `SUPERVISOR_UNAVAILABLE`。没有 `http.token` 时 arm 会降级成
-`observe` 并在 watch 日志里写 `watch/guard/notice:write_disabled`——不会假装在看。
+`supervised` 需要：根 agent（作为 parent）、`http.token`、swarm 可达、
+`非蜂后成员数 + 1 ≤ maxActiveSubagents`。HTTP arm 只能 `guard/observe`。
+没有 `http.token` 时 guard arm 会降级为 `observe` 并写
+`watch/guard/notice:write_disabled`；supervised 直接拒绝。
 
 ## 健康检查
 
@@ -55,7 +67,7 @@ dsh plugin --profile ow add C:\Users\11403\Desktop\overwatch
 GET /overwatch/api/health
 ```
 
-返回版本、模式、服务日志校验、每个 run 的状态/链校验/新鲜度，以及
+返回版本、模式、服务日志校验、每个 run 的状态/链校验/新鲜度/值班员状态，以及
 `swarm/pressure/fish` Port 能力。`/overwatch/api/runs`、`/runs/:id`、
 `/runs/:id/cases`、`/runs/:id/timeline` 为只读；写接口（arm/disarm/ack）
 要求 `x-overwatch-token` 且拒绝跨源。
@@ -69,6 +81,7 @@ $DSH_HOME/overwatch/
 └── runs/<runId>/
     ├── watch.jsonl             # 判断与动作，哈希链
     ├── cases/<caseId>.json     # 物化视图（可从日志重建）
+    ├── shifts/shift-0001.md    # 交接班
     ├── snapshots/last.json     # 最近快照
     └── watch-<runId>.lock/     # 单写者锁
 ```
@@ -80,19 +93,21 @@ $DSH_HOME/overwatch/
 ## 验证
 
 ```powershell
-npm test     # 单元 + 路由 + 服务/插件装配（node:test）
-npm run m0   # M0 探针（临时 profile，脚本化 provider）
-npm run m1   # M1 端到端（临时 web profile + 假 swarm，真实 Desktop DSH）
+npm test     # 98 个测试
+npm run m0   # M0 能力探针（真实 DSH，脚本化 provider）
+npm run m1   # M1 web 端到端（25/25）
+npm run m2   # M2 值班员 headless 端到端（12/12）
 ```
 
 沙箱/CI 里无法 spawn 子进程时，用 `node --test --test-isolation=none "test/*.test.js"`。
 
 ## 限制
 
-- **guard-only**：M1 没有值班员，只有确定性硬规则。"该教练还是该暂停"的判断留给 M2。
+- **M2 判断质量未验证**：端到端用脚本化 provider；真实模型的误动作率/成本 A/B 是 M4 门槛。
 - 教练/节流只保证写到 watch 日志与 swarm `steer` 事件；成员 inbox 投递要等
   上游 message 路由（P1）。
+- `pause` 需人工 resume；`throttle` 只对"由我们暂停"的运行自动恢复。
 - 自动鱼数据检查点需要浏览器凭据，v1 不做（P1）；面板只读展示。
 - swarm 写 token 与 overwatch 写 token 需一致（或显式 `ports.swarmToken`）。
 - 监管层崩溃时总支出上界是 `B + S`（S ≤ 5% × B），不宣称"监管崩溃也零超支"。
-- 面板目前没有真实浏览器自动化验收；M0 已记录 headless Edge 在本机会挂起。
+- 面板没有真实浏览器自动化验收；M0 已记录 headless Edge 在本机会挂起。

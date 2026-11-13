@@ -19,6 +19,7 @@ export const DEFAULT_CONFIG = Object.freeze({
     enabled: true,
     provider: 'spawn',
     model: 'inherit',
+    agentPreset: '',
     reserveRatio: 0.05,
     maxReserveTokens: 200_000,
     maxWakes: 30,
@@ -69,6 +70,7 @@ export const DEFAULT_CONFIG = Object.freeze({
   },
   ports: {
     swarmToken: '',
+    origin: '',
   },
   http: {
     enabled: true,
@@ -107,6 +109,7 @@ export function resolveConfig(raw, options = {}) {
   if (!MODES.has(config.mode)) fail(`mode must be one of ${[...MODES].join(', ')}`)
   if (!MODELS.has(config.supervisor.model)) fail(`supervisor.model must be one of ${[...MODELS].join(', ')}`)
   assertString(config.supervisor, 'provider')
+  assertString(config.supervisor, 'agentPreset')
 
   assertNumber(config.supervisor, 'reserveRatio', 0, 0.5)
   assertInteger(config.supervisor, 'maxReserveTokens', 0)
@@ -146,6 +149,8 @@ export function resolveConfig(raw, options = {}) {
   assertInteger(config.storage, 'maxBytesPerRun', 1_024)
 
   assertString(config.ports, 'swarmToken')
+  assertString(config.ports, 'origin')
+  if (config.ports.origin !== '' && !/^https?:\/\/[^\s]+$/.test(config.ports.origin)) fail('ports.origin must be an http(s) origin or empty')
   assertBoolean(config.http, 'enabled')
   assertString(config.http, 'token')
 

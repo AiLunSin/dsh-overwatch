@@ -22,8 +22,8 @@ function fakeService() {
   return {
     calls,
     async arm(input) {
-      calls.push(['arm', input.runId, input.mode])
-      return { runId: input.runId, mode: 'guard', state: 'watching', armed: true, armedAt: '2026-11-14T02:00:00.000Z', reserve: 0 }
+      calls.push(['arm', input.runId, input.mode, input.parentAgent?.id])
+      return { runId: input.runId, mode: input.mode ?? 'guard', state: 'watching', armed: true, armedAt: '2026-11-14T02:00:00.000Z', reserve: 0 }
     },
     async disarm(runId, reason) {
       calls.push(['disarm', runId, reason])
@@ -75,7 +75,7 @@ test('the root can arm, and the tool result is JSON-renderable', async () => {
   const result = await byName.watch_arm.definition.execute({ runId: 'run-1', mode: 'guard' }, ROOT)
   assert.equal(result.ok, true)
   assert.equal(result.state, 'watching')
-  assert.deepEqual(service.calls[0], ['arm', 'run-1', 'guard'])
+  assert.deepEqual(service.calls[0], ['arm', 'run-1', 'guard', 'root'])
   const rendered = byName.watch_arm.definition.output.render({}, result)
   assert.equal(rendered[0].type, 'text')
   assert.match(rendered[0].text, /watching/)
@@ -91,11 +91,19 @@ test('a subagent cannot arm or disarm even if it reaches the handler', async () 
   assert.equal(service.calls.length, 0)
 })
 
-test('supervised mode is rejected with a typed error instead of silently degrading', async () => {
+test('supervised arm forwards the live root agent as the watch officer parent', async () => {
   const { service, byName } = setup()
   const result = await byName.watch_arm.definition.execute({ runId: 'run-1', mode: 'supervised' }, ROOT)
+  assert.equal(result.ok, true)
+  assert.equal(service.calls[0][2], 'supervised')
+  assert.equal(service.calls[0][3], 'root')
+})
+
+test('supervised arm without a root agent is rejected before the service call', async () => {
+  const { service, byName } = setup()
+  const result = await byName.watch_arm.definition.execute({ runId: 'run-1', mode: 'supervised' }, {})
   assert.equal(result.ok, false)
-  assert.equal(result.code, 'SUPERVISOR_UNAVAILABLE')
+  assert.equal(result.code, 'AGENT_REQUIRED')
   assert.equal(service.calls.length, 0)
 })
 
