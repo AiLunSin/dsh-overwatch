@@ -30,9 +30,11 @@
           cooldownMs: 900000
           maxAutoInterventions: 5
           twoSignalRule: true
+          throttleMinutes: 10
           autopilot:
             throttle: true
             pause: false
+            pauseOnHardLimit: true
             abortOnHardLimit: true
             budgetAdjust: false
             restore: false

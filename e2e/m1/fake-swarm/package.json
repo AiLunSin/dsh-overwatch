@@ -1,0 +1,15 @@
+{
+  "name": "dsh-overwatch-m1-fake-swarm",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Fake dsh-swarm HTTP surface for the dsh-overwatch M1 real-host probe. Test only; never published.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

@@ -41,9 +41,11 @@ export const DEFAULT_CONFIG = Object.freeze({
     cooldownMs: 900_000,
     maxAutoInterventions: 5,
     twoSignalRule: true,
+    throttleMinutes: 10,
     autopilot: {
       throttle: true,
       pause: false,
+      pauseOnHardLimit: true,
       abortOnHardLimit: true,
       budgetAdjust: false,
       restore: false,
@@ -64,6 +66,9 @@ export const DEFAULT_CONFIG = Object.freeze({
     dataDir: '',
     retentionDays: 90,
     maxBytesPerRun: 52_428_800,
+  },
+  ports: {
+    swarmToken: '',
   },
   http: {
     enabled: true,
@@ -93,6 +98,7 @@ export function resolveConfig(raw, options = {}) {
     },
     thresholds: merge(DEFAULT_CONFIG.thresholds, input.thresholds),
     storage: merge(DEFAULT_CONFIG.storage, input.storage),
+    ports: merge(DEFAULT_CONFIG.ports, input.ports),
     http: merge(DEFAULT_CONFIG.http, input.http),
     dataDir: '',
   }
@@ -117,6 +123,8 @@ export function resolveConfig(raw, options = {}) {
   assertInteger(config.sampling, 'maxInflight', 1)
 
   for (const key of ['cooldownMs', 'maxAutoInterventions']) assertInteger(config.policy, key, 0)
+  assertInteger(config.policy, 'throttleMinutes', 1)
+  if (config.policy.throttleMinutes > 60) fail('policy.throttleMinutes must be at most 60')
   assertBoolean(config.policy, 'twoSignalRule')
   for (const key of Object.keys(DEFAULT_CONFIG.policy.autopilot)) assertBoolean(config.policy.autopilot, key)
 
@@ -137,6 +145,7 @@ export function resolveConfig(raw, options = {}) {
   assertInteger(config.storage, 'retentionDays', 1)
   assertInteger(config.storage, 'maxBytesPerRun', 1_024)
 
+  assertString(config.ports, 'swarmToken')
   assertBoolean(config.http, 'enabled')
   assertString(config.http, 'token')
 

@@ -1,0 +1,15 @@
+{
+  "name": "dsh-overwatch-m1-probe",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "M1 real-host HTTP probe for dsh-overwatch. Test only; never published.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

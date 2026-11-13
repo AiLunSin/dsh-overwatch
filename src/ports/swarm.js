@@ -89,8 +89,13 @@ export class SwarmPort {
     /** @type {{ action: string, reason?: string, actor?: string, text?: string, target?: unknown }} */
     let body
     if (decision.action === 'pause') body = { action: 'pause', reason, actor }
+    else if (decision.action === 'resume') body = { action: 'resume', reason, actor }
     else if (decision.action === 'abort') body = { action: 'abort', reason, actor }
-    else if (decision.action === 'throttle' || decision.action === 'coach') {
+    else if (decision.action === 'throttle') {
+      // v1 throttle is a pause with a scheduled resume (the executor/guard owns
+      // the timer); upstream has no precise concurrency throttle.
+      body = { action: 'pause', reason: `throttle: ${reason}`, actor }
+    } else if (decision.action === 'coach') {
       body = { action: 'steer', reason, actor, text: decision.params.text !== undefined ? String(decision.params.text) : decision.reason }
       if (decision.target.kind === 'swarm_member') body.target = decision.target.id
     } else if (decision.action === 'notice' || decision.action === 'escalate') {
@@ -117,6 +122,8 @@ export class SwarmPort {
     }
     const status = /** @type {any} */ (snapshot.data)?.state?.status ?? /** @type {any} */ (snapshot.data)?.status
     if (decision.action === 'pause') return { ok: status === 'paused', detail: { status } }
+    if (decision.action === 'throttle') return { ok: status === 'paused', detail: { status, kind: 'throttle-as-pause' } }
+    if (decision.action === 'resume') return { ok: status === 'running', detail: { status } }
     if (decision.action === 'abort') return { ok: status === 'aborted' || status === 'converged', detail: { status } }
     return { ok: true, detail: { status } }
   }

@@ -7,7 +7,7 @@
  * @module dsh-overwatch/signals
  */
 
-/** @typedef {'L1' | 'L2' | 'L3'} Severity */
+/** @typedef {'L0' | 'L1' | 'L2' | 'L3' | 'L4'} Severity */
 
 /**
  * @typedef {object} Signal
@@ -42,6 +42,22 @@ export function budgetSignal(input, thresholds) {
   const ratio = used / input.limit
   const at = input.at ?? new Date(0).toISOString()
   const scope = input.scope ?? 'run'
+  if (ratio >= 1) {
+    return {
+      code: 'budget_exhausted',
+      severity: 'L4',
+      summary: `${scope} budget exhausted at ${formatPercent(ratio)} — hard stop`,
+      suggestedAction: 'abort',
+      evidence: {
+        id: evidenceId('swarm', 'budget', `${scope}:${String(input.ref ?? '')}:exhausted`),
+        source: 'swarm',
+        kind: 'budget',
+        at,
+        ref: input.ref ?? null,
+        observed: { scope, used, limit: input.limit, ratio, threshold: 1 },
+      },
+    }
+  }
   if (ratio >= thresholds.budgetPause) {
     return {
       code: 'budget_pause',
@@ -86,17 +102,21 @@ export function budgetSignal(input, thresholds) {
 export function failureStreakSignal(input, thresholds) {
   if (input.failures < thresholds.failureStreak) return null
   const at = input.lastFailureAt ?? new Date(0).toISOString()
+  const ref = input.ref
+  const refKey = ref !== null && typeof ref === 'object'
+    ? String(/** @type {Record<string, unknown>} */ (ref).memberId ?? /** @type {Record<string, unknown>} */ (ref).taskId ?? 'run')
+    : String(ref ?? 'run')
   return {
     code: 'failure_streak',
     severity: 'L2',
     summary: `${input.failures} consecutive tool failures (threshold ${thresholds.failureStreak})`,
     suggestedAction: 'coach',
     evidence: {
-      id: evidenceId('swarm', 'failure_streak', String(input.ref ?? 'run')),
+      id: evidenceId('swarm', 'failure_streak', refKey),
       source: 'swarm',
       kind: 'failure_streak',
       at,
-      ref: input.ref ?? null,
+      ref: ref ?? null,
       observed: { failures: input.failures, threshold: thresholds.failureStreak },
     },
   }
@@ -157,15 +177,41 @@ export function contextPressureSignal(input, thresholds) {
 }
 
 /**
+ * The swarm event stream stopped being contiguous. The guard treats this as an
+ * integrity failure: it will not act on a stream it cannot trust.
+ * @param {{ expectedSeq?: number, actualSeq?: number, at?: string, ref?: unknown }} input
+ * @returns {Signal}
+ */
+export function eventGapSignal(input = {}) {
+  const expected = Number.isInteger(input.expectedSeq) ? input.expectedSeq : null
+  const actual = Number.isInteger(input.actualSeq) ? input.actualSeq : null
+  return {
+    code: 'log_integrity',
+    severity: 'L4',
+    summary: `swarm event sequence gap (expected ${String(expected)}, got ${String(actual)})`,
+    suggestedAction: 'abort',
+    evidence: {
+      id: evidenceId('swarm', 'log_integrity', `${String(expected)}:${String(actual)}`),
+      source: 'swarm',
+      kind: 'log_integrity',
+      at: input.at ?? new Date(0).toISOString(),
+      ref: input.ref ?? null,
+      observed: { expectedSeq: expected, actualSeq: actual },
+    },
+  }
+}
+
+/**
  * Evaluate every rule against one sampled snapshot.
  * @param {object} snapshot
- * @param {{ budget?: { used: number, limit: number, scope?: string, ref?: unknown, at?: string }, failures?: number, lastFailureAt?: string, run?: { status: string, lastEventAt: string, ref?: unknown }, context?: { ratio: number, sessionId?: string, at?: string }, now: number }} input
+ * @param {{ budget?: { used: number, limit: number, scope?: string, ref?: unknown, at?: string }, failures?: number, lastFailureAt?: string, run?: { status: string, lastEventAt: string, ref?: unknown }, context?: { ratio: number, sessionId?: string, at?: string }, eventGap?: { expectedSeq?: number, actualSeq?: number, at?: string, ref?: unknown }, now: number }} input
  * @param {typeof import('./config.js').DEFAULT_CONFIG} config
  * @returns {Signal[]}
  */
 export function evaluateSnapshot(input, config) {
   /** @type {Signal[]} */
   const signals = []
+  if (input.eventGap !== undefined) signals.push(eventGapSignal(input.eventGap))
   if (input.budget !== undefined) {
     const signal = budgetSignal(input.budget, config.thresholds)
     if (signal !== null) signals.push(signal)

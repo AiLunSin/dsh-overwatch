@@ -1,9 +1,11 @@
 /**
  * dsh-overwatch Host entry.
  *
- * M0: owns the run's watch log and exposes a loopback read API. It does not yet
- * arm a swarm, sample signals, or start the watch officer — those are M1/M2 and
- * deliberately absent so an installed bundle cannot silently act.
+ * M1: arm/disarm supervision of a live dsh-swarm run, sample the three
+ * upstreams, open incident cases from deterministic signals, and let the
+ * guard pause or abort on budget/log-integrity hard limits. The watch officer
+ * agent thread (M2) is deliberately absent: `supervised` arms are rejected, so an
+ * installed bundle cannot silently start a model.
  * @module dsh-overwatch
  */
 
@@ -11,11 +13,12 @@ import { readFileSync } from 'node:fs'
 import { resolveConfig } from './config.js'
 import { createNodeHandler } from './http.js'
 import { OverwatchService } from './service.js'
+import { registerTools } from './tools.js'
 
 export const name = 'dsh-overwatch'
 
-/** No hard dependency: every capability degrades to `unavailable`. */
-export const inject = []
+/** Tools are required; every other capability degrades to `unavailable`. */
+export const inject = ['tools']
 
 const VERSION = readVersion()
 
@@ -48,14 +51,24 @@ export async function apply(ctx, rawConfig) {
   await service.open()
   ctx.effect(() => () => service.close())
 
+  if (typeof ctx.tools?.register === 'function') {
+    registerTools(ctx, service, config)
+  } else {
+    ctx.logger?.warn?.('[overwatch] tools service is unavailable; watch_* tools are not registered')
+  }
+
   const webServer = ctx.get?.('webServer')
+  let registered = false
   const registerHttp = server => {
+    if (registered) return
     if (server === undefined || server === null || typeof server.register !== 'function') return
     try {
-      service.attachPorts(server.getOrigin())
+      registered = true
+      service.attachPorts(typeof server.getOrigin === 'function' ? server.getOrigin() : 'http://127.0.0.1')
       const handler = createNodeHandler({ service, config, version: VERSION })
       ctx.effect(() => server.register({ kind: 'prefix', path: '/overwatch/api', handler }))
     } catch (error) {
+      registered = false
       ctx.logger?.warn?.(`[overwatch] HTTP route unavailable: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
@@ -70,5 +83,5 @@ export async function apply(ctx, rawConfig) {
     }
   }
 
-  ctx.logger?.info?.(`[overwatch] active: v${VERSION} mode=${config.mode} dir=${config.dataDir}`)
+  ctx.logger?.info?.(`[overwatch] active: v${VERSION} mode=${config.mode} dir=${config.dataDir} write=${config.http.token !== ''}`)
 }

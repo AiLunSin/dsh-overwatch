@@ -1,0 +1,20 @@
+{
+  "name": "dsh-profile-m1web",
+  "private": true,
+  "dependencies": {
+    "dsh-overwatch": "link:C:/Users/11403/Desktop/overwatch",
+    "dsh-overwatch-m1-fake-swarm": "link:C:/Users/11403/Desktop/overwatch/e2e/m1/fake-swarm",
+    "dsh-overwatch-m1-probe": "link:C:/Users/11403/Desktop/overwatch/e2e/m1/probe"
+  },
+  "dsh": {
+    "profile": {
+      "bundles": [
+        "@deepseek-ai/dsh-base",
+        "@deepseek-ai/dsh-web-app",
+        "dsh-overwatch",
+        "dsh-overwatch-m1-fake-swarm",
+        "dsh-overwatch-m1-probe"
+      ]
+    }
+  }
+}

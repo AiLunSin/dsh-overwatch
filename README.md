@@ -4,7 +4,10 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M0 技术验证完成，尚未发布，还不是可用插件。** 本仓库现在包含可安装的 Host 骨架、经过真实 DSH 0.2.2-rc.3 验证的 M0 探针、锁/哈希链原型与结论。仲裁、采样、值班员、面板属于 M1–M4，尚未实现（见 [docs/spike-m0.md](./docs/spike-m0.md)）。
+**状态：M1 硬闸门完成（guard-only），值班员属于 M2。** 本仓库现在包含可安装的
+Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1 探针与证据。装上并 `watch_arm`
+之后，它会采样 swarm/pressure/鱼缸、按确定性阈值开事件单，并在预算 80%/95%/100%
+与事件流缺口上执行 throttle / pause / abort。
 
 ---
 
@@ -12,19 +15,35 @@
 
 | 模块 | 状态 | 说明 |
 | --- | --- | --- |
-| `src/config.js` | ✅ | 技术方案附录 A 的完整默认值 + 校验 |
-| `src/util.js` | ✅ | 规范化 JSON、哈希链、跨进程目录锁、原子写 |
-| `src/store.js` | ✅ | `watch.jsonl` 单写者 + 哈希链；崩溃尾部截断；篡改检测 |
-| `src/signals.js` | ✅ | 预算/连续失败/停滞/上下文压力纯函数信号 |
-| `src/policy.js` | ✅ | 决定 schema 校验、L2+ 证据要求、授权矩阵、幂等键 |
-| `src/executor.js` | ✅ | 校验→授权→执行→验证→记账，串行且幂等 |
-| `src/ports/*` | ✅ | swarm（读 + intervene 写）、pressure（只读）、fish（只读） |
-| `src/http.js` | ✅ | `/overwatch/api/health`、`/watch`、`/watch/verify`；本机 + 同源 + 写 token |
-| `src/service.js` | ✅ | 运行目录、watch 日志生命周期、能力探测 |
-| `client.js` / 面板 | ❌ | M3 |
-| arm / 采样 / 信号开单 / 值班员 | ❌ | M1–M2 |
+| `src/config.js` | ✅ | 技术方案附录 A 默认值 + 校验（含 M1 的 `ports.swarmToken`、`policy.throttleMinutes`、`autopilot.pauseOnHardLimit`） |
+| `src/util.js` | ✅ | 规范化 JSON、哈希链、跨进程目录锁、原子写、脱敏 |
+| `src/store.js` | ✅ | `watch.jsonl` 单写者 + 哈希链；崩溃尾部截断；篡改检测；只读归档读取 |
+| `src/probe.js` | ✅ | 三源采样、事件游标、缺口锁存、新鲜度、退避、成员→子会话映射 |
+| `src/signals.js` | ✅ | 预算四档/失败连击/停滞/上下文压力/事件缺口纯函数 |
+| `src/cases.js` | ✅ | 事件单 key/冷却/双 tick/升级/重开/物化视图 |
+| `src/guard.js` | ✅ | 无模型硬规则：throttle、hard pause、abort、log integrity |
+| `src/policy.js` | ✅ | 决定与 guard plan 的校验、授权矩阵、幂等键 |
+| `src/executor.js` | ✅ | 校验→授权→执行→验证→记账；串行、幂等、崩溃恢复 |
+| `src/run.js` | ✅ | 每 run 的状态机/锁/采样定时器/动作串行；disarm 归档 |
+| `src/service.js` | ✅ | 多 run 注册、arm/disarm、历史归档读取、服务生命周期日志 |
+| `src/tools.js` | ✅ | `watch_arm` / `watch_disarm` / `watch_status` / `watch_report`（根 agent 限定） |
+| `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack |
+| `client.js` | ✅ | Web 面板：值班室 + 事件单（侧边栏 + main） |
+| 值班员 agent 线程 | ❌ M2 | `mode: supervised` 在 M1 被显式拒绝 |
+| 鱼缸自动检查点/恢复 | ❌ P1 | 宿主写接口不可达，面板只读展示 |
 
-> 当前模式默认 `guard`，但没有 arm 和处置路径，所以**装上也只会写 `watch/armed` 与健康路由**；不会自动暂停或中止任何 run。
+### M1 硬闸门行为
+
+| 条件 | 动作 | 自动恢复 |
+| --- | --- | --- |
+| 预算 ≥ 80% | `throttle`：pause + 10 分钟后自动 resume | 是（可配 `throttleMinutes`） |
+| 预算 ≥ 95% | `pause`（硬暂停） | 否，等人 |
+| 预算 ≥ 100% | `abort` | 否 |
+| swarm 事件 seq 缺口 / 日志损坏 | `abort`（`log_integrity` L4） | 否 |
+| 成员工具失败 ≥3 / 上下文 ≥85% | 开 L2/L1 事件单，不动作 | — |
+
+`autopilot.pause` 仍只控制**值班员**（M2）的暂停权限；硬闸门用独立的
+`autopilot.pauseOnHardLimit` 开关，避免"开硬暂停就必须同时放开模型暂停"。
 
 ---
 
@@ -37,74 +56,110 @@ dsh --profile ow --from-default-profile headless --dump-config
 dsh plugin --profile ow add C:\Users\11403\Desktop\overwatch
 ```
 
-之后 `GET http://127.0.0.1:<port>/overwatch/api/health` 应返回版本、模式、watch 日志校验结果。Web profile 下路由会在 `webServer` 就绪后自动注册（M0 实测：插件行可能早于 Host 服务挂载）。
+Web 面板需要 web profile；装好后侧边栏出现「瞭望塔」，同时
+`GET http://127.0.0.1:<port>/overwatch/api/health` 返回版本、模式、链校验与源状态。
 
-配置在 profile 的 `cordis.patch.yml` 中按行 id 覆盖，例如：
+配置在 profile 的 `cordis.patch.yml` 中按行 id 覆盖（完整示例
+[examples/profile-patch.yml](./examples/profile-patch.yml)）：
 
 ```yaml
 - id: dsh-overwatch
   config:
-    mode: supervised
-    policy:
-      autopilot:
-        pause: false
+    mode: guard
     http:
-      token: change-me
+      token: change-me         # 空 = 写接口禁用，arm 降级 observe
+    ports:
+      swarmToken: change-me    # 空 = 复用 http.token；必须与 swarm 的 http.token 一致
+    policy:
+      throttleMinutes: 10
+      autopilot:
+        pauseOnHardLimit: true
 ```
+
+> `watch_arm` 需要 Host web server 就绪（swarm 在同一个 Host 里）。headless
+> profile 没有 webServer，arm 会返回 `WEB_UNAVAILABLE`，这是预期。
 
 ---
 
-## 3. 验证
+## 3. 使用
+
+```js
+// 根 agent
+watch_arm({ runId: 'swarm_xxx', mode: 'guard' })
+watch_status({ runId: 'swarm_xxx' })
+watch_report({ runId: 'swarm_xxx' })
+watch_disarm({ runId: 'swarm_xxx', reason: '收工' })
+```
+
+或走 HTTP（写接口需 `x-overwatch-token`）：
 
 ```powershell
-npm test        # 29 个单测：哈希链 / 锁（含 6 进程竞争）/ 校验 / 执行器 / HTTP / 信号 / 配置
-npm run lint    # node --check 全部源码
-npm run m0      # 抛一个临时 profile，跑真实 DSH 的 M0 探针（无模型、无费用）
+curl -X POST http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/arm `
+  -H 'content-type: application/json' -H 'x-overwatch-token: change-me' `
+  -d '{"mode":"guard"}'
+curl http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx
+curl 'http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/cases?state=open'
 ```
 
-`npm run m0` 需要本机安装 DeepSeek Harness Desktop（默认
-`%LOCALAPPDATA%\Programs\DeepSeek Harness`，可用 `DSH_DESKTOP_ROOT` 覆盖），
-会创建并删除临时 `DSH_HOME`；证据写到 `e2e/m0/results/`。
-
-M0 结论摘要（DSH 0.2.2-rc.3，Electron Node 24.21）：
-
-| 项 | 结论 |
-| --- | --- |
-| A-1 子代理工具限制 | ✅ `agent/created` 串行监听内 `agent.ctx.tools.restrict({deny:[...all]})`，子代理首个模型请求只剩 scoped 工具 |
-| A-2 caller 子代理续聊 | ✅ 结果后子代理已不常驻，`sendMessage` 冷恢复两次均有回复 |
-| A-3 子代理 usage 归集 | ✅ Host `session/event` 按 childId 汇总 |
-| A-4 Host 读 swarm | ✅ 等 Host 服务就绪后 `GET /swarm/api/health` 200 |
-| A-5 Host 读 fishkeeper | ❌ 401：`connection.fetch` 路由是浏览器面，写接口需要浏览器凭据 → 自动检查点放 P1 |
-| A-7 `agentPreset` | ✅ 显式 preset 子代理创建成功（headless 需自行声明 preset） |
-| A-8 写路由保护 | ⚠️ Host 不提供 origin/token 策略，必须 route owner 自己做（本插件已做） |
-| A-9 槽位 | ✅ 根/蜂后不占槽；容量 3 时 1 个常驻子代理 + 2 个工蜂刚好，第 3 个 `ACTIVATION_LIMIT_REACHED` |
-| 锁 / 哈希链 | ✅ 6 进程竞争仅 1 个写者；死锁接管；截断修复；篡改检测 |
-| 假 provider 闭环 | ✅ 信号→开单→唤醒→`watch_decide`→执行→验证→哈希链记账全通 |
-
-完整证据、偏差与 go/no-go 见 **[docs/spike-m0.md](./docs/spike-m0.md)**。
+面板：值班室看运行/预算/新鲜度/未决单；事件单看 severity、signals、证据引用、
+动作时间线，并可「确认接管（ack）」或 disarm。写操作需要先输入 token（只存
+`sessionStorage`）。
 
 ---
 
-## 4. 设计边界（不要过度承诺）
+## 4. 验证
 
-- **v1 的教练不保证送达**：dsh-swarm 0.1.1 的 `steer` 只写 `swarm/intervened` 事件，不投递成员 inbox；本层 coach/throttle 只能留痕。
-- **v1 的自动检查点只到运行快照**：鱼数据检查点需要浏览器凭据，宿主侧自动创建是 P1。
-- **"0 超支"以监管层存活为前提**：监管层崩溃时仍有 swarm 自身预算兜底，但总支出上限是 `B + S`（`S ≤ 5% × B`）。
-- **蜂后不占子代理槽**：M0 已实测根不占槽；8 成员 = 蜂后 + 7 工蜂，7 + 值班员 = 8，刚好。
-- **值班员不是万能的**：只做判断，不写代码、不合并、不修 bug。
+```powershell
+npm test        # 单元/路由/服务/装配测试
+npm run lint    # node --check 全部源码
+npm run m0      # M0 探针（真实 DSH，脚本化 provider，零模型费用）
+npm run m1      # M1 端到端（临时 web profile + 假 swarm，真实 Desktop DSH）
+```
+
+沙箱/CI 无法 spawn 子进程时：
+
+```powershell
+node --test --test-isolation=none "test/*.test.js"
+```
+
+M0 证据在 `e2e/m0/results/`，M1 证据在 `e2e/m1/results/`（`report.json`、
+`summary.json`、`watch-swarm_m1.jsonl`、profile patch 副本、运行日志）。
+
+M0 结论（DSH 0.2.2-rc.3，Electron Node 24.21）：A-1/A-2/A-3/A-4/A-7/A-8/A-9
+通过；fishkeeper 宿主读返回 401（浏览器面，P1）；`steer` 只落事件不投递 inbox。
+详见 [docs/spike-m0.md](./docs/spike-m0.md)。
+
+M1 结论与逐项证据见 [docs/m1.md](./docs/m1.md)。
 
 ---
 
-## 5. 目录
+## 5. 设计边界（不要过度承诺）
+
+- **v1 的教练不保证送达**：dsh-swarm 0.1.1 的 `steer` 只写 `swarm/intervened`
+  事件，不投递成员 inbox；coach/throttle 只能留痕。
+- **M1 没有判断层**：只有确定性阈值；"该不该暂停"的软判断是 M2 值班员的事。
+- **"0 超支"以监管层存活为前提**：监管层崩溃时仍有 swarm 自身预算兜底，但总支出
+  上限是 `B + S`（`S ≤ 5% × B`）。
+- **蜂后不占子代理槽**：8 成员 = 蜂后 + 7 工蜂；M1 不启动值班员，所以不占槽。
+  M2 的 `supervised` arm 会按「非蜂后成员数 + 1」校验，8 成员时需调大
+  `maxActiveSubagents` 或先移除成员。
+- **鱼数据自动检查点不在 v1**：需要浏览器凭据或新 Host 路由；面板只读。
+- **Windows 文件权限**：只做 best-effort，不宣称 0700/0600。
+- **面板未做真实浏览器自动化验收**（headless Edge 在本机会挂起）；HTTP 面有端到端。
+
+---
+
+## 6. 目录
 
 ```text
 overwatch/
-├── src/                 # Host 半（M0 地基）
-├── e2e/m0/              # M0 探针、脚本化 provider、临时 profile 运行器、证据
-├── test/                # 单元测试与双进程锁竞争 helper
-├── docs/spike-m0.md     # M0 结论与证据
+├── src/                 # Host 半（M0 地基 + M1 硬闸门）
+├── client.js            # Web 面板（值班室 + 事件单）
+├── e2e/m0/              # M0 探针与结果
+├── e2e/m1/              # M1 假 swarm + 探针 + runner + 结果
+├── test/                # 单元/路由/服务/装配测试
+├── docs/                # spike-m0.md、m1.md、DETAIL.md
 ├── cordis.patch.yml     # 组合包 patch 层
-├── package.json
 └── scripts/             # 语法检查入口
 ```
 
@@ -118,6 +173,6 @@ overwatch/
 
 ---
 
-## 6. License
+## 7. License
 
 MIT

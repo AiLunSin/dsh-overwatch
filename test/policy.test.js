@@ -1,8 +1,70 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { authorizeDecision, idempotencyKey, validateDecision } from '../src/policy.js'
+import { authorizeDecision, authorizePlan, idempotencyKey, planKey, validateDecision, validatePlan } from '../src/policy.js'
 
 const evidence = new Set(['ev-1'])
+
+function guardPlan(overrides = {}) {
+  return {
+    kind: 'throttle',
+    caseId: 'case-1',
+    severity: 'L2',
+    reason: 'budget pressure crossed the configured threshold',
+    evidenceRefs: ['ev-1'],
+    params: { runId: 'run-1', minutes: 10 },
+    hardLimit: false,
+    ...overrides,
+  }
+}
+
+test('a guard throttle plan validates with bounded minutes', () => {
+  const result = validatePlan(guardPlan(), { evidenceIds: evidence, runId: 'run-1' })
+  assert.equal(result.ok, true)
+  if (result.ok) assert.equal(result.plan.kind, 'throttle')
+
+  assert.equal(validatePlan(guardPlan({ params: { runId: 'run-1', minutes: 0 } })).ok, false)
+  assert.equal(validatePlan(guardPlan({ params: { runId: 'run-1', minutes: 31 } })).ok, false)
+  assert.equal(validatePlan(guardPlan({ evidenceRefs: [] })).ok, false)
+  assert.equal(validatePlan(guardPlan({ evidenceRefs: ['ev-x'] }), { evidenceIds: evidence }).ok, false)
+  assert.equal(validatePlan(guardPlan({ kind: 'coach' })).ok, false)
+})
+
+test('resume is an internal plan that needs the throttle action id', () => {
+  const plan = guardPlan({ kind: 'resume', params: { runId: 'run-1', ofActionId: 'act_1', automatic: true } })
+  const valid = validatePlan(plan, { evidenceIds: evidence })
+  assert.equal(valid.ok, true)
+  assert.equal(validatePlan(guardPlan({ kind: 'resume', params: { runId: 'run-1' } })).ok, false)
+  assert.equal(validatePlan(guardPlan({ kind: 'resume', params: { runId: 'run-1', ofActionId: 'act_1' } })).ok, false)
+})
+
+test('guard authorization follows the hard-limit switches, not the watch matrix', () => {
+  const autopilot = { throttle: true, pause: false, pauseOnHardLimit: true, abortOnHardLimit: true }
+  const throttle = validatePlan(guardPlan()).plan
+  assert.equal(authorizePlan(throttle, { mode: 'guard', autopilot }).allowed, true)
+  assert.equal(authorizePlan(throttle, { mode: 'observe', autopilot }).allowed, false)
+  assert.equal(authorizePlan(throttle, { mode: 'guard', autopilot: { ...autopilot, throttle: false } }).allowed, false)
+
+  const pause = validatePlan(guardPlan({ kind: 'pause', severity: 'L3', hardLimit: true, params: { runId: 'run-1' } })).plan
+  assert.equal(authorizePlan(pause, { mode: 'guard', autopilot }).allowed, true)
+  assert.equal(authorizePlan(pause, { mode: 'guard', autopilot: { ...autopilot, pauseOnHardLimit: false } }).allowed, false)
+  assert.equal(authorizePlan(pause, { mode: 'guard', autopilot }).allowed, pause.hardLimit === true)
+
+  const abort = validatePlan(guardPlan({ kind: 'abort', severity: 'L4', hardLimit: true, params: { runId: 'run-1' } })).plan
+  assert.equal(authorizePlan(abort, { mode: 'guard', autopilot }).allowed, true)
+  assert.equal(authorizePlan(abort, { mode: 'guard', autopilot: { ...autopilot, abortOnHardLimit: false } }).allowed, false)
+
+  const resume = validatePlan(guardPlan({ kind: 'resume', params: { runId: 'run-1', ofActionId: 'act_1', automatic: true } })).plan
+  assert.equal(authorizePlan(resume, { mode: 'guard', autopilot }).allowed, true)
+})
+
+test('guard plan keys are stable across evidence order but sensitive to params', () => {
+  const first = validatePlan(guardPlan({ evidenceRefs: ['ev-1', 'ev-2'] })).plan
+  const reordered = validatePlan(guardPlan({ evidenceRefs: ['ev-2', 'ev-1'] })).plan
+  const otherMinutes = validatePlan(guardPlan({ params: { runId: 'run-1', minutes: 5 } })).plan
+  assert.equal(planKey(first, 'run-1'), planKey(reordered, 'run-1'))
+  assert.notEqual(planKey(first, 'run-1'), planKey(otherMinutes, 'run-1'))
+  assert.notEqual(planKey(first, 'run-1'), planKey(first, 'run-2'))
+})
 
 function decision(overrides = {}) {
   return {

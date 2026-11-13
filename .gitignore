@@ -7,3 +7,8 @@ coverage/
 # The web run log contains a launch token URL; never commit it.
 e2e/m0/results/web-run.log
 e2e/m0/results/web-run.err.log
+
+# M1 local bridge scratch (not evidence)
+e2e/m1/.bridge-tmp/
+e2e/m1/.test-out.txt
+e2e/m1/results/run.log

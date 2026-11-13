@@ -5,6 +5,39 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — M1 hard guard (guard-only)
+
+- `Probe`: one timer per run, swarm event cursor with gap latching and one
+  rebuild, snapshot normalization, pressure sampling by member→child session,
+  fishkeeper overview, freshness, bounded buffers and exponential backoff.
+- `CaseManager`: deterministic case keys, 15-minute cooldown, L2 two-tick rule,
+  severity escalation, reopen with generation, urgent `ensure()`, materialized
+  case files, `closeAll()`.
+- `guard.js`: deterministic plans — throttle at `budgetPressure` (pause + timed
+  resume), hard pause at `budgetPause`, abort at 100%, abort on a swarm event
+  gap; intervention/cooldown limits; no action without a case or write token.
+- `RunSupervisor`: arming preconditions (swarm health, run state, prime), watch
+  log, guard loop, case/action records, disarm with archive snapshot, timeline,
+  acknowledgement, Markdown report.
+- `OverwatchService`: multi-run registry, arm/disarm, readonly reading of
+  historical runs, service-level life log, `health()` with per-run chain state.
+- Root-agent tools `watch_arm` / `watch_disarm` / `watch_status` /
+  `watch_report`, restricted by a `when` predicate and re-checked in handlers.
+- `/overwatch/api` read API (runs, snapshot, cases, case detail, timeline,
+  shift, export) and token-protected arm/disarm/ack/HEAD.
+- `client.js`: sidebar「瞭望塔」entry plus watch-room and case views (budget
+  bar with 80/95 ticks, freshness chips, case drawer, acknowledgement, guarded
+  write-op form with sessionStorage token).
+- M1 e2e: fake swarm plugin, probe, throwaway web-profile runner and evidence
+  under `e2e/m1/`.
+
+### Fixed
+
+- The probe no longer marks swarm freshness unavailable when only the pressure
+  service answers 404.
+- `ports.swarmToken` lets the swarm write token differ from the overwatch write
+  token (it defaults to `http.token`).
+
 ### Added — M0 foundation
 
 - Host bundle skeleton: `package.json`, `cordis.patch.yml`, config defaults and

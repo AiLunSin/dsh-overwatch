@@ -35,3 +35,14 @@ test('empty dataDir falls back to the DSH home convention', () => {
   const config = resolveConfig({ storage: { dataDir: '' } })
   assert.match(config.dataDir, /overwatch$/)
 })
+
+test('the M1 guard switches have explicit defaults and bounds', () => {
+  const config = resolveConfig({})
+  assert.equal(config.policy.autopilot.pauseOnHardLimit, true)
+  assert.equal(config.policy.autopilot.pause, false)
+  assert.equal(config.policy.throttleMinutes, 10)
+  assert.equal(config.ports.swarmToken, '')
+  assert.throws(() => resolveConfig({ policy: { throttleMinutes: 0 } }), /throttleMinutes/)
+  assert.throws(() => resolveConfig({ policy: { throttleMinutes: 61 } }), /throttleMinutes/)
+  assert.throws(() => resolveConfig({ ports: { swarmToken: 42 } }), /swarmToken/)
+})

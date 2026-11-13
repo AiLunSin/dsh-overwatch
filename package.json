@@ -17,11 +17,13 @@
   ],
   "exports": {
     ".": "./src/index.js",
+    "./client": "./client.js",
     "./locale/*.json": "./locale/*.json",
     "./icon": "./icon.svg"
   },
   "files": [
     "src",
+    "client.js",
     "cordis.patch.yml",
     "locale",
     "icon.svg",
@@ -37,7 +39,8 @@
     "test": "node --test \"test/*.test.js\"",
     "lint": "node scripts/check-syntax.mjs",
     "check": "npm run lint && npm test",
-    "m0": "node e2e/m0/run.mjs"
+    "m0": "node e2e/m0/run.mjs",
+    "m1": "node e2e/m1/run.mjs"
   },
   "engines": {
     "node": ">=22",
@@ -46,6 +49,10 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
     }
   }
 }

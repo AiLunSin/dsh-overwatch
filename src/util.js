@@ -91,14 +91,40 @@ export function ensureDir(dir) {
 
 /**
  * Write JSON through a same-directory temporary file and an atomic rename.
+ * On Windows a concurrent reader (the panel, a doctor poll, an indexer) can make
+ * `rename` fail with EPERM/EBUSY; retry briefly, then fall back to a direct write
+ * so a status file cannot wedge supervision.
  * @param {string} file
  * @param {unknown} value
  */
 export function atomicWriteJson(file, value) {
   ensureDir(path.dirname(file))
   const tmp = `${file}.${process.pid}.${randomUUID()}.tmp`
-  writeFileSync(tmp, `${JSON.stringify(value, null, 2)}\n`, 'utf8')
-  renameSync(tmp, file)
+  const text = `${JSON.stringify(value, null, 2)}\n`
+  writeFileSync(tmp, text, 'utf8')
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      renameSync(tmp, file)
+      return
+    } catch (error) {
+      const code = /** @type {NodeJS.ErrnoException} */ (error).code
+      if ((code !== 'EPERM' && code !== 'EBUSY' && code !== 'EACCES') || attempt === 7) {
+        try {
+          writeFileSync(file, text, 'utf8')
+        } catch {
+          // The caller records the failure; the lock still protects the log.
+        }
+        try {
+          rmSync(tmp, { force: true })
+        } catch {
+          // best effort
+        }
+        return
+      }
+      const end = Date.now() + 20
+      while (Date.now() < end) { /* short synchronous backoff */ }
+    }
+  }
 }
 
 /**
@@ -309,4 +335,69 @@ export function listDir(dir) {
   } catch {
     return []
   }
+}
+
+/** @param {number} value @param {number} min @param {number} max @returns {number} */
+export function clamp(value, min, max) {
+  return Math.min(max, Math.max(min, value))
+}
+
+/** @param {number} part @param {number} whole @returns {number} 0 when the whole is not positive */
+export function ratio(part, whole) {
+  if (!Number.isFinite(part) || !Number.isFinite(whole) || whole <= 0) return 0
+  return Math.max(0, part) / whole
+}
+
+/**
+ * Mask the few secret shapes that can plausibly reach a watch payload. Prose is
+ * never stored verbatim anywhere else, so this is a last line of defence, not a
+ * general DLP engine.
+ * @param {string} text
+ * @returns {string}
+ */
+export function scrubText(text) {
+  return text
+    .replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/g, '<email>')
+    .replace(/\bsk-[A-Za-z0-9_-]{16,}\b/g, '<key>')
+    .replace(/\b(?:ghp|gho|ghs|ghu)_[A-Za-z0-9]{20,}\b/g, '<key>')
+    .replace(/\bAKIA[0-9A-Z]{16}\b/g, '<key>')
+    .replace(/\bBearer\s+[A-Za-z0-9._~+/=-]{8,}/gi, 'Bearer <redacted>')
+    .replace(/\b(?:token|api[_-]?key|secret)\s*[:=]\s*["']?[A-Za-z0-9._~+/=-]{8,}["']?/gi, '<redacted>')
+    .replace(/(?<!\d)1[3-9]\d{9}(?!\d)/g, '<phone>')
+}
+
+/**
+ * Deep-scrub a JSON-like value and bound its size. Values that JSON cannot carry
+ * are dropped explicitly instead of becoming `undefined` inside the log.
+ * @param {unknown} value
+ * @param {number} [maxBytes]
+ * @returns {unknown}
+ */
+export function scrub(value, maxBytes = 16_384) {
+  const clean = scrubValue(value, 0)
+  let text
+  try {
+    text = JSON.stringify(clean)
+  } catch {
+    return { truncated: true, reason: 'unserializable' }
+  }
+  if (text.length > maxBytes) return { truncated: true, bytes: text.length }
+  return clean
+}
+
+/** @param {unknown} value @param {number} depth @returns {unknown} */
+function scrubValue(value, depth) {
+  if (depth > 8) return '<depth>'
+  if (typeof value === 'string') return scrubText(value).slice(0, 4_096)
+  if (value === null || typeof value === 'number' || typeof value === 'boolean') return value
+  if (Array.isArray(value)) return value.slice(0, 200).map(item => scrubValue(item, depth + 1))
+  if (typeof value === 'object') {
+    /** @type {Record<string, unknown>} */
+    const out = {}
+    for (const [key, child] of Object.entries(/** @type {Record<string, unknown>} */ (value))) {
+      out[scrubText(key)] = scrubValue(child, depth + 1)
+    }
+    return out
+  }
+  return undefined
 }

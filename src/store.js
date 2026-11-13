@@ -11,7 +11,7 @@
 
 import { appendFileSync, closeSync, existsSync, fsyncSync, openSync, readFileSync, statSync, truncateSync } from 'node:fs'
 import path from 'node:path'
-import { FileLock, GENESIS_HASH, canonicalJson, chainHash, ensureDir, newId, sha256 } from './util.js'
+import { FileLock, GENESIS_HASH, canonicalJson, chainHash, ensureDir, newId, scrub, sha256 } from './util.js'
 
 /** @typedef {{ v: 1, seq: number, id: string, runId: string, type: string, at: string, actor: string, generation: number, causationRef: unknown, payload: unknown, prev: string, hash: string }} WatchEvent */
 
@@ -151,7 +151,7 @@ export class WatchStore {
       actor: input.actor ?? 'system',
       generation: input.generation ?? 1,
       causationRef: input.causationRef ?? null,
-      payload: input.payload ?? null,
+      payload: scrub(input.payload ?? null),
       prev: this.prev,
     }
     const hash = chainHash(this.prev, body)
@@ -265,4 +265,28 @@ export function parseChain(raw, runId) {
 export function eventFingerprint(event) {
   const { hash: _hash, ...body } = event
   return sha256(canonicalJson(body))
+}
+
+/**
+ * Read and verify a run log without taking the writer lock. The panel and the
+ * service registry use this for runs this process does not supervise (history,
+ * or a run held by another Host). A corrupt chain is returned as data, not
+ * thrown: the read API must be able to describe the damage.
+ * @param {string} dir run directory
+ * @param {string} runId
+ * @returns {{ events: WatchEvent[], chain: { ok: boolean, count: number, lastHash: string | null, error: string | null } }}
+ */
+export function readWatchLog(dir, runId) {
+  const file = path.join(dir, 'watch.jsonl')
+  if (!existsSync(file)) return { events: [], chain: { ok: true, count: 0, lastHash: null, error: null } }
+  const parsed = parseChain(readFileSync(file, 'utf8'), runId)
+  const chain = parsed.error === null
+    ? { ok: true, count: parsed.events.length, lastHash: parsed.events.at(-1)?.hash ?? null, error: null }
+    : {
+        ok: false,
+        count: parsed.events.length,
+        lastHash: parsed.events.at(-1)?.hash ?? null,
+        error: `${parsed.error.code} at line ${parsed.error.line}: ${parsed.error.message}`,
+      }
+  return { events: parsed.events, chain }
 }

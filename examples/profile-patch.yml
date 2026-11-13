@@ -2,13 +2,20 @@
 # Merge this row into the profile's own cordis.patch.yml, then restart DSH.
 - id: dsh-overwatch
   config:
-    mode: supervised          # observe | guard | supervised
+    mode: guard               # observe | guard (supervised is M2, rejected in M1)
     http:
-      token: change-me        # empty disables writes
+      token: change-me        # empty disables writes and downgrades arm to observe
+    ports:
+      swarmToken: change-me   # optional; defaults to http.token (must match swarm http.token)
     policy:
+      throttleMinutes: 10
       autopilot:
         throttle: true
-        pause: false          # pause stays human-only in v1
-        abortOnHardLimit: true
+        pause: false          # watch-officer pause stays human-only (M2)
+        pauseOnHardLimit: true  # deterministic guard pause at budgetPause (0.95)
+        abortOnHardLimit: true  # deterministic guard abort at 100%
         budgetAdjust: false
         restore: false
+    thresholds:
+      budgetPressure: 0.80
+      budgetPause: 0.95

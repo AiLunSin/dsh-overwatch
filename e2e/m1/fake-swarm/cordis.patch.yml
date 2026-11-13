@@ -1,0 +1,6 @@
+# M1 test-only bundle: a fake swarm API mounted on the Host web server.
+# The profile patch sets config.token; the plugin also defaults to the fixed
+# test token so this bundle is useful on its own.
+- insert:
+    - id: dsh-overwatch-m1-fake-swarm
+      name: dsh-overwatch-m1-fake-swarm

@@ -1,0 +1,4 @@
+# M1 test-only bundle: drives the real Host HTTP surface and writes evidence.
+- insert:
+    - id: dsh-overwatch-m1-probe
+      name: dsh-overwatch-m1-probe

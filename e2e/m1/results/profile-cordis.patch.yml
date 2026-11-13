@@ -1,0 +1,25 @@
+# M1 e2e overrides. Test values only: these tokens are not secrets.
+# thresholds stay at the bundle defaults (budgetPressure 0.80 / budgetPause 0.95).
+- id: dsh-overwatch
+  config:
+    enabled: true
+    mode: guard
+    http:
+      token: m1-token
+    ports:
+      swarmToken: m1-swarm-token
+    sampling:
+      swarmEventMs: 500
+      swarmSnapshotMs: 500
+      pressureMs: 500
+      fishMs: 500
+      staleMs: 5000
+      requestTimeoutMs: 3000
+      maxInflight: 4
+    policy:
+      throttleMinutes: 1
+      autopilot:
+        throttle: false
+- id: dsh-overwatch-m1-fake-swarm
+  config:
+    token: m1-swarm-token

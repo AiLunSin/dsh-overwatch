@@ -8,7 +8,7 @@
  * @module dsh-overwatch/executor
  */
 
-import { authorizeDecision, idempotencyKey, validateDecision } from './policy.js'
+import { authorizeDecision, authorizePlan, idempotencyKey, planKey, validateDecision, validatePlan } from './policy.js'
 
 /** @typedef {{ name: string, supports: (decision: import('./policy.js').Decision) => boolean, apply: (decision: any, context: any) => Promise<any>, verify: (decision: any, result: any, context: any) => Promise<{ ok: boolean, detail?: unknown }> }} Port */
 
@@ -31,6 +31,8 @@ export class Executor {
     this.applied = new Set()
     /** @type {Map<string, { ok: boolean, duplicate: true, actionId: string, result: unknown, verified: boolean }>} */
     this.outcomes = new Map()
+    /** Number of guard actions that reached a port (successful or not). */
+    this.interventions = 0
     /** @type {Promise<unknown>} */
     this.queue = Promise.resolve()
   }
@@ -63,6 +65,127 @@ export class Executor {
       else this.applied.add(key)
     }
     return { completed: this.applied.size, incomplete, damaged }
+  }
+
+  /**
+   * Execute one deterministic guard plan. The guard has no model and no free
+   * text: the plan is validated and authorized by the same policy module the
+   * watch officer uses, then executed on the same serial queue.
+   * @param {unknown} rawPlan
+   * @param {{ runId: string, evidenceIds?: ReadonlySet<string> | readonly string[] }} context
+   * @returns {Promise<{ ok: boolean, code?: string, errors?: string[], requiresHuman?: boolean, actionId?: string, duplicate?: boolean, verified?: boolean, result?: unknown, reason?: string }>}
+   */
+  executePlan(rawPlan, context) {
+    const task = this.queue.then(() => this.#executePlan(rawPlan, context))
+    this.queue = task.catch(() => undefined)
+    return task
+  }
+
+  /**
+   * @param {unknown} rawPlan
+   * @param {{ runId: string, evidenceIds?: ReadonlySet<string> | readonly string[] }} context
+   */
+  async #executePlan(rawPlan, context) {
+    const validated = validatePlan(rawPlan, { runId: context.runId, evidenceIds: context.evidenceIds })
+    if (!validated.ok) return { ok: false, code: 'INVALID_PLAN', errors: validated.errors }
+    const plan = validated.plan
+    const authorization = authorizePlan(plan, { mode: this.policy.mode, autopilot: this.policy.autopilot })
+    if (!authorization.allowed) {
+      this.store.append({
+        type: 'watch/decision/denied',
+        actor: 'policy',
+        payload: {
+          kind: 'guard_plan',
+          caseId: plan.caseId,
+          action: plan.kind,
+          requiresHuman: authorization.requiresHuman,
+          reason: authorization.reason,
+        },
+      })
+      return { ok: false, code: 'DENIED', requiresHuman: authorization.requiresHuman, reason: authorization.reason }
+    }
+
+    const key = planKey(plan, context.runId)
+    const previous = this.outcomes.get(key)
+    if (previous !== undefined) return { ...previous, duplicate: true }
+
+    const runId = typeof plan.params.runId === 'string' ? plan.params.runId : context.runId
+    const decision = {
+      schemaVersion: 1,
+      caseId: plan.caseId,
+      action: plan.kind,
+      target: { kind: 'swarm_run', id: runId },
+      params: { ...plan.params, runId },
+      evidenceRefs: [...plan.evidenceRefs],
+      reason: plan.reason,
+    }
+    const port = this.ports.find(candidate => candidate.supports(decision))
+    if (port === undefined) {
+      this.store.append({
+        type: 'watch/decision/denied',
+        actor: 'policy',
+        payload: { kind: 'guard_plan', caseId: plan.caseId, action: plan.kind, reason: 'no port supports this target' },
+      })
+      return { ok: false, code: 'NO_PORT' }
+    }
+
+    const actionId = `act_${key.slice(0, 12)}`
+    this.store.append({
+      type: 'watch/action/intended',
+      actor: 'guard',
+      causationRef: { kind: 'case', caseId: plan.caseId },
+      payload: {
+        key,
+        actionId,
+        kind: plan.kind,
+        target: decision.target,
+        evidenceRefs: decision.evidenceRefs,
+        severity: plan.severity,
+        hardLimit: plan.hardLimit === true,
+        params: plan.params,
+      },
+    })
+    this.interventions += 1
+
+    let result
+    try {
+      result = await port.apply(decision, { caseId: plan.caseId, actionId, runId })
+    } catch (error) {
+      const detail = errorMessage(error)
+      this.store.append({
+        type: 'watch/action/failed',
+        actor: 'executor',
+        causationRef: { kind: 'action', actionId },
+        payload: { key, actionId, phase: 'apply', error: detail },
+      })
+      return { ok: false, code: 'APPLY_FAILED', actionId, reason: detail }
+    }
+
+    this.store.append({
+      type: 'watch/action/executed',
+      actor: 'executor',
+      causationRef: { kind: 'action', actionId },
+      payload: { key, actionId, kind: plan.kind, ok: result?.ok !== false, result: summarize(result) },
+    })
+
+    let verification
+    try {
+      verification = await port.verify(decision, result, { caseId: plan.caseId, actionId, runId })
+    } catch (error) {
+      verification = { ok: false, detail: { error: errorMessage(error) } }
+    }
+    this.store.append({
+      type: verification.ok ? 'watch/action/verified' : 'watch/action/unverified',
+      actor: 'executor',
+      causationRef: { kind: 'action', actionId },
+      payload: { key, actionId, kind: plan.kind, ok: verification.ok, detail: summarize(verification.detail) },
+    })
+
+    const outcome = { ok: verification.ok, actionId, result: summarize(result), verified: verification.ok }
+    this.outcomes.set(key, { ...outcome, duplicate: true })
+    if (verification.ok) this.applied.add(key)
+    else this.logger?.warn?.(`[overwatch] guard action ${actionId} could not be verified`)
+    return outcome
   }
 
   /**

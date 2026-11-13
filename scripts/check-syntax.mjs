@@ -12,6 +12,7 @@ const roots = ['src', 'test', 'scripts', 'e2e']
 const files = []
 for (const dir of roots) walk(path.join(root, dir))
 files.push(path.join(root, 'src', 'index.js'))
+files.push(path.join(root, 'client.js'))
 
 let failed = 0
 for (const file of files) {
