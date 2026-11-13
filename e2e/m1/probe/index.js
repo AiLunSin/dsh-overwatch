@@ -81,6 +81,14 @@ const EXPECTED_CHECKS = Object.freeze([
   'watch-types',
   'watch-pause-chain',
   'watch-abort-chain',
+  'doctor',
+  'fish-index',
+  'fish-source',
+  'fish-missing',
+  'timeline-page',
+  'restore-intent',
+  'restore-token-rejected',
+  'restore-evidence',
 ])
 
 const report = {
@@ -610,6 +618,86 @@ async function setBudget(ratio, id) {
 }
 
 /** L2: a case is opened but autopilot.throttle=false means no action is taken. */
+/**
+ * M3 surfaces on the same armed run: doctor, fish host index, merged timeline,
+ * and restore evidence recording (including confirm-token rejection).
+ */
+async function m3Checks() {
+  const doctor = await call('doctor', 'GET', '/overwatch/api/doctor', {}, 200)
+  const doctorBody = /** @type {any} */ (doctor.body)
+  const checks = Array.isArray(doctorBody?.checks) ? doctorBody.checks : []
+  const byId = Object.fromEntries(checks.map(entry => [String(entry?.id), entry]))
+  const doctorOk = doctor.status === 200
+    && doctorBody?.ok === true
+    && byId['data-dir']?.status === 'pass'
+    && byId['fish-index']?.status === 'pass'
+    && byId.swarm?.status === 'pass'
+  if (doctorOk) pass('doctor', { status: doctor.status, checks: checks.map(entry => ({ id: entry.id, status: entry.status })) })
+  else fail('doctor', { status: doctor.status, body: trim(doctor.body) })
+
+  const fish = await call('fish-index', 'GET', '/overwatch/api/fish', {}, 200)
+  const fishData = /** @type {any} */ (dataOf(fish.body) ?? fish.body)
+  const source = Array.isArray(fishData?.sources) ? fishData.sources.find(entry => entry?.sourceId === 'fish-a') : null
+  const checkpoint = Array.isArray(source?.checkpoints) ? source.checkpoints.find(entry => entry?.id === 'ck_m3') : null
+  if (fish.status === 200 && checkpoint !== null && checkpoint?.pinned === true && checkpoint?.trigger === 'diary') {
+    pass('fish-index', { sourceId: source.sourceId, checkpoint })
+  } else {
+    fail('fish-index', { status: fish.status, source: trim(source), body: trim(fish.body) })
+  }
+
+  const one = await call('fish-source', 'GET', '/overwatch/api/fish/fish-a', {}, 200)
+  const missing = await call('fish-missing', 'GET', '/overwatch/api/fish/fish-missing', {}, 404)
+  const missingCode = /** @type {any} */ (missing.body)?.code
+  if (one.status === 200) pass('fish-source', { status: one.status })
+  else fail('fish-source', { status: one.status, body: trim(one.body) })
+  if (missing.status === 404 && missingCode === 'FISH_SOURCE_NOT_FOUND') pass('fish-missing', { status: missing.status, code: missingCode })
+  else fail('fish-missing', { status: missing.status, code: missingCode })
+
+  const first = await call('timeline-page', 'GET', `/overwatch/api/runs/${RUN_ID}/timeline?since=0&limit=2`, {}, 200)
+  const firstData = /** @type {any} */ (dataOf(first.body) ?? first.body)
+  const events = Array.isArray(firstData?.events) ? firstData.events : []
+  const nextSince = firstData?.nextSince
+  const sources = new Set(events.map(event => String(event?.source)))
+  const second = typeof nextSince === 'string' && nextSince !== ''
+    ? await call('timeline-page-2', 'GET', `/overwatch/api/runs/${RUN_ID}/timeline?since=${encodeURIComponent(nextSince)}&limit=2`, {}, 200)
+    : null
+  const secondData = second === null ? null : /** @type {any} */ (dataOf(second.body) ?? second.body)
+  const secondEvents = Array.isArray(secondData?.events) ? secondData.events : []
+  const keyOf = event => `${event?.at}|${event?.source}|${event?.seq}|${event?.type}`
+  const firstKeys = new Set(events.map(keyOf))
+  const overlap = secondEvents.filter(event => firstKeys.has(keyOf(event)))
+  const allSources = new Set([...events, ...secondEvents].map(event => String(event?.source)))
+  if (first.status === 200 && events.length > 0 && typeof nextSince === 'string' && allSources.has('watch') && secondEvents.length > 0 && overlap.length === 0) {
+    pass('timeline-page', { status: first.status, count: events.length, sources: [...allSources], nextSince, secondCount: secondEvents.length })
+  } else {
+    fail('timeline-page', { status: first.status, count: events.length, sources: [...allSources], nextSince, second: second?.status ?? null, secondCount: secondEvents.length, overlap: overlap.length })
+  }
+
+  const intent = await call('restore-intent', 'POST', `/overwatch/api/runs/${RUN_ID}/restores`, {
+    token: TOKEN,
+    body: {
+      sourceId: 'fish-a',
+      checkpointId: 'ck_m3',
+      phase: 'intent',
+      files: [{ path: 'a.md', action: 'restore', stale: false, bytes: 10 }],
+      warnings: [],
+    },
+  }, 200)
+  const intentOk = intent.status === 200 && /** @type {any} */ (dataOf(intent.body))?.recorded === true
+  const rejected = await call('restore-token-rejected', 'POST', `/overwatch/api/runs/${RUN_ID}/restores`, {
+    token: TOKEN,
+    body: { sourceId: 'fish-a', checkpointId: 'ck_m3', phase: 'intent', confirmToken: 'never-store-me' },
+  }, 400)
+  const rejectedCode = /** @type {any} */ (rejected.body)?.code
+  if (intentOk) pass('restore-intent', { status: intent.status, recorded: true })
+  else fail('restore-intent', { status: intent.status, body: trim(intent.body) })
+  if (rejected.status === 400 && rejectedCode === 'RESTORE_TOKEN_REJECTED') {
+    pass('restore-token-rejected', { status: rejected.status, code: rejectedCode })
+  } else {
+    fail('restore-token-rejected', { status: rejected.status, code: rejectedCode, body: trim(rejected.body) })
+  }
+}
+
 async function pressureChecks() {
   await setBudget(0.81, 'fake-budget-l2')
   await delay(SAMPLING_SETTLE_MS)
@@ -838,6 +926,19 @@ async function finalWatchChecks() {
   const abort = actionChain(snapshot.events, 'abort')
   if (abort.ok && snapshot.chain.ok) pass('watch-abort-chain', abort)
   else fail('watch-abort-chain', { ...abort, chainOk: snapshot.chain.ok })
+
+  const restoreEvent = snapshot.events.find(event => event.type === 'watch/restore/intent')
+  const leakedToken = snapshot.events.some(event => JSON.stringify(event.payload ?? null).includes('never-store-me'))
+  if (restoreEvent !== undefined && !leakedToken && snapshot.chain.ok) {
+    pass('restore-evidence', {
+      seq: restoreEvent.seq,
+      sourceId: restoreEvent.payload?.sourceId,
+      checkpointId: restoreEvent.payload?.checkpointId,
+      confirmTokenLeaked: leakedToken,
+    })
+  } else {
+    fail('restore-evidence', { found: restoreEvent !== undefined, confirmTokenLeaked: leakedToken, chainOk: snapshot.chain.ok })
+  }
 }
 
 /** Run the whole scenario. Throwing here is caught by `apply` and recorded as fatal. */
@@ -861,12 +962,12 @@ async function runScenario(webOrigin) {
     return
   }
 
+  await m3Checks()
   await pressureChecks()
   await pauseChecks()
   await exhaustChecks()
   await disarmChecks()
-  await finalWatchChecks()
-}
+  await finalWatchChecks()}
 
 /**
  * @param {any} ctx Cordis Host context

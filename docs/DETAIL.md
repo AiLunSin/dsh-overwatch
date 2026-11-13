@@ -12,7 +12,7 @@ dsh-overwatch 把这三件事拆成 Guard / Watch / Evidence 三层，叠加在
 dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-console（审计）
 之上，不改写三个上游。
 
-## 当前版本（0.1.0，M1+M2）
+## 当前版本（0.1.0，M1+M2+M3）
 
 **M1 硬闸门（guard-only 也完整可用）**：
 
@@ -37,8 +37,20 @@ dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-conso
 - 面板显示值班员 state/wakes/timeouts/S/R/child，并区分 guard-only / supervised
 - 真实 DSH 端到端：`npm run m2`（12/12），见 `docs/m2.md`
 
-**未实现（M3+）**：鱼缸与合并时间轴、人类 resume HTTP 动作、A/B/C 基准、
-真实模型判断质量评估、鱼数据自动检查点（P1）。
+**M3 鱼缸 / 回放 / 恢复（Host/API 完成，浏览器恢复待验收）**：
+
+- 只读 fishkeeper 数据目录（检查点索引、manifest 摘要、audit 尾部）；不读 blob
+- `GET /overwatch/api/fish`、`/fish/:sourceId`；`config.fish.dataDir` 可覆盖默认
+  `~/.dsh/fishkeeper`
+- 合并时间轴：swarm + pressure 采样 + watch，`(at, sourceRank, seq)` 排序，
+  `nextSince` 不透明游标
+- `GET /overwatch/api/doctor`：数据目录/服务链/上游/token/鱼缸索引/每 run/磁盘
+- `POST /runs/:id/restores`：只记录 intent/result，**拒绝 confirmToken**
+- 面板：鱼缸索引与恢复流程（dryRun→确认→执行→记账）、回放页、doctor 卡
+- 真实 DSH 端到端：`npm run m1`（33/33，含 M3 检查），见 `docs/m3.md`
+
+**未实现（M4）**：真实模型 A/B、8 场景全量、混沌/安全、npm 发布、
+真实浏览器恢复演练（fishkeeper 浏览器凭据）、鱼数据自动检查点（P1）。
 
 ## 用法（5 分钟）
 
@@ -93,9 +105,9 @@ $DSH_HOME/overwatch/
 ## 验证
 
 ```powershell
-npm test     # 99 个测试
+npm test     # 112 个测试
 npm run m0   # M0 能力探针（真实 DSH，脚本化 provider）
-npm run m1   # M1 web 端到端（25/25）
+npm run m1   # M1/M3 web 端到端（33/33）
 npm run m2   # M2 值班员 headless 端到端（12/12）
 ```
 
@@ -108,6 +120,8 @@ npm run m2   # M2 值班员 headless 端到端（12/12）
   上游 message 路由（P1）。
 - `pause` 需人工 resume；`throttle` 只对"由我们暂停"的运行自动恢复。
 - 自动鱼数据检查点需要浏览器凭据，v1 不做（P1）；面板只读展示。
+- 面板的 fishkeeper 恢复流程需要浏览器认证；**真实恢复演练未验收**（本环境没有可
+  自动化的浏览器）。overwatch 永不接收/存储 confirmToken。
 - swarm 写 token 与 overwatch 写 token 需一致（或显式 `ports.swarmToken`）。
 - 监管层崩溃时总支出上界是 `B + S`（S ≤ 5% × B），不宣称"监管崩溃也零超支"。
 - 面板没有真实浏览器自动化验收；M0 已记录 headless Edge 在本机会挂起。

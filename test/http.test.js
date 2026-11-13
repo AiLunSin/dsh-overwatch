@@ -53,7 +53,7 @@ function fakeService() {
     getRun: runId => (runId === 'run-1' ? { runId, armed: true, state: 'watching', budget: { limit: 1_000, spent: 810, ratio: 0.81 } } : null),
     cases: (_runId, query) => [{ id: 'case-1', state: 'open', severity: 'L2', code: 'budget_pressure', query }],
     caseDetail: runId => (runId === 'run-1' ? { case: { id: 'case-1' }, timeline: [] } : null),
-    timeline: () => ({ events: [], nextSince: 0, total: 0 }),
+    timeline: (_runId, query) => ({ events: [], nextSince: query?.since ?? 0, total: 0 }),
     report: () => '# report',
     watchEvents: () => [],
     async arm(input) {
@@ -67,6 +67,25 @@ function fakeService() {
     acknowledge(runId, caseId) {
       calls.push(['ack', runId, caseId])
       return { id: caseId, state: 'acknowledged' }
+    },
+    fishIndex(sourceId) {
+      return {
+        available: true,
+        dataDir: '/fish',
+        sources: sourceId === undefined || sourceId === 'fish-a'
+          ? [{ sourceId: 'fish-a', checkpoints: [{ id: 'ck_1', pinned: true }], audit: [] }]
+          : [],
+        errors: [],
+        checkpoints: 1,
+        asOf: new Date().toISOString(),
+      }
+    },
+    async doctor() {
+      return { ok: true, version: '0.1.0', checks: [{ id: 'data-dir', status: 'pass', detail: { writable: true } }], asOf: new Date().toISOString() }
+    },
+    recordRestore(runId, input) {
+      calls.push(['restore', runId, input.phase])
+      return { recorded: true, phase: input.phase, sourceId: input.sourceId, checkpointId: input.checkpointId }
     },
   }
 }
@@ -127,6 +146,33 @@ test('read routes answer with the data envelope and 404 for unknown runs', async
     assert.equal(shift.status, 200)
     assert.equal(await shift.text(), '# report')
     assert.equal(service.calls.length, 0)
+
+    const cursor = '2026-11-14T02:00:00.000Z|3|watch:12'
+    const timeline = await fetch(`${base}/overwatch/api/runs/run-1/timeline?since=${encodeURIComponent(cursor)}&limit=2`)
+    assert.equal(timeline.status, 200)
+    assert.equal((await timeline.json()).data.nextSince, cursor)
+
+    const legacy = await fetch(`${base}/overwatch/api/runs/run-1/timeline?since=12&limit=2`)
+    assert.equal(legacy.status, 200)
+    assert.equal((await legacy.json()).data.nextSince, 12)
+
+    const doctor = await fetch(`${base}/overwatch/api/doctor`)
+    assert.equal(doctor.status, 200)
+    const doctorBody = await doctor.json()
+    assert.equal(doctorBody.ok, true)
+    assert.equal(doctorBody.checks[0].id, 'data-dir')
+
+    const fish = await fetch(`${base}/overwatch/api/fish`)
+    assert.equal(fish.status, 200)
+    assert.equal((await fish.json()).data.sources[0].sourceId, 'fish-a')
+
+    const fishOne = await fetch(`${base}/overwatch/api/fish/fish-a`)
+    assert.equal(fishOne.status, 200)
+    assert.equal((await fishOne.json()).data.sources[0].sourceId, 'fish-a')
+
+    const fishMissing = await fetch(`${base}/overwatch/api/fish/fish-z`)
+    assert.equal(fishMissing.status, 404)
+    assert.equal((await fishMissing.json()).code, 'FISH_SOURCE_NOT_FOUND')
   })
 })
 
@@ -187,6 +233,15 @@ test('write routes enforce token, origin, method and path shape', async () => {
     })
     assert.equal(ack.status, 200)
     assert.deepEqual(service.calls[2], ['ack', 'run-1', 'case-1'])
+
+    const restore = await fetch(`${base}/overwatch/api/runs/run-1/restores`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ sourceId: 'fish-a', checkpointId: 'ck_1', phase: 'intent', files: [{ path: 'a.md' }] }),
+    })
+    assert.equal(restore.status, 200, await restore.clone().text())
+    assert.equal((await restore.json()).data.recorded, true)
+    assert.deepEqual(service.calls[3], ['restore', 'run-1', 'intent'])
   })
 })
 

@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "stage": "headless-m2",
   "dshVersion": "0.2.2-rc.3",
-  "port": 53906,
-  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m2-IZYM49",
-  "startedAt": "2026-11-13T18:09:16.950Z",
-  "finishedAt": "2026-11-13T18:09:23.055Z",
+  "port": 56467,
+  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m2-eEgchH",
+  "startedAt": "2026-11-13T18:38:19.265Z",
+  "finishedAt": "2026-11-13T18:38:25.520Z",
   "error": null,
   "checks": {
     "run-exit": {
@@ -32,7 +32,7 @@
           "runId": "swarm_m2",
           "reserve": 50000,
           "supervisor": "lazy",
-          "watchName": "ow-a1f6e9f0ab8b",
+          "watchName": "ow-9dd6f7c6e24d",
           "sampling": {
             "swarmEventMs": 500,
             "swarmSnapshotMs": 500,
@@ -66,7 +66,7 @@
       "status": "pass",
       "evidence": {
         "decision": {
-          "caseId": "case_0bcd7c808d6c4dd6",
+          "caseId": "case_84728294eb08430d",
           "generation": 1,
           "action": "coach",
           "confidence": 0.82,
@@ -74,7 +74,7 @@
           "accepted": true,
           "code": null,
           "requiresHuman": false,
-          "actionId": "act_cebcac438f86"
+          "actionId": "act_73ecc28a1f59"
         }
       }
     },
@@ -82,8 +82,8 @@
       "status": "pass",
       "evidence": {
         "intended": {
-          "key": "cebcac438f86db132af10c01d603f8ef",
-          "actionId": "act_cebcac438f86",
+          "key": "73ecc28a1f597e38506813e291f8d3f9",
+          "actionId": "act_73ecc28a1f59",
           "kind": "coach",
           "target": {
             "kind": "swarm_run",
@@ -94,8 +94,8 @@
           ]
         },
         "executed": {
-          "key": "cebcac438f86db132af10c01d603f8ef",
-          "actionId": "act_cebcac438f86",
+          "key": "73ecc28a1f597e38506813e291f8d3f9",
+          "actionId": "act_73ecc28a1f59",
           "kind": "coach",
           "ok": true,
           "result": {
@@ -113,8 +113,8 @@
               "status": "running",
               "round": 1,
               "concurrencyLimit": 2,
-              "createdAt": 1794593359200,
-              "updatedAt": 1794593360026,
+              "createdAt": 1794595101644,
+              "updatedAt": 1794595102487,
               "endedAt": null,
               "recovered": false,
               "convergedReason": null,
@@ -180,7 +180,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794593359200,
+                  "joinedAt": 1794595101644,
                   "lastWinRound": 0,
                   "skills": []
                 },
@@ -196,7 +196,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794593359200,
+                  "joinedAt": 1794595101644,
                   "lastWinRound": 0,
                   "skills": [
                     ".js"
@@ -215,8 +215,8 @@
           }
         },
         "verified": {
-          "key": "cebcac438f86db132af10c01d603f8ef",
-          "actionId": "act_cebcac438f86",
+          "key": "73ecc28a1f597e38506813e291f8d3f9",
+          "actionId": "act_73ecc28a1f59",
           "kind": "coach",
           "ok": true,
           "detail": {
@@ -252,7 +252,7 @@
       "status": "pass",
       "evidence": {
         "usage": {
-          "caseId": "case_0bcd7c808d6c4dd6",
+          "caseId": "case_84728294eb08430d",
           "spent": 18720,
           "reserve": 50000,
           "calls": 3
@@ -263,7 +263,7 @@
       "status": "pass",
       "evidence": {
         "closed": {
-          "caseId": "case_0bcd7c808d6c4dd6",
+          "caseId": "case_84728294eb08430d",
           "reason": "mitigated",
           "note": "watch officer issued coach",
           "actions": 1
@@ -277,8 +277,8 @@
           "shiftId": "shift-0001",
           "reason": "M2 e2e complete",
           "window": {
-            "from": "2026-11-13T18:09:19.442Z",
-            "to": "2026-11-13T18:09:22.986Z"
+            "from": "2026-11-13T18:38:21.901Z",
+            "to": "2026-11-13T18:38:25.443Z"
           },
           "summary": {
             "mode": "supervised",
@@ -331,7 +331,7 @@
       "runId": "swarm_m2",
       "reserve": 50000,
       "supervisor": "lazy",
-      "watchName": "ow-a1f6e9f0ab8b",
+      "watchName": "ow-9dd6f7c6e24d",
       "sampling": {
         "swarmEventMs": 500,
         "swarmSnapshotMs": 500,
@@ -348,7 +348,7 @@
       }
     },
     "decision": {
-      "caseId": "case_0bcd7c808d6c4dd6",
+      "caseId": "case_84728294eb08430d",
       "generation": 1,
       "action": "coach",
       "confidence": 0.82,
@@ -356,7 +356,7 @@
       "accepted": true,
       "code": null,
       "requiresHuman": false,
-      "actionId": "act_cebcac438f86"
+      "actionId": "act_73ecc28a1f59"
     }
   },
   "calls": [
@@ -368,7 +368,7 @@
         "actor": "overwatch",
         "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
       },
-      "at": "2026-11-13T18:09:20.025Z",
+      "at": "2026-11-13T18:38:22.486Z",
       "status": "running"
     }
   ],
@@ -381,7 +381,7 @@
     "leaked": [],
     "requests": [
       {
-        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "sessionId": "80d69f0b-799c-4a0c-af1c-476bb3b0c833",
         "call": 1,
         "toolNames": [
           "watch_case",
@@ -390,7 +390,7 @@
         ]
       },
       {
-        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "sessionId": "80d69f0b-799c-4a0c-af1c-476bb3b0c833",
         "call": 2,
         "toolNames": [
           "watch_case",
@@ -399,7 +399,7 @@
         ]
       },
       {
-        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "sessionId": "80d69f0b-799c-4a0c-af1c-476bb3b0c833",
         "call": 3,
         "toolNames": [
           "watch_case",
@@ -408,7 +408,7 @@
         ]
       },
       {
-        "sessionId": "d1ebf119-9a61-464d-a3d6-a73aca969f86",
+        "sessionId": "80d69f0b-799c-4a0c-af1c-476bb3b0c833",
         "call": 4,
         "toolNames": [
           "watch_case",
@@ -418,6 +418,6 @@
       }
     ]
   },
-  "durationMs": 6105,
+  "durationMs": 6255,
   "exitCode": 0
 }

@@ -347,6 +347,74 @@ test('a watch timeout is recorded, the case stays open, and the guard remains in
   assert.match(shift.id, /^shift-/)
 })
 
+test('the merged timeline includes swarm, pressure and watch with an opaque cursor', async () => {
+  const h = await harness(0.1)
+  await h.supervisor.arm({ mode: 'guard' })
+  h.ports.state.events = [{
+    seq: 1,
+    id: 'ev_1',
+    type: 'swarm/dispatch/started',
+    at: new Date(Date.parse('2026-11-14T02:00:00.000Z')).toISOString(),
+    actor: 'system',
+    payload: { memberId: 'mem_1', childId: 'sess-1', taskId: 'task_1' },
+  }]
+  h.advance(1_000)
+  await h.supervisor.tick()
+
+  const first = h.supervisor.timeline({ since: 0, limit: 100 })
+  const sources = new Set(first.events.map(event => event.source))
+  assert.ok(sources.has('swarm'))
+  assert.ok(sources.has('pressure'))
+  assert.ok(sources.has('watch'))
+  assert.equal(typeof first.nextSince, 'string')
+  const ats = first.events.map(event => event.at)
+  assert.deepEqual(ats, [...ats].sort())
+
+  const page = h.supervisor.timeline({ since: 0, limit: 2 })
+  assert.equal(page.events.length, 2)
+  const next = h.supervisor.timeline({ since: page.nextSince, limit: 2 })
+  assert.ok(next.events.length > 0)
+  assert.notEqual(next.events[0].at + next.events[0].type, page.events[0].at + page.events[0].type)
+  await h.supervisor.disarm('test over')
+})
+
+test('restore intent/result are recorded, and the confirm token is refused', async () => {
+  const h = await harness(0.1)
+  await h.supervisor.arm({ mode: 'guard' })
+  const intent = h.supervisor.recordRestore({
+    phase: 'intent',
+    sourceId: 'fish-a',
+    checkpointId: 'ck_1',
+    files: [{ path: 'a.md', action: 'restore', stale: false, bytes: 10 }],
+    warnings: ['a.md changed after the checkpoint'],
+  })
+  assert.equal(intent.recorded, true)
+  const result = h.supervisor.recordRestore({
+    phase: 'result',
+    sourceId: 'fish-a',
+    checkpointId: 'ck_1',
+    result: { ok: true, files: [{ path: 'a.md', ok: true, sha256: 'a'.repeat(64) }] },
+  })
+  assert.equal(result.phase, 'result')
+  const events = h.supervisor.store.read()
+  assert.ok(events.some(event => event.type === 'watch/restore/intent' && event.payload.sourceId === 'fish-a'))
+  assert.ok(events.some(event => event.type === 'watch/restore/result' && event.payload.result.ok === true))
+
+  assert.throws(
+    () => h.supervisor.recordRestore({ phase: 'intent', sourceId: 'fish-a', checkpointId: 'ck_1', confirmToken: 'secret' }),
+    error => error.code === 'RESTORE_TOKEN_REJECTED',
+  )
+  assert.throws(
+    () => h.supervisor.recordRestore({ phase: 'intent', sourceId: 'fish-a', checkpointId: 'ck_1', result: { nested: { confirmToken: 'x' } } }),
+    error => error.code === 'RESTORE_TOKEN_REJECTED',
+  )
+  assert.throws(
+    () => h.supervisor.recordRestore({ phase: 'later', sourceId: 'fish-a', checkpointId: 'ck_1' }),
+    error => error.code === 'INVALID_PHASE',
+  )
+  await h.supervisor.disarm('test over')
+})
+
 test('a missing write token downgrades the arm and the guard never acts', async () => {
   const config = testConfig({ http: { token: '' } })
   const { supervisor, ports } = await harness(0.97, config)

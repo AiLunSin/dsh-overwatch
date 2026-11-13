@@ -72,6 +72,9 @@ export const DEFAULT_CONFIG = Object.freeze({
     swarmToken: '',
     origin: '',
   },
+  fish: {
+    dataDir: '',
+  },
   http: {
     enabled: true,
     token: '',
@@ -101,6 +104,7 @@ export function resolveConfig(raw, options = {}) {
     thresholds: merge(DEFAULT_CONFIG.thresholds, input.thresholds),
     storage: merge(DEFAULT_CONFIG.storage, input.storage),
     ports: merge(DEFAULT_CONFIG.ports, input.ports),
+    fish: merge(DEFAULT_CONFIG.fish, input.fish),
     http: merge(DEFAULT_CONFIG.http, input.http),
     dataDir: '',
   }
@@ -151,6 +155,7 @@ export function resolveConfig(raw, options = {}) {
   assertString(config.ports, 'swarmToken')
   assertString(config.ports, 'origin')
   if (config.ports.origin !== '' && !/^https?:\/\/[^\s]+$/.test(config.ports.origin)) fail('ports.origin must be an http(s) origin or empty')
+  assertString(config.fish, 'dataDir')
   assertBoolean(config.http, 'enabled')
   assertString(config.http, 'token')
 

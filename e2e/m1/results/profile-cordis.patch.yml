@@ -8,6 +8,8 @@
       token: m1-token
     ports:
       swarmToken: m1-swarm-token
+    fish:
+      dataDir: 'C:/Users/11403/AppData/Local/Temp/overwatch-m1-mrfPWK/fish-data'
     sampling:
       swarmEventMs: 500
       swarmSnapshotMs: 500

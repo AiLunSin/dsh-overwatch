@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { after, test } from 'node:test'
@@ -73,7 +73,17 @@ function fakePorts() {
         return { ok: state.status === expected, detail: { status: state.status } }
       },
     },
-    pressure: { async live() { return { ok: false, status: 404, data: null, error: 'HTTP 404' } }, supports() { return false } },
+    pressure: {
+      async health() {
+        return { ok: false, status: 404, data: null, error: 'HTTP 404' }
+      },
+      async live() {
+        return { ok: false, status: 404, data: null, error: 'HTTP 404' }
+      },
+      supports() {
+        return false
+      },
+    },
     fish: { async overview() { return { ok: false, status: 401, data: null, error: 'HTTP 401' } }, supports() { return false } },
   }
 }
@@ -126,13 +136,30 @@ function fakeCtx(webServer) {
   }
 }
 
-function config(dataDir) {
+function config(dataDir, fishDir) {
   return resolveConfig({
     storage: { dataDir },
+    fish: { dataDir: fishDir ?? '' },
     http: { token: 'secret' },
     sampling: { swarmEventMs: 1_000, swarmSnapshotMs: 1_000, pressureMs: 1_000, fishMs: 1_000 },
     policy: { twoSignalRule: false },
   })
+}
+
+function fishFixture() {
+  const root = tempDir()
+  const source = path.join(root, 'checkpoints', 'fish-a')
+  mkdirSync(source, { recursive: true })
+  writeFileSync(path.join(source, 'index.jsonl'), `${JSON.stringify({
+    schemaVersion: 1,
+    id: 'ck_1',
+    createdAt: '2026-11-14T02:00:00.000Z',
+    trigger: 'diary',
+    files: 2,
+    storedBytes: 100,
+    pinned: true,
+  })}\n`)
+  return root
 }
 
 test('the service arms one supervisor, lists it, and leaves a readable archive after disarm', async () => {
@@ -162,6 +189,31 @@ test('the service arms one supervisor, lists it, and leaves a readable archive a
   assert.equal(archived.state, 'disarmed')
   assert.equal(service.listRuns()[0].armed, false)
   assert.match(service.report('run-1'), /archive/)
+  service.close()
+})
+
+test('doctor reports data dir, chain, upstreams, fish index and the run', async () => {
+  const dataDir = tempDir()
+  const fishDir = fishFixture()
+  const ctx = fakeCtx(fakeWebServer('http://127.0.0.1:1')).ctx
+  const ports = fakePorts()
+  const service = new OverwatchService({ ctx, config: config(dataDir, fishDir), version: '0.1.0', portsFactory: () => ports })
+  await service.open()
+  await service.arm({ runId: 'run-1', mode: 'guard' })
+  const doctor = await service.doctor()
+  const byId = Object.fromEntries(doctor.checks.map(check => [check.id, check]))
+  assert.equal(byId['data-dir'].status, 'pass')
+  assert.equal(byId['service-log'].status, 'pass')
+  assert.equal(byId.swarm.status, 'pass')
+  assert.equal(byId.pressure.status, 'warn')
+  assert.equal(byId['fishkeeper-write'].status, 'warn')
+  assert.equal(byId['fish-index'].status, 'pass')
+  assert.equal(byId['run:run-1'].status, 'pass')
+  assert.equal(byId['disk-free'].status, 'pass')
+  assert.equal(doctor.ok, true)
+  const fish = service.fishIndex()
+  assert.equal(fish.sources[0].sourceId, 'fish-a')
+  assert.equal(fish.sources[0].checkpoints[0].pinned, true)
   service.close()
 })
 

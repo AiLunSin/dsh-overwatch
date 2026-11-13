@@ -5,6 +5,20 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — M3 fish tank, replay, restore evidence
+
+- `fish-index.js`: read-only fishkeeper checkpoint index, manifest summaries and
+  audit tails from `~/.dsh/fishkeeper` (or `fish.dataDir`); no blob/diary content.
+- `GET /overwatch/api/fish`, `/fish/:sourceId`, `/doctor`; doctor checks data dir,
+  service chain, upstreams, write token, fish index, runs and disk.
+- Merged timeline: swarm + pressure samples + watch events, ordered by
+  `(at, sourceRank, seq)`, opaque `nextSince` cursor.
+- `POST /runs/:id/restores`: records fishkeeper restore intent/result and rejects
+  any `confirmToken`; overwatch never stores or proxies the token.
+- Panel: fish tab (index, checkpoints, browser-side restore flow with dryRun and
+  confirmation, audit), replay tab, doctor checks, zh/en + keyboard/a11y copy.
+- M1 web regression extended to 33 checks with doctor/fish/timeline/restore.
+
 ### Added — M2 watch officer (experimental)
 
 - `WatchOfficer`: lazy `delivery:'caller'` child at the first L2+ case, reserved

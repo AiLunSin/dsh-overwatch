@@ -12,9 +12,15 @@ window.__ModuleLoader__.load({
     // considered stale by the panel once its sample is older than the default
     // sampling.staleMs (30s) from the technical plan.
     const STALE_MS = 30000
-    const TIMELINE_PAGE_LIMIT = 200
-    const TIMELINE_MAX_PAGES = 20
-    const TIMELINE_BUFFER = 2000
+    // Replay pages forward with the opaque cursor the server returns. The room
+    // catches up in bounded batches so one poll can never walk an unbounded
+    // timeline; the next tick continues where this one stopped.
+    const TIMELINE_PAGE_LIMIT = 100
+    const TIMELINE_MAX_PAGES = 8
+    const TIMELINE_BUFFER = 5000
+    const FISH_POLL_MS = 15000
+    const TIMELINE_POLL_MS = 5000
+    const DOCTOR_POLL_MS = 15000
 
     const DICT = {
       en: {
@@ -316,6 +322,163 @@ window.__ModuleLoader__.load({
         'errorCode.INTERNAL': 'server internal error',
         'errorCode.LOOPBACK_ONLY': 'loopback access only',
         'errorCode.MALFORMED_RESPONSE': 'malformed response',
+        'errorCode.FISH_SOURCE_NOT_FOUND': 'fish source not found',
+        'errorCode.RESTORE_TOKEN_REJECTED': 'overwatch rejects the fishkeeper confirmToken',
+        'errorCode.INVALID_RESTORE': 'invalid restore record',
+        'errorCode.INVALID_PHASE': 'restore phase must be intent or result',
+        'errorCode.RESTORE_STALE': 'target files changed after the checkpoint',
+        tabFish: 'Fish tank',
+        tabReplay: 'Replay',
+        fishTitle: 'Fish tank',
+        fishSubtitle: 'Read-only fishkeeper checkpoints, audit tails, and a human-confirmed restore flow. File contents never reach this panel.',
+        fishHostIndex: 'Host index',
+        fishHostHint: 'Read-only index of checkpoint summaries and audit tails built from the fishkeeper data directory.',
+        fishIndexAvailable: 'Index available',
+        fishIndexUnavailable: 'Index unavailable',
+        fishIndexPartial: 'Partially corrupt',
+        fishIndexMissing: 'fishkeeper data directory not found: {path}',
+        fishIndexMissingHint: 'Install fishkeeper and create a checkpoint first; overwatch only reads this directory and never writes to it.',
+        fishIndexErrors: 'Index errors',
+        fishDataDir: 'fishkeeper data directory',
+        fishSources: 'Sources',
+        fishSource: 'Source',
+        fishNoSources: 'No fishkeeper source was found.',
+        fishNoHostSource: 'This source is not in the host index; showing the fishkeeper browser view only.',
+        fishCheckpoints: 'Checkpoints',
+        fishNoCheckpoints: 'This source has no checkpoints yet.',
+        fishAudit: 'Recent audit',
+        fishNoAudit: 'No audit records yet.',
+        fishTrigger: 'Trigger',
+        fishFiles: 'Files',
+        fishStoredBytes: 'Stored',
+        fishPinned: 'Pinned',
+        fishNotPinned: 'Not pinned',
+        fishBaseline: 'Baseline',
+        fishAuditAt: 'Time',
+        fishAuditAction: 'Action',
+        fishAuditResult: 'Result',
+        fishAuditCheckpoint: 'Checkpoint',
+        fishAuditError: 'Error',
+        fishBrowser: 'fishkeeper browser surface',
+        fishBrowserAvailable: 'Browser surface available',
+        fishBrowserAvailableHint: 'The same-origin browser surface is available; richer state and the human-confirmed restore flow are enabled.',
+        fishBrowserChecking: 'Checking the browser surface…',
+        fishBrowserIndexOnly: 'Host index only',
+        fishBrowserUnavailableHint: 'Restore needs fishkeeper browser credentials and an installed fishkeeper. This view keeps the host index and audit instead of failing.',
+        fishBrowserUnauthorized: 'The browser surface returned 401/403: fishkeeper browser credentials are required.',
+        fishBrowserNotFound: 'The browser surface returned 404: fishkeeper is not installed or its routes are not registered.',
+        fishBrowserNetwork: 'The browser surface is unreachable (network or same-origin restriction).',
+        fishBrowserError: 'The browser surface failed: {message}',
+        fishBrowserCheckpointsError: 'Checkpoint list unavailable: {message}',
+        fishBrowserGeneratedAt: 'Read {time}',
+        fishBrowserMode: 'Browser mode',
+        fishBrowserSourceStatus: 'Source status',
+        fishBrowserReadOnly: 'fishkeeper is in read-only degradation',
+        fishRestoreSupported: 'Restore supported',
+        fishRestoreUnsupported: 'This source does not support restore; checkpoints are for audit and migration reference only.',
+        fishRestoreNeedBrowser: 'Restore needs a browser-visible source from fishkeeper.',
+        fishRestoreNeedRun: 'Select a run before restoring, so the intent and result can be recorded.',
+        fishRestoreNeedToken: 'Set the overwatch write token before restoring, so the evidence can be recorded.',
+        fishRestoreNeedReadOnly: 'This source is read-only; restore is disabled.',
+        fishRestoreAction: 'Restore',
+        fishRestoreReady: 'Restore preflights first and records the intent in the overwatch log before execution.',
+        fishRestoreTitle: 'Restore checkpoint',
+        fishRestorePreflight: 'Preflighting…',
+        fishRestoreStepPreflight: 'Preflight',
+        fishRestoreStepConfirm: 'Confirm',
+        fishRestoreStepResult: 'Result',
+        fishRestorePlan: 'Impact preview',
+        fishRestorePlanCount: '{count} file(s) will be written; {skipped} skipped.',
+        fishRestorePlanHint: 'fishkeeper creates a pre-restore checkpoint of the current state, then writes only files declared restorable.',
+        fishRestoreWarnings: 'Warnings',
+        fishRestoreNoWarnings: 'No warnings.',
+        fishRestoreStale: 'Target changed',
+        fishRestoreStaleHint: 'These files changed after the checkpoint. Enable the override to continue.',
+        fishRestoreOverride: 'Overwrite newer content (overrideStale)',
+        fishRestoreFile: 'File',
+        fishRestoreActionCol: 'Action',
+        fishRestoreStaleCol: 'Stale',
+        fishRestoreBytes: 'Bytes',
+        fishRestoreFileRestore: 'restore',
+        fishRestoreFileSkip: 'skip',
+        fishRestoreSkipReason: 'not restorable',
+        fishRestoreConfirm: 'Restore checkpoint {id} of {source}?',
+        fishRestoreSafety: 'overwatch never creates or forges the fishkeeper confirmToken; it stays in this dialog memory only.',
+        fishRestoreSafetyTitle: 'Safety notes',
+        fishRestoreSafetyCheckpoint: 'fishkeeper creates a pre-restore safety checkpoint before writing anything.',
+        fishRestoreSafetyGit: 'Code rollback is out of scope: use the swarm worktree/branch and git.',
+        fishRestoreIntentRecording: 'Recording the restore intent…',
+        fishRestoreIntentRecorded: 'Restore intent recorded in the overwatch log.',
+        fishRestoreIntentFailed: 'Could not record the restore intent; the restore was not executed.',
+        fishRestoreRetryIntent: 'Retry intent',
+        fishRestoreExecuting: 'Restoring…',
+        fishRestoreExecute: 'Execute restore',
+        fishRestorePreflightFailed: 'Preflight failed',
+        fishRestoreError: 'Restore failed',
+        fishRestoreRetryPreflight: 'Run preflight again',
+        fishRestoreNothing: 'This checkpoint has no restorable files.',
+        fishRestoreResultTitle: 'Restore result',
+        fishRestoreOk: 'Restore succeeded',
+        fishRestorePartial: 'Some files failed to restore',
+        fishRestoreRestored: '{count} file(s) restored',
+        fishRestoreSafetyCheckpointId: 'Pre-restore safety checkpoint',
+        fishRestorePerFile: 'Per-file results',
+        fishRestoreFileOk: 'ok',
+        fishRestoreFileFailed: 'failed',
+        fishRestoreRecorded: 'Result recorded in the overwatch log.',
+        fishRestoreResultRecording: 'Recording the restore result…',
+        fishRestoreResultRecordFailed: 'The restore ran, but its result could not be recorded in the overwatch log.',
+        fishRestoreRetryResult: 'Retry result',
+        fishRestoreConfirmExpired: 'The confirm token expired or was consumed; run preflight again.',
+        fishRestoreStaleBlocked: 'Targets changed; enable the override and run preflight again.',
+        fishRestoreReadOnlyError: 'The source is read-only (possibly held by another fishkeeper instance).',
+        fishRestoreCloseHint: 'The confirm token is discarded when this dialog closes.',
+        replayTitle: 'Replay',
+        replaySubtitle: 'Read-only merged timeline in server order; the panel never re-sorts by seq.',
+        replayLegend: 'Sources',
+        replaySourceCol: 'Source',
+        replayEvents: 'Replay events',
+        replayCount: 'Loaded {loaded} / {total}',
+        replayLoadMore: 'Load more',
+        replayLoadingMore: 'Loading more…',
+        replayAllLoaded: 'All events loaded',
+        replayEmpty: 'This run has no timeline events yet.',
+        replayError: 'Timeline unavailable.',
+        replayAutoHint: 'Refreshes every 5s and pauses while the page is hidden.',
+        replayCursorHint: 'Paging uses the opaque server cursor; no local re-sorting.',
+        'source.watch': 'watch',
+        doctorTitle: 'Doctor checks',
+        doctorSubtitle: 'Read-only checks polled separately so the main views never wait on them.',
+        doctorLoading: 'Loading doctor checks…',
+        doctorEmpty: 'No doctor checks reported.',
+        doctorError: 'Doctor request failed',
+        doctorOverallOk: 'All checks pass',
+        doctorOverallWarn: 'Warnings present',
+        doctorOverallFail: 'Failures present',
+        doctorOverallUnknown: 'Not loaded',
+        doctorCheck: 'Check',
+        doctorStatusCol: 'Status',
+        doctorDetailCol: 'Detail',
+        'doctorStatus.pass': 'pass',
+        'doctorStatus.warn': 'warn',
+        'doctorStatus.fail': 'fail',
+        'doctorStatus.unknown': 'unknown',
+        'trigger.manual': 'manual',
+        'trigger.baseline': 'baseline',
+        'trigger.auto': 'auto',
+        'trigger.pre-restore': 'pre-restore',
+        'trigger.diary': 'diary',
+        'trigger.persona': 'persona',
+        'trigger.memory': 'memory',
+        'trigger.unknown': 'unknown trigger',
+        'auditAction.restore': 'restore',
+        'auditAction.pin': 'pin',
+        'auditAction.unpin': 'unpin',
+        'auditAction.delete-checkpoint': 'delete checkpoint',
+        'auditAction.unknown': 'unknown action',
+        'auditResult.ok': 'ok',
+        'auditResult.failed': 'failed',
+        'auditResult.unknown': 'not reported',
       },
       zh: {
         navLabel: '瞭望塔',
@@ -616,6 +779,163 @@ window.__ModuleLoader__.load({
         'errorCode.INTERNAL': '服务端内部错误',
         'errorCode.LOOPBACK_ONLY': '仅允许本机访问',
         'errorCode.MALFORMED_RESPONSE': '响应格式错误',
+        'errorCode.FISH_SOURCE_NOT_FOUND': '鱼缸数据源不存在',
+        'errorCode.RESTORE_TOKEN_REJECTED': 'overwatch 拒绝接收 fishkeeper 的 confirmToken',
+        'errorCode.INVALID_RESTORE': '恢复记录无效',
+        'errorCode.INVALID_PHASE': '恢复阶段必须是 intent 或 result',
+        'errorCode.RESTORE_STALE': '目标文件在检查点之后又被修改',
+        tabFish: '鱼缸',
+        tabReplay: '回放',
+        fishTitle: '鱼缸',
+        fishSubtitle: '只读的 fishkeeper 检查点、审计尾部与人工确认的恢复流程；文件正文不会进入本面板。',
+        fishHostIndex: '宿主索引',
+        fishHostHint: '从 fishkeeper 数据目录只读构建的检查点摘要与审计尾部。',
+        fishIndexAvailable: '索引可用',
+        fishIndexUnavailable: '索引不可用',
+        fishIndexPartial: '部分损坏',
+        fishIndexMissing: '未找到 fishkeeper 数据目录：{path}',
+        fishIndexMissingHint: '需要先安装 fishkeeper 并创建检查点；overwatch 只读这个目录，从不写入。',
+        fishIndexErrors: '索引错误',
+        fishDataDir: 'fishkeeper 数据目录',
+        fishSources: '数据源',
+        fishSource: '数据源',
+        fishNoSources: '没有找到 fishkeeper 数据源。',
+        fishNoHostSource: '该数据源不在宿主索引中；这里只展示 fishkeeper 浏览器面的视图。',
+        fishCheckpoints: '检查点',
+        fishNoCheckpoints: '该数据源还没有检查点。',
+        fishAudit: '最近审计',
+        fishNoAudit: '还没有审计记录。',
+        fishTrigger: '触发',
+        fishFiles: '文件数',
+        fishStoredBytes: '占用',
+        fishPinned: '已固定',
+        fishNotPinned: '未固定',
+        fishBaseline: '基线',
+        fishAuditAt: '时间',
+        fishAuditAction: '动作',
+        fishAuditResult: '结果',
+        fishAuditCheckpoint: '检查点',
+        fishAuditError: '错误',
+        fishBrowser: 'fishkeeper 浏览器面',
+        fishBrowserAvailable: '浏览器面可用',
+        fishBrowserAvailableHint: '同源浏览器面可用：可以查看更丰富的状态，并走人工确认的恢复流程。',
+        fishBrowserChecking: '正在检查浏览器面…',
+        fishBrowserIndexOnly: '仅宿主索引可用',
+        fishBrowserUnavailableHint: '恢复需要浏览器凭据且已安装 fishkeeper；本视图会保留宿主索引与审计，不会崩溃。',
+        fishBrowserUnauthorized: '浏览器面返回 401/403：需要 fishkeeper 浏览器凭据。',
+        fishBrowserNotFound: '浏览器面返回 404：未安装 fishkeeper 或路由未注册。',
+        fishBrowserNetwork: '无法连接浏览器面（网络或同源限制）。',
+        fishBrowserError: '浏览器面失败：{message}',
+        fishBrowserCheckpointsError: '检查点列表不可用：{message}',
+        fishBrowserGeneratedAt: '读于 {time}',
+        fishBrowserMode: '浏览器面模式',
+        fishBrowserSourceStatus: '数据源状态',
+        fishBrowserReadOnly: 'fishkeeper 处于只读降级',
+        fishRestoreSupported: '支持恢复',
+        fishRestoreUnsupported: '此数据源不支持恢复；检查点仅用于审计与迁移参考。',
+        fishRestoreNeedBrowser: '恢复需要一个在 fishkeeper 浏览器面可见的数据源。',
+        fishRestoreNeedRun: '先选择一个运行，才能记录恢复意图与结果。',
+        fishRestoreNeedToken: '先设置 overwatch 写 token，才能记录恢复证据。',
+        fishRestoreNeedReadOnly: '该数据源当前只读，恢复已禁用。',
+        fishRestoreAction: '恢复',
+        fishRestoreReady: '恢复会先预检，并在执行前把 intent 写入 overwatch 日志。',
+        fishRestoreTitle: '恢复检查点',
+        fishRestorePreflight: '预检中…',
+        fishRestoreStepPreflight: '预检',
+        fishRestoreStepConfirm: '确认',
+        fishRestoreStepResult: '结果',
+        fishRestorePlan: '影响预览',
+        fishRestorePlanCount: '将写入 {count} 个文件，跳过 {skipped} 个。',
+        fishRestorePlanHint: 'fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。',
+        fishRestoreWarnings: '警告',
+        fishRestoreNoWarnings: '没有警告。',
+        fishRestoreStale: '目标已变化',
+        fishRestoreStaleHint: '以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。',
+        fishRestoreOverride: '覆盖较新内容（overrideStale）',
+        fishRestoreFile: '文件',
+        fishRestoreActionCol: '动作',
+        fishRestoreStaleCol: '已变化',
+        fishRestoreBytes: '字节',
+        fishRestoreFileRestore: '恢复',
+        fishRestoreFileSkip: '跳过',
+        fishRestoreSkipReason: '不可恢复',
+        fishRestoreConfirm: '确认恢复 {source} 的检查点 {id}？',
+        fishRestoreSafety: 'overwatch 不生成、不伪造 fishkeeper 的 confirmToken；确认令牌只存在于这个对话框的内存中。',
+        fishRestoreSafetyTitle: '安全说明',
+        fishRestoreSafetyCheckpoint: '写入任何文件之前，fishkeeper 会自己创建一个 pre-restore 安全检查点。',
+        fishRestoreSafetyGit: '代码回滚不在此流程：请用 swarm 的 worktree/分支与 git。',
+        fishRestoreIntentRecording: '正在记录恢复意图…',
+        fishRestoreIntentRecorded: '恢复意图已写入 overwatch 日志。',
+        fishRestoreIntentFailed: '无法记录恢复意图，恢复未执行。',
+        fishRestoreRetryIntent: '重试记录意图',
+        fishRestoreExecuting: '正在恢复…',
+        fishRestoreExecute: '执行恢复',
+        fishRestorePreflightFailed: '预检失败',
+        fishRestoreError: '恢复失败',
+        fishRestoreRetryPreflight: '重新预检',
+        fishRestoreNothing: '该检查点没有可恢复的文件。',
+        fishRestoreResultTitle: '恢复结果',
+        fishRestoreOk: '恢复成功',
+        fishRestorePartial: '部分文件恢复失败',
+        fishRestoreRestored: '已恢复 {count} 个文件',
+        fishRestoreSafetyCheckpointId: '恢复前安全检查点',
+        fishRestorePerFile: '逐文件结果',
+        fishRestoreFileOk: '成功',
+        fishRestoreFileFailed: '失败',
+        fishRestoreRecorded: '结果已写入 overwatch 日志。',
+        fishRestoreResultRecording: '正在记录恢复结果…',
+        fishRestoreResultRecordFailed: '恢复已执行，但结果未能写入 overwatch 日志。',
+        fishRestoreRetryResult: '重试记录结果',
+        fishRestoreConfirmExpired: '确认令牌已过期或已被使用；请重新预检。',
+        fishRestoreStaleBlocked: '目标已变化；请打开覆盖开关并重新预检。',
+        fishRestoreReadOnlyError: '数据源当前只读（可能被另一个 fishkeeper 实例持有）。',
+        fishRestoreCloseHint: '关闭对话框会丢弃确认令牌。',
+        replayTitle: '回放',
+        replaySubtitle: '按服务端顺序展示的只读合并时间轴；面板不会按 seq 重新排序。',
+        replayLegend: '来源',
+        replaySourceCol: '来源',
+        replayEvents: '回放事件',
+        replayCount: '已加载 {loaded} / {total}',
+        replayLoadMore: '加载更多',
+        replayLoadingMore: '加载中…',
+        replayAllLoaded: '已全部加载',
+        replayEmpty: '这个运行还没有时间线事件。',
+        replayError: '时间线不可用。',
+        replayAutoHint: '每 5 秒刷新；页面隐藏时暂停。',
+        replayCursorHint: '用服务端不透明游标翻页，不做本地排序。',
+        'source.watch': '值班员',
+        doctorTitle: '自检（doctor）',
+        doctorSubtitle: '只读检查，独立轮询，主视图不会等待它。',
+        doctorLoading: '自检加载中…',
+        doctorEmpty: '没有自检项。',
+        doctorError: '自检请求失败',
+        doctorOverallOk: '全部通过',
+        doctorOverallWarn: '有警告',
+        doctorOverallFail: '存在失败项',
+        doctorOverallUnknown: '未加载',
+        doctorCheck: '检查项',
+        doctorStatusCol: '结果',
+        doctorDetailCol: '详情',
+        'doctorStatus.pass': '通过',
+        'doctorStatus.warn': '警告',
+        'doctorStatus.fail': '失败',
+        'doctorStatus.unknown': '未知',
+        'trigger.manual': '手动',
+        'trigger.baseline': '基线',
+        'trigger.auto': '自动',
+        'trigger.pre-restore': '恢复前',
+        'trigger.diary': '日记',
+        'trigger.persona': '人设',
+        'trigger.memory': '记忆',
+        'trigger.unknown': '未知触发',
+        'auditAction.restore': '恢复',
+        'auditAction.pin': '固定',
+        'auditAction.unpin': '取消固定',
+        'auditAction.delete-checkpoint': '删除检查点',
+        'auditAction.unknown': '未知动作',
+        'auditResult.ok': '成功',
+        'auditResult.failed': '失败',
+        'auditResult.unknown': '未提供',
       },
     }
 
@@ -792,6 +1112,31 @@ window.__ModuleLoader__.load({
       return '—'
     }
 
+    function formatBytes(value) {
+      if (typeof value !== 'number' || !Number.isFinite(value) || value < 0) return '—'
+      if (value < 1024) return `${formatNumber(value)} B`
+      const units = ['KB', 'MB', 'GB', 'TB']
+      let amount = value / 1024
+      let unit = units[0]
+      for (let index = 1; index < units.length && amount >= 1024; index += 1) {
+        amount /= 1024
+        unit = units[index]
+      }
+      return `${formatNumber(amount)} ${unit}`
+    }
+
+    function summarizeDetail(detail, t) {
+      if (detail === null || detail === undefined) return '—'
+      if (typeof detail === 'string' || typeof detail === 'number' || typeof detail === 'boolean') return formatScalar(detail, t)
+      try {
+        const text = JSON.stringify(detail)
+        if (typeof text !== 'string') return '—'
+        return text.length > 220 ? `${text.slice(0, 220)}…` : text
+      } catch {
+        return '—'
+      }
+    }
+
     function translateCode(t, prefix, code, fallbackKey = 'unknown') {
       if (code === null || code === undefined || code === '') return t(fallbackKey)
       const text = String(code)
@@ -824,6 +1169,46 @@ window.__ModuleLoader__.load({
       return meaning === key ? code : `${code} ${meaning}`
     }
 
+    function triggerLabel(t, trigger) {
+      if (typeof trigger !== 'string' || trigger === '') return t('trigger.unknown')
+      return translateCode(t, 'trigger', trigger, 'trigger.unknown')
+    }
+
+    function auditActionLabel(t, action) {
+      if (typeof action !== 'string' || action === '') return t('auditAction.unknown')
+      return translateCode(t, 'auditAction', action, 'auditAction.unknown')
+    }
+
+    function auditResultLabel(t, result) {
+      if (typeof result !== 'string' || result === '') return t('auditResult.unknown')
+      return translateCode(t, 'auditResult', result, 'auditResult.unknown')
+    }
+
+    function sourceLabel(t, source) {
+      if (typeof source !== 'string' || source === '') return t('unknown')
+      return translateCode(t, 'source', source, 'unknown')
+    }
+
+    function doctorStatusLabel(t, status) {
+      const key = `doctorStatus.${typeof status === 'string' ? status : 'unknown'}`
+      const text = t(key)
+      return text === key ? t('doctorStatus.unknown') : text
+    }
+
+    function doctorTone(status) {
+      if (status === 'pass') return 'ok'
+      if (status === 'warn') return 'warn'
+      if (status === 'fail') return 'error'
+      return 'idle'
+    }
+
+    function browserFailureKind(error) {
+      if (error !== null && typeof error === 'object' && error.network === true) return 'network'
+      if (error?.status === 401 || error?.status === 403) return 'unauthorized'
+      if (error?.status === 404) return 'not-found'
+      return 'error'
+    }
+
     function isAbort(error) {
       return error !== null && typeof error === 'object' && error.name === 'AbortError'
     }
@@ -831,6 +1216,13 @@ window.__ModuleLoader__.load({
     function errorDescription(error, t) {
       if (error === null || error === undefined) return ''
       const code = typeof error.code === 'string' ? error.code : ''
+      // fishkeeper restore errors carry their own namespace; translate them
+      // before the generic status text so a 409 is not just "state conflict".
+      if (code.endsWith('restore-stale') || code === 'RESTORE_STALE') return t('fishRestoreStaleBlocked')
+      if (code.endsWith('confirm-invalid')) return t('fishRestoreConfirmExpired')
+      if (code.endsWith('lock-held')) return t('fishRestoreReadOnlyError')
+      if (code.endsWith('restore-unsupported')) return t('fishRestoreUnsupported')
+      if (code === 'RESTORE_TOKEN_REJECTED') return t('fishRestoreConfirmExpired')
       const knownKey = code === '' ? '' : `errorCode.${code}`
       const known = knownKey === '' ? '' : t(knownKey)
       const translatedCode = known !== knownKey ? known : ''
@@ -896,6 +1288,98 @@ window.__ModuleLoader__.load({
         body: JSON.stringify(body ?? {}),
         signal,
       })
+    }
+
+    function httpErrorFromPayload(payload, status, fallbackCode) {
+      const nested = payload !== null && typeof payload === 'object'
+        && payload.error !== null && typeof payload.error === 'object'
+        ? payload.error
+        : null
+      const code = typeof nested?.code === 'string'
+        ? nested.code
+        : (typeof payload?.code === 'string' ? payload.code : fallbackCode)
+      const message = typeof nested?.message === 'string'
+        ? nested.message
+        : (typeof payload?.message === 'string' ? payload.message : '')
+      const error = new Error(message)
+      error.status = status
+      error.code = code
+      if (payload === null) error.malformed = true
+      return error
+    }
+
+    // Doctor answers HTTP 200 even when individual checks fail, so its payload
+    // must be accepted on transport success instead of requiring `ok: true`.
+    async function apiGetRaw(path, signal) {
+      let response
+      try {
+        response = await fetch(`${API}${path}`, {
+          method: 'GET',
+          headers: { accept: 'application/json' },
+          credentials: 'same-origin',
+          signal,
+        })
+      } catch (cause) {
+        if (isAbort(cause)) throw cause
+        const error = new Error('')
+        error.network = true
+        throw error
+      }
+      let payload = null
+      try {
+        payload = await response.json()
+      } catch {
+        payload = null
+      }
+      if (!response.ok) throw httpErrorFromPayload(payload, response.status, `HTTP_${response.status}`)
+      if (payload === null || typeof payload !== 'object') {
+        const error = new Error('')
+        error.status = response.status
+        error.malformed = true
+        throw error
+      }
+      return payload
+    }
+
+    // fishkeeper routes live on the browser-authenticated connection channel,
+    // not under /overwatch/api. A 401/404/network failure downgrades the view to
+    // the host index; it is never treated as a panel crash.
+    async function fishkeeperRequest(path, options) {
+      const method = options?.method === 'POST' ? 'POST' : 'GET'
+      const signal = options?.signal
+      const init = {
+        method,
+        headers: { accept: 'application/json' },
+        credentials: 'same-origin',
+        signal,
+      }
+      if (options?.body !== undefined) {
+        init.headers['content-type'] = 'application/json'
+        init.body = JSON.stringify(options.body ?? {})
+      }
+      let response
+      try {
+        response = await fetch(`/api/fishkeeper${path}`, init)
+      } catch (cause) {
+        if (isAbort(cause)) throw cause
+        const error = new Error('')
+        error.network = true
+        throw error
+      }
+      let payload = null
+      try {
+        payload = await response.json()
+      } catch {
+        payload = null
+      }
+      if (!response.ok) throw httpErrorFromPayload(payload, response.status, `HTTP_${response.status}`)
+      if (payload === null || typeof payload !== 'object') {
+        const error = new Error('')
+        error.status = response.status
+        error.malformed = true
+        throw error
+      }
+      return payload
     }
 
     function asArray(value) {
@@ -988,10 +1472,11 @@ window.__ModuleLoader__.load({
     function eventKey(event) {
       if (event !== null && event !== undefined && event.seq !== null && event.seq !== undefined) {
         // A merged timeline can carry the same per-source seq for different
-        // sources; include the type and timestamp so React keys stay unique.
-        return `seq:${event.seq}:${event?.type ?? ''}:${event?.at ?? ''}`
+        // sources; include the source, type, and timestamp so React keys stay
+        // unique without re-ordering the server sequence.
+        return `seq:${event.seq}:${event?.source ?? ''}:${event?.type ?? ''}:${event?.at ?? ''}`
       }
-      return `x:${event?.type ?? ''}:${event?.at ?? ''}:${event?.summary ?? ''}`
+      return `x:${event?.source ?? ''}:${event?.type ?? ''}:${event?.at ?? ''}:${event?.summary ?? ''}`
     }
 
     const WATCH_EVENT_TYPES = /^(watch|case|action|decision|signal|guard)/i
@@ -1012,6 +1497,14 @@ window.__ModuleLoader__.load({
     }
 
     const ENDED_RUN_STATES = new Set(['disarmed', 'closed', 'ended', 'stopped', 'archived'])
+
+    const TAB_ORDER = ['room', 'cases', 'fish', 'replay']
+    const TAB_LABEL_KEYS = {
+      room: 'tabRoom',
+      cases: 'tabCases',
+      fish: 'tabFish',
+      replay: 'tabReplay',
+    }
 
     function groupRuns(runs) {
       const armed = []
@@ -1383,7 +1876,7 @@ window.__ModuleLoader__.load({
       )
     }
 
-    function IntegrityCard({ health, detail, error, selectedRunId, onRetry, t }) {
+    function IntegrityCard({ health, detail, error, selectedRunId, doctor, doctorError, doctorReady, onRetry, t }) {
       const runHealth = selectedRunId === null
         ? null
         : asArray(health?.runs).find((entry) => String(entry?.runId) === String(selectedRunId)) ?? null
@@ -1428,6 +1921,70 @@ window.__ModuleLoader__.load({
           dtDd(t('serviceMode'), health?.mode ? translateCode(t, 'mode', health.mode) : '—'),
           dtDd(t('dataDir'), health?.dataDir ?? '—'),
         ),
+        h(DoctorChecks, {
+          doctor,
+          error: doctorError,
+          ready: doctorReady,
+          onRetry,
+          t,
+        }),
+      )
+    }
+
+    // Doctor checks live in their own poll and are rendered as a nested card so
+    // a slow or failing /doctor request never delays the run overview.
+    function DoctorChecks({ doctor, error, ready, onRetry, t }) {
+      const checks = asArray(doctor?.checks)
+      const overall = error !== null && error !== undefined
+        ? 'fail'
+        : !ready || checks.length === 0
+          ? 'unknown'
+          : checks.some((check) => check?.status === 'fail')
+            ? 'fail'
+            : checks.some((check) => check?.status === 'warn')
+              ? 'warn'
+              : 'ok'
+      const overallKey = overall === 'ok'
+        ? 'doctorOverallOk'
+        : overall === 'warn'
+          ? 'doctorOverallWarn'
+          : overall === 'fail'
+            ? 'doctorOverallFail'
+            : 'doctorOverallUnknown'
+      const tone = overall === 'ok' ? 'ok' : overall === 'warn' ? 'warn' : overall === 'fail' ? 'error' : 'idle'
+      return h('div', { className: 'ow-doctor', 'aria-label': t('doctorTitle') },
+        h('div', { className: 'ow-card-head' },
+          h('div', null,
+            h('h3', null, t('doctorTitle')),
+            h('p', { className: 'ow-muted ow-small' }, t('doctorSubtitle')),
+          ),
+          h('div', { className: 'ow-actions-row' },
+            h(Badge, { tone }, t(overallKey)),
+            h('button', { type: 'button', className: 'ow-btn ow-btn-small', onClick: onRetry }, t('retry')),
+          ),
+        ),
+        h(ErrorNotice, { error, title: t('doctorError'), onRetry, t }),
+        !ready && (error === null || error === undefined) ? h('p', { className: 'ow-muted ow-small' }, t('doctorLoading')) : null,
+        ready && checks.length === 0 && (error === null || error === undefined)
+          ? h('p', { className: 'ow-muted ow-small' }, t('doctorEmpty'))
+          : null,
+        checks.length > 0
+          ? h('div', { className: 'ow-table-wrap' },
+              h('table', { className: 'ow-table ow-doctor-table' },
+                h('caption', { className: 'ow-sr' }, t('doctorTitle')),
+                h('thead', null, h('tr', null,
+                  h('th', { scope: 'col' }, t('doctorCheck')),
+                  h('th', { scope: 'col' }, t('doctorStatusCol')),
+                  h('th', { scope: 'col' }, t('doctorDetailCol')),
+                )),
+                h('tbody', null, checks.map((check, index) => h('tr', { key: `${check?.id ?? 'check'}:${index}` },
+                  h('td', null, h('code', { className: 'ow-code' }, check?.id ?? '—')),
+                  h('td', null, h(Badge, { tone: doctorTone(check?.status) }, doctorStatusLabel(t, check?.status))),
+                  h('td', { className: 'ow-cell-summary' }, summarizeDetail(check?.detail, t)),
+                ))),
+              ),
+            )
+          : null,
       )
     }
 
@@ -1460,13 +2017,589 @@ window.__ModuleLoader__.load({
                 )),
                 h('tbody', null, watchEvents.map((event) => h('tr', { key: eventKey(event) },
                   h('td', { className: 'ow-cell-seq' }, typeof event.seq === 'number' ? formatNumber(event.seq) : (event.seq ?? '—')),
-                  h('td', { className: 'ow-cell-time', title: hasTime(event.at) ? undefined : t('unknownTime') }, formatTime(event.at)),
+                  h('td', { className: 'ow-cell-time', title: hasTime(event.at) ? undefined : t('unknownTime') },
+                    hasTime(event.at) ? formatTime(event.at) : h('span', { className: 'ow-muted' }, t('unknownTime'))),
                   h('td', null, h('code', { className: 'ow-code' }, event.type ?? '—')),
                   h('td', null, event.actor ?? '—'),
                   h('td', { className: 'ow-cell-summary' }, event.summary ?? '—'),
                 ))),
               ),
             ),
+      )
+    }
+
+    function browserFailureText(t, state) {
+      const kind = state?.kind
+      if (kind === 'unauthorized') return t('fishBrowserUnauthorized')
+      if (kind === 'not-found') return t('fishBrowserNotFound')
+      if (kind === 'network') return t('fishBrowserNetwork')
+      const message = typeof state?.message === 'string' && state.message !== '' ? state.message : t('errorGeneric')
+      return t('fishBrowserError', { message })
+    }
+
+    function mergeCheckpoints(hostList, browserList) {
+      const byId = new Map()
+      for (const item of asArray(hostList)) {
+        if (item === null || typeof item !== 'object' || typeof item.id !== 'string') continue
+        byId.set(item.id, { ...item, fromHost: true })
+      }
+      for (const item of asArray(browserList)) {
+        if (item === null || typeof item !== 'object' || typeof item.id !== 'string') continue
+        const existing = byId.get(item.id) ?? {}
+        byId.set(item.id, { ...existing, ...item, fromHost: existing.fromHost === true, fromBrowser: true })
+      }
+      return Array.from(byId.values()).sort((left, right) => String(right.createdAt ?? '').localeCompare(String(left.createdAt ?? '')))
+    }
+
+    function sourceChip(t, source) {
+      const label = sourceLabel(t, source)
+      const slug = typeof source === 'string' ? source.toLowerCase().replace(/[^a-z0-9_-]/g, '') : 'unknown'
+      return h('span', {
+        className: `ow-source-chip ow-source-${slug}`,
+        title: label,
+        'aria-label': label,
+      },
+        h('span', { className: 'ow-source-dot', 'aria-hidden': true }),
+        h('span', null, label),
+      )
+    }
+
+    function FishView({ model, restoreBusy, onSelectSource, onRestore, onRetry, t }) {
+      const index = model.index
+      const indexErrors = asArray(index?.errors)
+      const sourceErrors = sourceIdFilter(indexErrors, model.sourceId)
+      const hostSource = model.hostSource
+      const browserSource = model.browserSource
+      const overview = model.overview ?? { state: 'unknown' }
+      const checkpointsState = model.checkpointsState ?? { state: 'idle' }
+      const rows = asArray(model.checkpoints)
+      const audit = asArray(hostSource?.audit)
+      const indexTone = model.hostError !== null && model.hostError !== undefined
+        ? 'error'
+        : !model.ready
+          ? 'idle'
+          : index !== null && index !== undefined && index.available === false
+            ? 'warn'
+            : indexErrors.length > 0 ? 'warn' : 'ok'
+      const indexLabel = model.hostError !== null && model.hostError !== undefined
+        ? t('fishIndexUnavailable')
+        : !model.ready
+          ? t('loading')
+          : index !== null && index !== undefined && index.available === false
+            ? t('fishIndexUnavailable')
+            : indexErrors.length > 0 ? t('fishIndexPartial') : t('fishIndexAvailable')
+      const browserTone = (overview.state === 'unavailable' || checkpointsState.state === 'error')
+        ? 'warn'
+        : overview.state === 'available' ? 'ok' : 'idle'
+      const browserFailure = overview.state === 'unavailable'
+        ? overview
+        : checkpointsState.state === 'error' ? checkpointsState : null
+      const browserLabel = browserFailure !== null
+        ? t('fishBrowserIndexOnly')
+        : overview.state === 'available' ? t('fishBrowserAvailable') : t('fishBrowserChecking')
+      const restoreCapable = checkpointsState.state === 'available'
+        && checkpointsState.data?.restoreSupported === true
+        && checkpointsState.data?.readOnly !== true
+      return h('div', { className: 'ow-fish' },
+        h('section', { className: 'ow-card ow-fish-host', 'aria-label': t('fishHostIndex') },
+          h('div', { className: 'ow-card-head' },
+            h('div', null,
+              h('h2', null, t('fishTitle')),
+              h('p', { className: 'ow-muted ow-small ow-subtitle' }, t('fishSubtitle')),
+            ),
+            h('div', { className: 'ow-actions-row' },
+              h(Badge, { tone: indexTone }, indexLabel),
+              h('button', { type: 'button', className: 'ow-btn ow-btn-small', onClick: onRetry }, t('refresh')),
+            ),
+          ),
+          h(ErrorNotice, { error: model.hostError, title: t('fishIndexUnavailable'), onRetry, t }),
+          !model.ready && (model.hostError === null || model.hostError === undefined)
+            ? h('p', { className: 'ow-muted' }, t('loading'))
+            : null,
+          index !== null && index !== undefined
+            ? h('div', null,
+                h('h3', null, t('fishHostIndex')),
+                h('p', { className: 'ow-muted ow-small' }, t('fishHostHint')),
+                h('dl', { className: 'ow-dl' },
+                  dtDd(t('fishDataDir'), index.dataDir ?? '—'),
+                  dtDd(t('asOf'), formatTime(index.asOf ?? model.asOf)),
+                ),
+                index.available === false
+                  ? h('p', { className: 'ow-tone-warn' },
+                      t('fishIndexMissing', { path: index.dataDir ?? '—' }),
+                      ' ',
+                      t('fishIndexMissingHint'),
+                    )
+                  : null,
+                indexErrors.length > 0
+                  ? h('div', { className: 'ow-fish-errors', role: 'alert' },
+                      h('h3', null, t('fishIndexErrors')),
+                      h('ul', null, indexErrors.map((error, position) => h('li', { key: `${error?.sourceId ?? ''}:${error?.code ?? ''}:${position}` },
+                        error?.sourceId ? h('code', { className: 'ow-code' }, error.sourceId) : null,
+                        h('code', { className: 'ow-code' }, error?.code ?? '—'),
+                        h('span', null, error?.message ?? ''),
+                      ))),
+                    )
+                  : null,
+              )
+            : null,
+        ),
+        h('section', { className: 'ow-card ow-fish-browser', 'aria-label': t('fishBrowser') },
+          h('div', { className: 'ow-card-head' },
+            h('div', null,
+              h('h2', null, t('fishBrowser')),
+              h('p', { className: 'ow-muted ow-small ow-subtitle' },
+                browserFailure !== null ? t('fishBrowserUnavailableHint') : t('fishBrowserAvailableHint')),
+            ),
+            h(Badge, { tone: browserTone }, browserLabel),
+          ),
+          browserFailure !== null
+            ? h('div', { className: 'ow-fish-degraded', role: 'status' },
+                h('strong', null, t('fishBrowserIndexOnly')),
+                h('p', null, browserFailureText(t, browserFailure)),
+              )
+            : null,
+          overview.state === 'unknown'
+            ? h('p', { className: 'ow-muted' }, t('fishBrowserChecking'))
+            : null,
+          overview.state === 'available'
+            ? h('div', null,
+                h('dl', { className: 'ow-dl' },
+                  dtDd(t('fishBrowserMode'), overview.data?.mode ?? '—'),
+                  dtDd(t('asOf'), formatTime(overview.data?.generatedAt)),
+                ),
+                browserSource !== null && browserSource !== undefined
+                  ? h('dl', { className: 'ow-dl' },
+                      dtDd(t('fishSource'), browserSource.displayName ?? browserSource.id ?? model.sourceId ?? '—'),
+                      dtDd(t('fishBrowserSourceStatus'), h('span', { className: browserSource.status === 'error' ? 'ow-tone-error' : 'ow-tone-ok' },
+                        browserSource.status === 'ok' ? t('fresh.ok') : translateCode(t, 'runState', browserSource.status),
+                        browserSource.readOnly === true ? ` · ${t('fishBrowserReadOnly')}` : '',
+                      )),
+                    )
+                  : null,
+                checkpointsState.state === 'available'
+                  ? h('p', { className: restoreCapable ? 'ow-tone-ok' : 'ow-tone-warn' },
+                      restoreCapable ? t('fishRestoreSupported') : t('fishRestoreUnsupported'))
+                  : null,
+              )
+            : null,
+        ),
+        model.sourceIds.length === 0
+          ? h('section', { className: 'ow-card ow-state' }, t('fishNoSources'))
+          : h('section', { className: 'ow-card ow-fish-source', 'aria-label': t('fishSource') },
+              h('div', { className: 'ow-card-head' },
+                h('div', null,
+                  h('h2', { className: 'ow-mono' }, model.sourceId ?? t('fishSource')),
+                  browserSource !== null && browserSource !== undefined && browserSource.displayName
+                    ? h('p', { className: 'ow-muted ow-small' }, browserSource.displayName)
+                    : null,
+                ),
+                h('div', { className: 'ow-source-picker', role: 'group', 'aria-label': t('fishSources') },
+                  model.sourceIds.map((id) => h('button', {
+                    key: id,
+                    type: 'button',
+                    className: 'ow-btn ow-btn-small',
+                    'aria-pressed': id === model.sourceId,
+                    onClick: () => onSelectSource(id),
+                  }, id)),
+                ),
+              ),
+              hostSource === null || hostSource === undefined
+                ? h('p', { className: 'ow-muted ow-small' }, t('fishNoHostSource'))
+                : null,
+              sourceErrors.length > 0
+                ? h('ul', { className: 'ow-fish-errors', role: 'alert' },
+                    sourceErrors.map((error, position) => h('li', { key: `${error?.code ?? ''}:${position}` },
+                      h('code', { className: 'ow-code' }, error?.code ?? '—'),
+                      h('span', null, error?.message ?? ''),
+                    )),
+                  )
+                : null,
+              h('p', {
+                className: model.restoreDisabledReason === null ? 'ow-hint' : 'ow-hint ow-tone-warn',
+                role: 'status',
+              }, model.restoreDisabledReason === null ? t('fishRestoreReady') : t(model.restoreDisabledReason)),
+              h('h3', null, t('fishCheckpoints')),
+              rows.length === 0
+                ? h('p', { className: 'ow-muted' }, t('fishNoCheckpoints'))
+                : h('div', { className: 'ow-table-wrap' },
+                    h('table', { className: 'ow-table ow-fish-checkpoints' },
+                      h('caption', { className: 'ow-sr' }, `${t('fishCheckpoints')} · ${model.sourceId ?? ''}`),
+                      h('thead', null, h('tr', null,
+                        h('th', { scope: 'col' }, t('fishTrigger')),
+                        h('th', { scope: 'col' }, t('fishAuditAt')),
+                        h('th', { scope: 'col' }, t('fishFiles')),
+                        h('th', { scope: 'col' }, t('fishStoredBytes')),
+                        h('th', { scope: 'col' }, t('fishPinned')),
+                        h('th', { scope: 'col' }, t('fishRestoreAction')),
+                      )),
+                      h('tbody', null, rows.map((checkpoint) => {
+                        const disabled = model.restoreDisabledReason !== null || restoreBusy
+                        return h('tr', { key: checkpoint.id },
+                          h('td', null,
+                            h(Badge, { tone: 'idle' }, triggerLabel(t, checkpoint.trigger)),
+                            checkpoint.baseline === true ? h(Badge, { tone: 'brand' }, t('fishBaseline')) : null,
+                          ),
+                          h('td', { className: 'ow-cell-time' }, formatTime(checkpoint.createdAt)),
+                          h('td', null, typeof checkpoint.files === 'number' ? formatNumber(checkpoint.files) : '—'),
+                          h('td', null, formatBytes(checkpoint.storedBytes)),
+                          h('td', null, checkpoint.pinned === true
+                            ? h(Badge, { tone: 'ok' }, t('fishPinned'))
+                            : h('span', { className: 'ow-muted ow-small' }, t('fishNotPinned'))),
+                          h('td', null, h('button', {
+                            type: 'button',
+                            className: 'ow-btn ow-btn-small',
+                            disabled,
+                            title: model.restoreDisabledReason === null ? t('fishRestoreAction') : t(model.restoreDisabledReason),
+                            'aria-label': `${t('fishRestoreAction')} ${checkpoint.id}`,
+                            'aria-disabled': disabled,
+                            onClick: () => onRestore(model.sourceId, checkpoint.id),
+                          }, t('fishRestoreAction'))),
+                        )
+                      })),
+                    ),
+                  ),
+              h('h3', null, t('fishAudit')),
+              audit.length === 0
+                ? h('p', { className: 'ow-muted' }, t('fishNoAudit'))
+                : h('div', { className: 'ow-table-wrap' },
+                    h('table', { className: 'ow-table ow-fish-audit' },
+                      h('caption', { className: 'ow-sr' }, `${t('fishAudit')} · ${model.sourceId ?? ''}`),
+                      h('thead', null, h('tr', null,
+                        h('th', { scope: 'col' }, t('fishAuditAt')),
+                        h('th', { scope: 'col' }, t('fishAuditAction')),
+                        h('th', { scope: 'col' }, t('fishAuditCheckpoint')),
+                        h('th', { scope: 'col' }, t('fishAuditResult')),
+                        h('th', { scope: 'col' }, t('fishAuditError')),
+                      )),
+                      h('tbody', null, audit.map((entry, position) => h('tr', { key: `${entry?.at ?? ''}:${position}` },
+                        h('td', { className: 'ow-cell-time' }, formatTime(entry?.at)),
+                        h('td', null, auditActionLabel(t, entry?.action)),
+                        h('td', null, entry?.checkpointId ? h('code', { className: 'ow-code' }, entry.checkpointId) : '—'),
+                        h('td', null, h(Badge, {
+                          tone: entry?.result === 'ok' ? 'ok' : entry?.result === 'failed' ? 'error' : 'idle',
+                        }, auditResultLabel(t, entry?.result))),
+                        h('td', { className: 'ow-cell-summary' }, entry?.error ? h('span', { className: 'ow-tone-error' }, entry.error) : '—'),
+                      ))),
+                    ),
+                  ),
+            ),
+      )
+    }
+
+    function sourceIdFilter(errors, sourceId) {
+      if (sourceId === null || sourceId === undefined) return errors
+      return errors.filter((error) => error?.sourceId === undefined || error?.sourceId === null || error?.sourceId === sourceId)
+    }
+
+    function RestoreDialog({ dialogRef, restore, onConfirm, onOverrideChange, onClose, onRetryPreflight, onRetryIntent, onRetryResult, t }) {
+      if (restore === null) return null
+      const stage = restore.stage
+      const files = asArray(restore.files)
+      const restorable = asArray(restore.restorable)
+      const staleFiles = asArray(restore.staleFiles)
+      const warnings = asArray(restore.warnings)
+      const executing = stage === 'executing'
+      const currentStep = stage === 'result'
+        ? 2
+        : stage === 'error'
+          ? (restore.preflightError !== null && restore.preflightError !== undefined ? 0 : 1)
+          : stage === 'confirm' || stage === 'executing' ? 1 : 0
+      const steps = [t('fishRestoreStepPreflight'), t('fishRestoreStepConfirm'), t('fishRestoreStepResult')]
+      const sourceName = restore.sourceName ?? restore.sourceId ?? '—'
+      const resultFiles = asArray(restore.result?.files)
+      const skipped = files.filter((file) => file?.action !== 'restore').length
+      const canExecute = restore.intentStatus === 'recorded'
+        && restorable.length > 0
+        && (staleFiles.length === 0 || restore.overrideStale === true)
+      return h('aside', {
+        className: 'ow-dialog',
+        role: 'dialog',
+        'aria-modal': 'true',
+        'aria-labelledby': 'ow-restore-title',
+        tabIndex: -1,
+        ref: dialogRef,
+      },
+        h('div', { className: 'ow-dialog-head' },
+          h('div', null,
+            h('h2', { id: 'ow-restore-title', className: 'ow-drawer-title' }, t('fishRestoreTitle')),
+            h('p', { className: 'ow-drawer-sub' },
+              h('code', { className: 'ow-code' }, restore.checkpointId ?? '—'),
+              ' · ',
+              sourceName,
+            ),
+          ),
+          h('button', {
+            type: 'button',
+            className: 'ow-btn ow-btn-small',
+            disabled: executing,
+            onClick: onClose,
+            'aria-label': t('close'),
+          }, t('close')),
+        ),
+        h('ol', { className: 'ow-steps', 'aria-label': t('fishRestoreTitle') },
+          steps.map((label, index) => h('li', {
+            key: label,
+            className: `ow-step ${index < currentStep ? 'ow-step-done' : ''} ${index === currentStep ? 'ow-step-current' : ''}`,
+            'aria-current': index === currentStep ? 'step' : undefined,
+          },
+            h('span', { className: 'ow-step-index', 'aria-hidden': true }, String(index + 1)),
+            h('span', null, label),
+          )),
+        ),
+        stage === 'preflight'
+          ? h('p', { className: 'ow-state-inline', role: 'status' }, t('fishRestorePreflight'))
+          : null,
+        stage === 'error'
+          ? h('div', { className: 'ow-dialog-body' },
+              h(ErrorNotice, {
+                error: restore.preflightError ?? restore.executeError ?? restore.intentError,
+                title: restore.preflightError !== null && restore.preflightError !== undefined ? t('fishRestorePreflightFailed') : t('fishRestoreError'),
+                onRetry: onRetryPreflight,
+                t,
+              }),
+              h('p', { className: 'ow-muted ow-small' }, t('fishRestoreSafetyGit')),
+              restore.resultRecord === 'recording'
+                ? h('p', { role: 'status', className: 'ow-muted ow-small' }, t('fishRestoreResultRecording'))
+                : restore.resultRecord === 'recorded'
+                  ? h('p', { role: 'status', className: 'ow-tone-ok ow-small' }, t('fishRestoreRecorded'))
+                  : restore.resultRecord === 'error'
+                    ? h('div', { className: 'ow-restore-intent-error' },
+                        h('p', { role: 'alert', className: 'ow-tone-warn' }, t('fishRestoreResultRecordFailed')),
+                        h(ErrorNotice, { error: restore.resultRecordError, title: t('fishRestoreResultRecordFailed'), onRetry: onRetryResult, t }),
+                      )
+                    : null,
+            )
+          : null,
+        stage === 'confirm' || stage === 'executing' || stage === 'result'
+          ? h('div', { className: 'ow-dialog-body' },
+              h('section', { className: 'ow-drawer-section' },
+                h('h3', null, t('fishRestorePlan')),
+                h('p', { className: 'ow-muted ow-small' }, t('fishRestorePlanHint')),
+                h('p', null, t('fishRestorePlanCount', {
+                  count: formatNumber(restorable.length),
+                  skipped: formatNumber(skipped),
+                })),
+                warnings.length > 0
+                  ? h('div', { className: 'ow-restore-warnings', role: 'alert' },
+                      h('strong', null, t('fishRestoreWarnings')),
+                      h('ul', null, warnings.map((warning, index) => h('li', { key: `${index}:${String(warning)}` }, String(warning)))),
+                    )
+                  : h('p', { className: 'ow-muted ow-small' }, t('fishRestoreNoWarnings')),
+                staleFiles.length > 0
+                  ? h('div', { className: 'ow-restore-stale', role: 'alert' },
+                      h('strong', { className: 'ow-tone-warn' }, t('fishRestoreStale')),
+                      h('p', null, t('fishRestoreStaleHint')),
+                      h('ul', null, staleFiles.map((path) => h('li', { key: String(path) }, h('code', { className: 'ow-code' }, String(path))))),
+                      stage === 'confirm'
+                        ? h('label', { className: 'ow-check' },
+                            h('input', {
+                              type: 'checkbox',
+                              checked: restore.overrideStale === true,
+                              onChange: (event) => onOverrideChange(event.target.checked),
+                            }),
+                            t('fishRestoreOverride'),
+                          )
+                        : null,
+                    )
+                  : null,
+                files.length > 0
+                  ? h('div', { className: 'ow-table-wrap' },
+                      h('table', { className: 'ow-table ow-restore-files' },
+                        h('caption', { className: 'ow-sr' }, t('fishRestorePlan')),
+                        h('thead', null, h('tr', null,
+                          h('th', { scope: 'col' }, t('fishRestoreFile')),
+                          h('th', { scope: 'col' }, t('fishRestoreActionCol')),
+                          h('th', { scope: 'col' }, t('fishRestoreStaleCol')),
+                          h('th', { scope: 'col' }, t('fishRestoreBytes')),
+                        )),
+                        h('tbody', null, files.map((file, index) => h('tr', { key: `${file?.path ?? 'file'}:${index}` },
+                          h('td', null, h('code', { className: 'ow-code' }, file?.path ?? '—')),
+                          h('td', null, file?.action === 'restore' ? t('fishRestoreFileRestore') : t('fishRestoreFileSkip')),
+                          h('td', null, file?.stale === true ? h('span', { className: 'ow-tone-warn' }, t('yes')) : t('no')),
+                          h('td', null, formatBytes(file?.bytes)),
+                        ))),
+                      ),
+                    )
+                  : null,
+                restorable.length === 0
+                  ? h('p', { className: 'ow-tone-error' }, t('fishRestoreNothing'))
+                  : null,
+              ),
+              h('section', { className: 'ow-safety' },
+                h('h3', null, t('fishRestoreSafetyTitle')),
+                h('ul', { className: 'ow-safety-list' },
+                  h('li', null, t('fishRestoreSafety')),
+                  h('li', null, t('fishRestoreSafetyCheckpoint')),
+                  h('li', null, t('fishRestoreSafetyGit')),
+                ),
+              ),
+              stage === 'confirm'
+                ? h('section', { className: 'ow-drawer-section' },
+                    h('p', null, t('fishRestoreConfirm', { id: restore.checkpointId ?? '—', source: sourceName })),
+                    restore.intentStatus === 'recording'
+                      ? h('p', { role: 'status', className: 'ow-muted ow-small' }, t('fishRestoreIntentRecording'))
+                      : restore.intentStatus === 'recorded'
+                        ? h('p', { role: 'status', className: 'ow-tone-ok ow-small' }, t('fishRestoreIntentRecorded'))
+                        : restore.intentStatus === 'error'
+                          ? h('div', { className: 'ow-restore-intent-error' },
+                              h('p', { role: 'alert', className: 'ow-tone-error' }, t('fishRestoreIntentFailed')),
+                              h(ErrorNotice, { error: restore.intentError, title: t('fishRestoreIntentFailed'), onRetry: onRetryIntent, t }),
+                            )
+                          : null,
+                    restore.executeError !== null && restore.executeError !== undefined
+                      ? h(ErrorNotice, { error: restore.executeError, title: t('fishRestoreError'), onRetry: onRetryPreflight, t })
+                      : null,
+                    h('div', { className: 'ow-dialog-actions' },
+                      h('span', { className: 'ow-hint' }, t('fishRestoreCloseHint')),
+                      h('button', { type: 'button', className: 'ow-btn ow-btn-small', onClick: onClose }, t('cancel')),
+                      h('button', {
+                        type: 'button',
+                        className: 'ow-btn ow-btn-primary',
+                        disabled: !canExecute,
+                        'aria-disabled': !canExecute,
+                        onClick: onConfirm,
+                      }, t('fishRestoreExecute')),
+                    ),
+                  )
+                : null,
+              stage === 'executing'
+                ? h('p', { className: 'ow-state-inline', role: 'status' }, t('fishRestoreExecuting'))
+                : null,
+              stage === 'result'
+                ? h('section', { className: 'ow-drawer-section ow-restore-result' },
+                    h('div', { className: 'ow-card-head' },
+                      h('h3', null, t('fishRestoreResultTitle')),
+                      h(Badge, { tone: restore.result?.ok === true ? 'ok' : 'error' },
+                        restore.result?.ok === true ? t('fishRestoreOk') : t('fishRestorePartial')),
+                    ),
+                    h('p', null, t('fishRestoreRestored', {
+                      count: formatNumber(typeof restore.result?.restored === 'number' ? restore.result.restored : resultFiles.filter((file) => file?.ok === true).length),
+                    })),
+                    restore.result?.safetyCheckpointId
+                      ? h('p', null,
+                          `${t('fishRestoreSafetyCheckpointId')}: `,
+                          h('code', { className: 'ow-code' }, String(restore.result.safetyCheckpointId)),
+                        )
+                      : null,
+                    h('h3', null, t('fishRestorePerFile')),
+                    resultFiles.length === 0
+                      ? h('p', { className: 'ow-muted' }, t('fishRestoreNothing'))
+                      : h('div', { className: 'ow-table-wrap' },
+                          h('table', { className: 'ow-table ow-restore-results' },
+                            h('caption', { className: 'ow-sr' }, t('fishRestorePerFile')),
+                            h('thead', null, h('tr', null,
+                              h('th', { scope: 'col' }, t('fishRestoreFile')),
+                              h('th', { scope: 'col' }, t('doctorStatusCol')),
+                            )),
+                            h('tbody', null, resultFiles.map((file, index) => h('tr', { key: `${file?.path ?? 'file'}:${index}` },
+                              h('td', null, h('code', { className: 'ow-code' }, file?.path ?? '—')),
+                              h('td', null, h(Badge, { tone: file?.ok === true ? 'ok' : 'error' },
+                                file?.ok === true ? t('fishRestoreFileOk') : t('fishRestoreFileFailed'))),
+                            ))),
+                          ),
+                        ),
+                    restore.resultRecord === 'recording'
+                      ? h('p', { role: 'status', className: 'ow-muted ow-small' }, t('fishRestoreResultRecording'))
+                      : restore.resultRecord === 'recorded'
+                        ? h('p', { role: 'status', className: 'ow-tone-ok ow-small' }, t('fishRestoreRecorded'))
+                        : restore.resultRecord === 'error'
+                          ? h('div', { className: 'ow-restore-intent-error' },
+                              h('p', { role: 'alert', className: 'ow-tone-warn' }, t('fishRestoreResultRecordFailed')),
+                              h(ErrorNotice, { error: restore.resultRecordError, title: t('fishRestoreResultRecordFailed'), onRetry: onRetryResult, t }),
+                            )
+                          : null,
+                    h('div', { className: 'ow-dialog-actions' },
+                      h('span', { className: 'ow-hint' }, t('fishRestoreCloseHint')),
+                      h('button', { type: 'button', className: 'ow-btn ow-btn-primary', onClick: onClose }, t('close')),
+                    ),
+                  )
+                : null,
+            )
+          : null,
+      )
+    }
+
+    function ReplayView({ runId, events, total, hasMore, ready, error, loadingMore, onLoadMore, onRetry, t }) {
+      const list = asArray(events)
+      const counts = { swarm: 0, pressure: 0, watch: 0 }
+      for (const event of list) {
+        if (event?.source === 'swarm' || event?.source === 'pressure' || event?.source === 'watch') {
+          counts[event.source] += 1
+        }
+      }
+      return h('div', { className: 'ow-replay' },
+        h('section', { className: 'ow-card' },
+          h('div', { className: 'ow-card-head' },
+            h('div', null,
+              h('h2', null, t('replayTitle')),
+              h('p', { className: 'ow-muted ow-small ow-subtitle' }, t('replaySubtitle')),
+              h('p', { className: 'ow-muted ow-small' },
+                `${t('runIdLabel')}: `,
+                h('code', { className: 'ow-code' }, runId ?? '—'),
+              ),
+            ),
+            h('span', { className: 'ow-muted ow-small' }, t('replayCount', {
+              loaded: formatNumber(list.length),
+              total: typeof total === 'number' && Number.isFinite(total) ? formatNumber(total) : '—',
+            })),
+          ),
+          h('div', { className: 'ow-legend', role: 'list', 'aria-label': t('replayLegend') },
+            ['swarm', 'pressure', 'watch'].map((source) => h('span', {
+              key: source,
+              className: 'ow-legend-item',
+              role: 'listitem',
+            },
+              sourceChip(t, source),
+              h('span', { className: 'ow-muted ow-small' }, formatNumber(counts[source])),
+            )),
+          ),
+          h('p', { className: 'ow-hint' }, t('replayAutoHint')),
+          h('p', { className: 'ow-hint ow-muted' }, t('replayCursorHint')),
+        ),
+        h(ErrorNotice, { error, title: t('replayError'), onRetry, t }),
+        !ready && (error === null || error === undefined)
+          ? h('section', { className: 'ow-card ow-state', role: 'status' }, t('loading'))
+          : null,
+        ready && list.length === 0 && (error === null || error === undefined)
+          ? h('section', { className: 'ow-card ow-state' }, t('replayEmpty'))
+          : null,
+        list.length > 0
+          ? h('section', { className: 'ow-card ow-replay-events' },
+              h('div', { className: 'ow-table-wrap' },
+                h('table', { className: 'ow-table ow-replay-table' },
+                  h('caption', { className: 'ow-sr' }, t('replayEvents')),
+                  h('thead', null, h('tr', null,
+                    h('th', { scope: 'col' }, t('eventTime')),
+                    h('th', { scope: 'col' }, t('replaySourceCol')),
+                    h('th', { scope: 'col' }, t('eventType')),
+                    h('th', { scope: 'col' }, t('eventActor')),
+                    h('th', { scope: 'col' }, t('eventSummary')),
+                  )),
+                  h('tbody', null, list.map((event, index) => h('tr', { key: eventKey(event) ?? String(index) },
+                    h('td', {
+                      className: 'ow-cell-time',
+                      title: hasTime(event?.at) ? formatTime(event.at) : t('unknownTime'),
+                    }, hasTime(event?.at) ? formatTime(event.at) : h('span', { className: 'ow-muted' }, t('unknownTime'))),
+                    h('td', null, sourceChip(t, event?.source)),
+                    h('td', null, h('code', { className: 'ow-code' }, event?.type ?? '—')),
+                    h('td', null, event?.actor ?? '—'),
+                    h('td', { className: 'ow-cell-summary' }, event?.summary ?? '—'),
+                  ))),
+                ),
+              ),
+              h('div', { className: 'ow-replay-foot' },
+                hasMore
+                  ? h('button', {
+                      type: 'button',
+                      className: 'ow-btn ow-btn-small',
+                      disabled: loadingMore,
+                      onClick: onLoadMore,
+                    }, loadingMore ? t('replayLoadingMore') : t('replayLoadMore'))
+                  : h('span', { className: 'ow-muted ow-small' }, t('replayAllLoaded')),
+              ),
+            )
+          : null,
       )
     }
 
@@ -1913,21 +3046,55 @@ window.__ModuleLoader__.load({
       const [ackError, setAckError] = useState(null)
       const [ackNotice, setAckNotice] = useState(null)
       const [refreshKey, setRefreshKey] = useState(0)
+      const [doctor, setDoctor] = useState(null)
+      const [doctorError, setDoctorError] = useState(null)
+      const [doctorReady, setDoctorReady] = useState(false)
+      const [fishIndex, setFishIndex] = useState(null)
+      const [fishIndexError, setFishIndexError] = useState(null)
+      const [fishReady, setFishReady] = useState(false)
+      const [fishAsOf, setFishAsOf] = useState(null)
+      const [fishSourceId, setFishSourceId] = useState(null)
+      const [fishOverview, setFishOverview] = useState({ state: 'unknown', kind: null, message: '', data: null })
+      const [fishCheckpoints, setFishCheckpoints] = useState({
+        state: 'idle',
+        kind: null,
+        message: '',
+        data: null,
+        sourceId: null,
+      })
+      const [timelineTotal, setTimelineTotal] = useState(null)
+      const [timelineHasMore, setTimelineHasMore] = useState(false)
+      const [timelineReady, setTimelineReady] = useState(false)
+      const [timelineLoadingMore, setTimelineLoadingMore] = useState(false)
+      const [restore, setRestore] = useState(null)
       const selectedCaseId = selectedCase !== null && selectedCase.id !== undefined && selectedCase.id !== null
         ? String(selectedCase.id)
         : null
-      const timelineSinceRef = useRef(0)
+      const timelineCursorRef = useRef('0')
       const timelineEventsRef = useRef([])
+      const timelineHasMoreRef = useRef(false)
+      const timelineManualAbortRef = useRef(null)
+      const timelineManualBusyRef = useRef(false)
       const drawerRef = useRef(null)
       const writeAbortRef = useRef(null)
+      const restoreAbortRef = useRef(null)
+      const restoreTokenRef = useRef(null)
+      const restoreRef = useRef(null)
+      const closeRestoreRef = useRef(null)
+      const restoreDialogRef = useRef(null)
       const aliveRef = useRef(true)
       const locale = currentLocale()
+      const restoreOpen = restore !== null
+      restoreRef.current = restore
 
       useEffect(() => {
         aliveRef.current = true
         return () => {
           aliveRef.current = false
           if (writeAbortRef.current !== null) writeAbortRef.current.abort()
+          if (timelineManualAbortRef.current !== null) timelineManualAbortRef.current.abort()
+          if (restoreAbortRef.current !== null) restoreAbortRef.current.abort()
+          restoreTokenRef.current = null
         }
       }, [])
 
@@ -1937,8 +3104,24 @@ window.__ModuleLoader__.load({
         setRunError(null)
         setTimeline([])
         setTimelineError(null)
-        timelineSinceRef.current = 0
+        setTimelineTotal(null)
+        setTimelineHasMore(false)
+        setTimelineReady(false)
+        setTimelineLoadingMore(false)
+        timelineCursorRef.current = '0'
         timelineEventsRef.current = []
+        timelineHasMoreRef.current = false
+        if (timelineManualAbortRef.current !== null) {
+          timelineManualAbortRef.current.abort()
+          timelineManualAbortRef.current = null
+        }
+        timelineManualBusyRef.current = false
+        if (restoreAbortRef.current !== null) {
+          restoreAbortRef.current.abort()
+          restoreAbortRef.current = null
+        }
+        restoreTokenRef.current = null
+        setRestore(null)
         setCases([])
         setCasesAsOf(null)
         setCasesError(null)
@@ -1974,6 +3157,71 @@ window.__ModuleLoader__.load({
           setSelectedRunId(String(preferred.runId))
         }
       }, [runs, selectedRunId])
+
+      // Keep the fish source selection valid across host/browser refreshes.
+      useEffect(() => {
+        const ids = []
+        for (const source of asArray(fishIndex?.sources)) {
+          if (typeof source?.sourceId === 'string' && !ids.includes(source.sourceId)) ids.push(source.sourceId)
+        }
+        for (const source of asArray(fishOverview.data?.sources)) {
+          if (typeof source?.id === 'string' && !ids.includes(source.id)) ids.push(source.id)
+        }
+        if (ids.length === 0) {
+          if (fishSourceId !== null) setFishSourceId(null)
+          return
+        }
+        if (fishSourceId === null || !ids.includes(fishSourceId)) setFishSourceId(ids[0])
+      }, [fishIndex, fishOverview.data, fishSourceId])
+
+      // Restore dialog focus management: focus the dialog, trap Tab, close on
+      // Escape (except while the restore request is in flight), and restore the
+      // button that opened it.
+      useEffect(() => {
+        if (!restoreOpen) return undefined
+        const previous = typeof document !== 'undefined' ? document.activeElement : null
+        const node = restoreDialogRef.current
+        if (node !== null && typeof node.focus === 'function') node.focus()
+        const onKeyDown = (event) => {
+          if (event.key === 'Escape') {
+            const current = restoreRef.current
+            const busy = current !== null && current.stage === 'executing'
+            event.preventDefault()
+            event.stopPropagation()
+            if (!busy && typeof closeRestoreRef.current === 'function') closeRestoreRef.current()
+            return
+          }
+          if (event.key !== 'Tab' || node === null) return
+          const focusable = Array.from(node.querySelectorAll(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          )).filter((element) => element.offsetParent !== null || element === document.activeElement)
+          if (focusable.length === 0) {
+            event.preventDefault()
+            if (typeof node.focus === 'function') node.focus()
+            return
+          }
+          const first = focusable[0]
+          const last = focusable[focusable.length - 1]
+          if (event.shiftKey && (document.activeElement === first || document.activeElement === node)) {
+            event.preventDefault()
+            last.focus()
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault()
+            first.focus()
+          }
+        }
+        document.addEventListener('keydown', onKeyDown, true)
+        return () => {
+          document.removeEventListener('keydown', onKeyDown, true)
+          if (previous !== null && previous !== undefined && typeof previous.focus === 'function' && previous.isConnected !== false) {
+            try {
+              previous.focus()
+            } catch {
+              // The restore button may have been removed by a refresh.
+            }
+          }
+        }
+      }, [restoreOpen])
 
       // Drawer focus management: focus the panel, trap Tab, close on Escape,
       // and restore the row that opened it.
@@ -2062,37 +3310,136 @@ window.__ModuleLoader__.load({
       }, 3000, selectedRunId !== null ? `${selectedRunId}:${refreshKey}` : null)
 
       usePolling(async (signal) => {
-        let since = timelineSinceRef.current
+        if (selectedRunId === null || timelineManualBusyRef.current) return
+        // Replay leaves a manual backlog to the "load more" control and only
+        // live-tails once caught up. A failed page is retried on the next tick.
+        if (tab === 'replay' && timelineHasMoreRef.current && timelineError === null) return
+        const maxPages = tab === 'room' ? TIMELINE_MAX_PAGES : 1
+        let cursor = timelineCursorRef.current
         let collected = timelineEventsRef.current
-        let pages = 0
+        let hasMore = timelineHasMoreRef.current
+        let total = null
         try {
-          while (pages < TIMELINE_MAX_PAGES && !signal.aborted) {
+          for (let page = 0; page < maxPages && !signal.aborted; page += 1) {
             const payload = await apiGet(
-              `/runs/${encodeURIComponent(selectedRunId)}/timeline?since=${encodeURIComponent(String(since))}&limit=${TIMELINE_PAGE_LIMIT}`,
+              `/runs/${encodeURIComponent(selectedRunId)}/timeline?since=${encodeURIComponent(cursor)}&limit=${TIMELINE_PAGE_LIMIT}`,
               signal,
             )
             if (signal.aborted) return
             const data = payload.data ?? {}
             const batch = asArray(data.events)
             collected = mergeEvents(collected, batch)
-            let next = Number(data.nextSince)
-            if (!Number.isFinite(next)) next = since + batch.length
-            // The server cursor is an index into the merged list. Only move
-            // forward; an empty page or a shrinking list must not loop.
-            if (!(next > since)) break
-            since = next
-            pages += 1
-            if (batch.length < TIMELINE_PAGE_LIMIT) break
+            if (typeof data.total === 'number' && Number.isFinite(data.total)) total = data.total
+            // `nextSince` is opaque: echo the server string verbatim. Never
+            // parse it, renumber it, or re-sort by per-source seq.
+            const next = typeof data.nextSince === 'string' ? data.nextSince : String(data.nextSince ?? cursor)
+            const advanced = next !== cursor
+            if (advanced) cursor = next
+            hasMore = batch.length >= TIMELINE_PAGE_LIMIT && advanced
+            if (!advanced || batch.length < TIMELINE_PAGE_LIMIT) break
           }
           if (signal.aborted) return
-          timelineSinceRef.current = since
-          timelineEventsRef.current = collected.slice(-TIMELINE_BUFFER)
-          setTimeline(collected.slice(-TIMELINE_BUFFER))
+          if (collected.length > TIMELINE_BUFFER) collected = collected.slice(-TIMELINE_BUFFER)
+          timelineCursorRef.current = cursor
+          timelineEventsRef.current = collected
+          timelineHasMoreRef.current = hasMore
+          setTimeline(collected)
+          setTimelineTotal(total)
+          setTimelineHasMore(hasMore)
           setTimelineError(null)
+          setTimelineReady(true)
         } catch (error) {
-          if (!signal.aborted && !isAbort(error)) setTimelineError(error)
+          if (!signal.aborted && !isAbort(error)) {
+            setTimelineError(error)
+            setTimelineReady(true)
+          }
         }
-      }, 5000, tab === 'room' && selectedRunId !== null ? `${selectedRunId}:${refreshKey}` : null)
+      }, TIMELINE_POLL_MS, selectedRunId !== null && (tab === 'room' || tab === 'replay')
+        ? `${selectedRunId}:${tab}:${refreshKey}`
+        : null)
+
+      // Doctor is polled by its own effect; a slow or failing doctor route must
+      // never delay the run overview or the timeline.
+      usePolling(async (signal) => {
+        try {
+          const payload = await apiGetRaw('/doctor', signal)
+          if (signal.aborted) return
+          const data = payload.data !== null && payload.data !== undefined
+            && typeof payload.data === 'object' && !Array.isArray(payload.data)
+            ? payload.data
+            : payload
+          const checks = asArray(data?.checks).filter((check) => check !== null && typeof check === 'object')
+          setDoctor({
+            ok: payload.ok === true,
+            checks,
+            asOf: data?.asOf ?? payload.asOf ?? null,
+          })
+          setDoctorError(null)
+          setDoctorReady(true)
+        } catch (error) {
+          if (!signal.aborted && !isAbort(error)) {
+            setDoctorError(error)
+            setDoctorReady(true)
+          }
+        }
+      }, DOCTOR_POLL_MS, tab === 'room' ? refreshKey : null)
+
+      // Host fish index and the fishkeeper browser overview are different data
+      // and are fetched once per tick. A browser 401/404/network failure only
+      // downgrades the view; the host index stays available.
+      usePolling(async (signal) => {
+        try {
+          const payload = await apiGet('/fish', signal)
+          if (signal.aborted) return
+          setFishIndex(payload.data ?? null)
+          setFishAsOf(payload.asOf ?? payload.data?.asOf ?? null)
+          setFishIndexError(null)
+          setFishReady(true)
+        } catch (error) {
+          if (!signal.aborted && !isAbort(error)) {
+            setFishIndexError(error)
+            setFishReady(true)
+          }
+        }
+        try {
+          const overview = await fishkeeperRequest('/overview', { signal })
+          if (signal.aborted) return
+          setFishOverview({ state: 'available', kind: null, message: '', data: overview })
+        } catch (error) {
+          if (signal.aborted || isAbort(error)) return
+          setFishOverview({
+            state: 'unavailable',
+            kind: browserFailureKind(error),
+            message: typeof error?.message === 'string' ? error.message : '',
+            data: null,
+          })
+        }
+      }, FISH_POLL_MS, tab === 'fish' ? refreshKey : null)
+
+      usePolling(async (signal) => {
+        try {
+          const payload = await fishkeeperRequest(`/checkpoints?source=${encodeURIComponent(fishSourceId)}`, { signal })
+          if (signal.aborted) return
+          setFishCheckpoints({
+            state: 'available',
+            kind: null,
+            message: '',
+            data: payload,
+            sourceId: fishSourceId,
+          })
+        } catch (error) {
+          if (signal.aborted || isAbort(error)) return
+          setFishCheckpoints({
+            state: 'error',
+            kind: browserFailureKind(error),
+            message: typeof error?.message === 'string' ? error.message : '',
+            data: null,
+            sourceId: fishSourceId,
+          })
+        }
+      }, FISH_POLL_MS, tab === 'fish' && fishSourceId !== null && fishOverview.state === 'available'
+        ? `${fishSourceId}:${refreshKey}`
+        : null)
 
       usePolling(async (signal) => {
         try {
@@ -2186,12 +3533,15 @@ window.__ModuleLoader__.load({
       }
 
       const onTabKeyDown = (event) => {
-        if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft' && event.key !== 'Home' && event.key !== 'End') return
+        const key = event.key
+        if (key !== 'ArrowRight' && key !== 'ArrowLeft' && key !== 'ArrowUp' && key !== 'ArrowDown' && key !== 'Home' && key !== 'End') return
         event.preventDefault()
+        const index = TAB_ORDER.indexOf(tab)
         let next = tab
-        if (event.key === 'Home') next = 'room'
-        else if (event.key === 'End') next = 'cases'
-        else next = tab === 'room' ? 'cases' : 'room'
+        if (key === 'Home') next = TAB_ORDER[0]
+        else if (key === 'End') next = TAB_ORDER[TAB_ORDER.length - 1]
+        else if (key === 'ArrowRight' || key === 'ArrowDown') next = TAB_ORDER[(index + 1) % TAB_ORDER.length]
+        else next = TAB_ORDER[(index - 1 + TAB_ORDER.length) % TAB_ORDER.length]
         setTab(next)
         if (typeof document !== 'undefined') {
           const node = document.getElementById(`ow-tab-${next}`)
@@ -2225,6 +3575,14 @@ window.__ModuleLoader__.load({
         return null
       }
 
+      const forgetToken = () => {
+        removeWriteToken()
+        setToken(null)
+        setTokenDraft('')
+        setTokenMemoryOnly(false)
+        setTokenNotice(null)
+      }
+
       const runWrite = async (key, path, body) => {
         if (token === null) return { ok: false, error: { code: 'TOKEN_REQUIRED', message: '' } }
         if (writeAbortRef.current !== null) writeAbortRef.current.abort()
@@ -2237,13 +3595,7 @@ window.__ModuleLoader__.load({
           return { ok: true, aborted: false, error: null }
         } catch (error) {
           if (controller.signal.aborted || isAbort(error)) return { ok: false, aborted: true, error: null }
-          if (error?.status === 401) {
-            removeWriteToken()
-            setToken(null)
-            setTokenDraft('')
-            setTokenMemoryOnly(false)
-            setTokenNotice(null)
-          }
+          if (error?.status === 401) forgetToken()
           return { ok: false, aborted: false, error }
         } finally {
           if (writeAbortRef.current === controller) writeAbortRef.current = null
@@ -2313,6 +3665,347 @@ window.__ModuleLoader__.load({
         }
       }
 
+      const closeRestore = () => {
+        const current = restoreRef.current
+        if (current !== null && current.stage === 'executing') return
+        // Do not abort a result-recording request: the restore already ran, and
+        // the overwatch evidence write must be allowed to finish. Its state
+        // updates are guarded against a null dialog.
+        const keepRecording = current !== null
+          && (current.stage === 'result' || current.stage === 'error')
+          && current.resultRecord === 'recording'
+        if (!keepRecording && restoreAbortRef.current !== null) {
+          restoreAbortRef.current.abort()
+          restoreAbortRef.current = null
+        }
+        // The fishkeeper confirm token is memory-only and dies with the dialog.
+        restoreTokenRef.current = null
+        setRestore(null)
+      }
+      closeRestoreRef.current = closeRestore
+
+      const postRestoreRecord = async (phase, context, controller, extra) => {
+        if (selectedRunId === null) {
+          const error = new Error('')
+          error.code = 'RUN_NOT_ARMED'
+          throw error
+        }
+        if (token === null) {
+          const error = new Error('')
+          error.code = 'TOKEN_REQUIRED'
+          throw error
+        }
+        const body = {
+          sourceId: context.sourceId,
+          checkpointId: context.checkpointId,
+          phase,
+          files: asArray(context.restorable).map((file) => file?.path).filter((path) => typeof path === 'string'),
+          warnings: asArray(context.warnings).filter((warning) => typeof warning === 'string'),
+        }
+        if (phase === 'result') {
+          const result = extra?.result
+          body.result = {
+            ok: result?.ok === true,
+            files: asArray(result?.files).map((file) => ({
+              path: typeof file?.path === 'string' ? file.path : '',
+              ok: file?.ok === true,
+              sha256: typeof file?.sha256 === 'string' ? file.sha256 : null,
+            })),
+            error: typeof result?.error === 'string' && result.error !== '' ? result.error : null,
+          }
+        }
+        try {
+          await apiPost(`/runs/${encodeURIComponent(selectedRunId)}/restores`, body, token, controller.signal)
+        } catch (error) {
+          if (error?.status === 401) forgetToken()
+          throw error
+        }
+      }
+
+      const beginRestore = async (sourceId, checkpointId) => {
+        if (typeof sourceId !== 'string' || typeof checkpointId !== 'string') return
+        if (restoreAbortRef.current !== null) restoreAbortRef.current.abort()
+        const controller = new AbortController()
+        restoreAbortRef.current = controller
+        restoreTokenRef.current = null
+        setRestore({
+          stage: 'preflight',
+          sourceId,
+          checkpointId,
+          sourceName: undefined,
+          files: [],
+          restorable: [],
+          staleFiles: [],
+          warnings: [],
+          overrideStale: false,
+          intentStatus: 'idle',
+          intentError: null,
+          executeError: null,
+          preflightError: null,
+          result: null,
+          resultRecord: 'idle',
+          resultRecordError: null,
+        })
+        try {
+          const plan = await fishkeeperRequest('/checkpoint/restore', {
+            method: 'POST',
+            body: { id: checkpointId },
+            signal: controller.signal,
+          })
+          if (controller.signal.aborted) return
+          const files = asArray(plan.files)
+          const restorable = files.filter((file) => file?.action === 'restore')
+          const staleFiles = restorable
+            .filter((file) => file?.stale === true)
+            .map((file) => file?.path)
+            .filter((path) => typeof path === 'string')
+          const warnings = asArray(plan.warnings).filter((warning) => typeof warning === 'string')
+          const resolvedSourceId = typeof plan.sourceId === 'string' ? plan.sourceId : sourceId
+          const context = {
+            stage: 'confirm',
+            sourceId: resolvedSourceId,
+            checkpointId: typeof plan.checkpointId === 'string' ? plan.checkpointId : checkpointId,
+            sourceName: typeof plan.sourceName === 'string' ? plan.sourceName : undefined,
+            files,
+            restorable,
+            staleFiles,
+            warnings,
+            overrideStale: false,
+            intentStatus: restorable.length === 0 ? 'idle' : 'recording',
+            intentError: null,
+            executeError: null,
+            preflightError: null,
+            result: null,
+            resultRecord: 'idle',
+            resultRecordError: null,
+          }
+          const planToken = typeof plan.confirmToken === 'string' ? plan.confirmToken : ''
+          // Memory only: never sessionStorage/localStorage, URL, logs, or render.
+          restoreTokenRef.current = planToken
+          if (restorable.length > 0 && planToken === '') {
+            // Every execute path must send the fishkeeper-issued token; there is
+            // nothing for overwatch to generate or invent.
+            setRestore({
+              ...context,
+              stage: 'error',
+              preflightError: { code: 'fishkeeper/confirm-invalid', message: '' },
+            })
+            return
+          }
+          setRestore(context)
+          if (restorable.length === 0) return
+          try {
+            await postRestoreRecord('intent', context, controller)
+            if (!controller.signal.aborted) {
+              setRestore((current) => current !== null && current.stage === 'confirm'
+                ? { ...current, intentStatus: 'recorded' }
+                : current)
+            }
+          } catch (error) {
+            if (!controller.signal.aborted && !isAbort(error)) {
+              setRestore((current) => current !== null && current.stage === 'confirm'
+                ? { ...current, intentStatus: 'error', intentError: error }
+                : current)
+            }
+          }
+        } catch (error) {
+          if (controller.signal.aborted || isAbort(error)) return
+          setRestore((current) => current === null ? current : { ...current, stage: 'error', preflightError: error })
+        } finally {
+          if (restoreAbortRef.current === controller) restoreAbortRef.current = null
+        }
+      }
+
+      const retryRestorePreflight = () => {
+        const current = restoreRef.current
+        if (current === null) return
+        void beginRestore(current.sourceId, current.checkpointId)
+      }
+
+      const retryRestoreIntent = async () => {
+        const current = restoreRef.current
+        if (current === null) return
+        if (restoreAbortRef.current !== null) restoreAbortRef.current.abort()
+        const controller = new AbortController()
+        restoreAbortRef.current = controller
+        setRestore((value) => value === null ? value : { ...value, intentStatus: 'recording', intentError: null })
+        try {
+          await postRestoreRecord('intent', current, controller)
+          if (!controller.signal.aborted) {
+            setRestore((value) => value === null ? value : { ...value, intentStatus: 'recorded' })
+          }
+        } catch (error) {
+          if (!controller.signal.aborted && !isAbort(error)) {
+            setRestore((value) => value === null ? value : { ...value, intentStatus: 'error', intentError: error })
+          }
+        } finally {
+          if (restoreAbortRef.current === controller) restoreAbortRef.current = null
+        }
+      }
+
+      const confirmRestore = async () => {
+        const current = restoreRef.current
+        if (current === null || current.stage !== 'confirm' || current.intentStatus !== 'recorded') return
+        if (current.restorable.length === 0) return
+        if (current.staleFiles.length > 0 && current.overrideStale !== true) return
+        if (token === null || selectedRunId === null) {
+          // Never perform a restore whose evidence could not be recorded.
+          setRestore((value) => value === null ? value : {
+            ...value,
+            stage: 'error',
+            preflightError: { code: 'TOKEN_REQUIRED', message: '' },
+          })
+          return
+        }
+        if (restoreTokenRef.current === null || restoreTokenRef.current === '') {
+          setRestore((value) => value === null ? value : {
+            ...value,
+            stage: 'error',
+            preflightError: { code: 'fishkeeper/confirm-invalid', message: '' },
+          })
+          return
+        }
+        if (restoreAbortRef.current !== null) restoreAbortRef.current.abort()
+        const controller = new AbortController()
+        restoreAbortRef.current = controller
+        setRestore({ ...current, stage: 'executing', executeError: null })
+        try {
+          const result = await fishkeeperRequest('/checkpoint/restore', {
+            method: 'POST',
+            body: {
+              id: current.checkpointId,
+              dryRun: false,
+              confirmToken: restoreTokenRef.current,
+              overrideStale: current.overrideStale === true,
+              files: current.restorable.map((file) => file.path),
+            },
+            signal: controller.signal,
+          })
+          if (controller.signal.aborted) return
+          // The one-time token has been consumed; drop it before anything else.
+          restoreTokenRef.current = null
+          setRestore({
+            ...current,
+            stage: 'result',
+            executeError: null,
+            result,
+            resultRecord: 'recording',
+            resultRecordError: null,
+          })
+          try {
+            await postRestoreRecord('result', current, controller, { result })
+            if (!controller.signal.aborted) {
+              setRestore((value) => value !== null && value.stage === 'result'
+                ? { ...value, resultRecord: 'recorded' }
+                : value)
+            }
+          } catch (error) {
+            if (!controller.signal.aborted && !isAbort(error)) {
+              setRestore((value) => value !== null && value.stage === 'result'
+                ? { ...value, resultRecord: 'error', resultRecordError: error }
+                : value)
+            }
+          }
+        } catch (error) {
+          if (controller.signal.aborted || isAbort(error)) return
+          // A failed execute consumes the token, so force a fresh preflight.
+          // Still record a result: the overwatch evidence must show the failure.
+          restoreTokenRef.current = null
+          const failedResult = {
+            ok: false,
+            files: [],
+            error: typeof error?.message === 'string' && error.message !== ''
+              ? error.message
+              : (typeof error?.code === 'string' ? error.code : 'restore failed'),
+          }
+          setRestore({
+            ...current,
+            stage: 'error',
+            executeError: error,
+            result: failedResult,
+            resultRecord: 'recording',
+            resultRecordError: null,
+          })
+          try {
+            await postRestoreRecord('result', current, controller, { result: failedResult })
+            if (!controller.signal.aborted) {
+              setRestore((value) => value !== null && value.stage === 'error'
+                ? { ...value, resultRecord: 'recorded' }
+                : value)
+            }
+          } catch (recordError) {
+            if (!controller.signal.aborted && !isAbort(recordError)) {
+              setRestore((value) => value !== null && value.stage === 'error'
+                ? { ...value, resultRecord: 'error', resultRecordError: recordError }
+                : value)
+            }
+          }
+        } finally {
+          if (restoreAbortRef.current === controller) restoreAbortRef.current = null
+        }
+      }
+
+      const retryRestoreResult = async () => {
+        const current = restoreRef.current
+        if (current === null || current.result === null) return
+        if (restoreAbortRef.current !== null) restoreAbortRef.current.abort()
+        const controller = new AbortController()
+        restoreAbortRef.current = controller
+        setRestore((value) => value === null ? value : { ...value, resultRecord: 'recording', resultRecordError: null })
+        try {
+          await postRestoreRecord('result', current, controller, { result: current.result })
+          if (!controller.signal.aborted) {
+            setRestore((value) => value === null ? value : { ...value, resultRecord: 'recorded' })
+          }
+        } catch (error) {
+          if (!controller.signal.aborted && !isAbort(error)) {
+            setRestore((value) => value === null ? value : { ...value, resultRecord: 'error', resultRecordError: error })
+          }
+        } finally {
+          if (restoreAbortRef.current === controller) restoreAbortRef.current = null
+        }
+      }
+
+      const changeRestoreOverride = (value) => {
+        setRestore((current) => current === null ? current : { ...current, overrideStale: value === true })
+      }
+
+      const loadMoreTimeline = async () => {
+        if (selectedRunId === null || timelineManualBusyRef.current) return
+        const controller = new AbortController()
+        timelineManualAbortRef.current = controller
+        timelineManualBusyRef.current = true
+        setTimelineLoadingMore(true)
+        try {
+          const payload = await apiGet(
+            `/runs/${encodeURIComponent(selectedRunId)}/timeline?since=${encodeURIComponent(timelineCursorRef.current)}&limit=${TIMELINE_PAGE_LIMIT}`,
+            controller.signal,
+          )
+          if (controller.signal.aborted) return
+          const data = payload.data ?? {}
+          const batch = asArray(data.events)
+          const collected = mergeEvents(timelineEventsRef.current, batch)
+          const bounded = collected.length > TIMELINE_BUFFER ? collected.slice(-TIMELINE_BUFFER) : collected
+          const next = typeof data.nextSince === 'string' ? data.nextSince : String(data.nextSince ?? timelineCursorRef.current)
+          const advanced = next !== timelineCursorRef.current
+          timelineCursorRef.current = advanced ? next : timelineCursorRef.current
+          timelineEventsRef.current = bounded
+          const hasMore = batch.length >= TIMELINE_PAGE_LIMIT && advanced
+          timelineHasMoreRef.current = hasMore
+          setTimeline(bounded)
+          if (typeof data.total === 'number' && Number.isFinite(data.total)) setTimelineTotal(data.total)
+          setTimelineHasMore(hasMore)
+          setTimelineError(null)
+          setTimelineReady(true)
+        } catch (error) {
+          if (!controller.signal.aborted && !isAbort(error)) setTimelineError(error)
+        } finally {
+          if (timelineManualAbortRef.current === controller) timelineManualAbortRef.current = null
+          timelineManualBusyRef.current = false
+          if (aliveRef.current) setTimelineLoadingMore(false)
+        }
+      }
+
       const runArmed = selectedDetail !== null ? selectedDetail.armed === true : selectedRun?.armed === true
       const supervisedRun = selectedDetail?.watch?.enabled === true
         || selectedDetail?.mode === 'supervised'
@@ -2323,8 +4016,65 @@ window.__ModuleLoader__.load({
           ? formatTime(new Date(lastRunsAt).toISOString())
           : '—'
 
+      // Fish sources are the union of the host index and the fishkeeper
+      // browser overview, so a browser-only source never disappears.
+      const fishSources = []
+      for (const source of asArray(fishIndex?.sources)) {
+        if (typeof source?.sourceId !== 'string') continue
+        if (fishSources.some((entry) => entry.sourceId === source.sourceId)) continue
+        fishSources.push({ sourceId: source.sourceId, host: source, browser: undefined })
+      }
+      for (const source of asArray(fishOverview.data?.sources)) {
+        if (typeof source?.id !== 'string') continue
+        const existing = fishSources.find((entry) => entry.sourceId === source.id)
+        if (existing !== undefined) existing.browser = source
+        else fishSources.push({ sourceId: source.id, host: undefined, browser: source })
+      }
+      const fishSourceIds = fishSources.map((entry) => entry.sourceId)
+      const selectedFishSource = fishSources.find((entry) => entry.sourceId === fishSourceId) ?? null
+      const hostFishSource = selectedFishSource?.host ?? null
+      const browserFishSource = selectedFishSource?.browser ?? null
+      const selectedFishCheckpoints = fishCheckpoints.sourceId === fishSourceId
+        ? fishCheckpoints
+        : { state: 'idle', kind: null, message: '', data: null, sourceId: fishSourceId }
+      const restoreCheckpointData = selectedFishCheckpoints.state === 'available' ? selectedFishCheckpoints.data : null
+      let restoreDisabledReason = null
+      if (fishSourceId === null) restoreDisabledReason = 'fishRestoreNeedBrowser'
+      else if (fishOverview.state !== 'available' || restoreCheckpointData === null) restoreDisabledReason = 'fishRestoreNeedBrowser'
+      else if (restoreCheckpointData.readOnly === true || browserFishSource?.readOnly === true) restoreDisabledReason = 'fishRestoreNeedReadOnly'
+      else if (restoreCheckpointData.restoreSupported !== true) restoreDisabledReason = 'fishRestoreUnsupported'
+      else if (selectedRunId === null) restoreDisabledReason = 'fishRestoreNeedRun'
+      else if (token === null) restoreDisabledReason = 'fishRestoreNeedToken'
+      const fishModel = {
+        index: fishIndex,
+        hostError: fishIndexError,
+        ready: fishReady,
+        asOf: fishAsOf ?? fishIndex?.asOf ?? null,
+        sourceIds: fishSourceIds,
+        sourceId: fishSourceId,
+        hostSource: hostFishSource,
+        browserSource: browserFishSource,
+        checkpoints: mergeCheckpoints(hostFishSource?.checkpoints, restoreCheckpointData?.items),
+        overview: fishOverview,
+        checkpointsState: selectedFishCheckpoints.state === 'idle' && fishOverview.state === 'available'
+          ? { state: 'loading', kind: null, message: '' }
+          : selectedFishCheckpoints,
+        restoreDisabledReason,
+      }
+
       let body
-      if (!runsReady && runsError === null) {
+      if (tab === 'fish') {
+        // The fish index is independent of supervised runs: view and audit work
+        // even before any run exists. Restore itself still needs a run + token.
+        body = h(FishView, {
+          model: fishModel,
+          restoreBusy: restore !== null,
+          onSelectSource: (sourceId) => setFishSourceId(sourceId),
+          onRestore: (sourceId, checkpointId) => { void beginRestore(sourceId, checkpointId) },
+          onRetry: refreshAll,
+          t,
+        })
+      } else if (!runsReady && runsError === null) {
         body = h('div', { className: 'ow-card ow-state', role: 'status' }, t('loading'))
       } else if (runs.length === 0) {
         body = runsError !== null
@@ -2353,6 +4103,9 @@ window.__ModuleLoader__.load({
               detail: selectedDetail,
               error: healthError,
               selectedRunId,
+              doctor,
+              doctorError,
+              doctorReady,
               onRetry: refreshAll,
               t,
             }),
@@ -2364,7 +4117,7 @@ window.__ModuleLoader__.load({
             }),
           ),
         )
-      } else {
+      } else if (tab === 'cases') {
         body = selectedRun === null
           ? h('div', { className: 'ow-card ow-state' }, t('noRunSelected'))
           : h(CasesPanel, {
@@ -2375,6 +4128,21 @@ window.__ModuleLoader__.load({
               asOf: casesAsOf,
               onFilter: changeFilter,
               onOpenCase: openCase,
+              onRetry: refreshAll,
+              t,
+            })
+      } else {
+        body = selectedRun === null
+          ? h('div', { className: 'ow-card ow-state' }, t('noRunSelected'))
+          : h(ReplayView, {
+              runId: selectedRunId,
+              events: timeline,
+              total: timelineTotal,
+              hasMore: timelineHasMore,
+              ready: timelineReady,
+              error: timelineError,
+              loadingMore: timelineLoadingMore,
+              onLoadMore: () => { void loadMoreTimeline() },
               onRetry: refreshAll,
               t,
             })
@@ -2440,36 +4208,27 @@ window.__ModuleLoader__.load({
             })
           : null,
         h('div', { className: 'ow-tabs', role: 'tablist', 'aria-label': t('pageTitle'), onKeyDown: onTabKeyDown },
-          h('button', {
+          TAB_ORDER.map((key) => h('button', {
+            key,
             type: 'button',
-            id: 'ow-tab-room',
+            id: `ow-tab-${key}`,
             role: 'tab',
-            'aria-selected': tab === 'room',
-            'aria-controls': tab === 'room' ? 'ow-panel-room' : undefined,
-            tabIndex: tab === 'room' ? 0 : -1,
+            'aria-selected': tab === key,
+            'aria-controls': tab === key ? `ow-panel-${key}` : undefined,
+            tabIndex: tab === key ? 0 : -1,
             className: 'ow-tab',
-            onClick: () => setTab('room'),
-          }, t('tabRoom')),
-          h('button', {
-            type: 'button',
-            id: 'ow-tab-cases',
-            role: 'tab',
-            'aria-selected': tab === 'cases',
-            'aria-controls': tab === 'cases' ? 'ow-panel-cases' : undefined,
-            tabIndex: tab === 'cases' ? 0 : -1,
-            className: 'ow-tab',
-            onClick: () => setTab('cases'),
+            onClick: () => setTab(key),
           },
-            t('tabCases'),
-            selectedDetail !== null && typeof selectedDetail.cases?.open === 'number'
+            t(TAB_LABEL_KEYS[key]),
+            key === 'cases' && selectedDetail !== null && typeof selectedDetail.cases?.open === 'number'
               ? h('span', { className: 'ow-tab-count' }, formatNumber(selectedDetail.cases.open))
               : null,
-          ),
+          )),
         ),
         h('div', {
-          id: tab === 'room' ? 'ow-panel-room' : 'ow-panel-cases',
+          id: `ow-panel-${tab}`,
           role: 'tabpanel',
-          'aria-labelledby': tab === 'room' ? 'ow-tab-room' : 'ow-tab-cases',
+          'aria-labelledby': `ow-tab-${tab}`,
           className: 'ow-tab-panel',
         }, body),
         selectedCase !== null
@@ -2492,6 +4251,21 @@ window.__ModuleLoader__.load({
                 onAckCancel: () => setAckConfirm(false),
                 onAck: confirmAck,
                 onClose: () => setSelectedCase(null),
+                t,
+              }),
+            )
+          : null,
+        restore !== null
+          ? h('div', { className: 'ow-backdrop ow-backdrop-center' },
+              h(RestoreDialog, {
+                dialogRef: restoreDialogRef,
+                restore,
+                onConfirm: () => { void confirmRestore() },
+                onOverrideChange: changeRestoreOverride,
+                onClose: closeRestore,
+                onRetryPreflight: retryRestorePreflight,
+                onRetryIntent: () => { void retryRestoreIntent() },
+                onRetryResult: () => { void retryRestoreResult() },
                 t,
               }),
             )
@@ -2695,6 +4469,52 @@ window.__ModuleLoader__.load({
 .ow-action-head { display: flex; gap: 6px; flex-wrap: wrap; align-items: baseline; }
 .ow-action-time { color: var(--dsw-alias-label-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
 .ow-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.ow-fish { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ow-fish-errors { margin: 8px 0 0; padding: 8px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 35%, transparent); background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 8%, transparent); font-size: 12px; line-height: 1.5; }
+.ow-fish-errors h3 { margin: 0 0 4px; }
+.ow-fish-errors ul { margin: 4px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+.ow-fish-errors li { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; }
+.ow-fish-degraded { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; border: 1px dashed color-mix(in srgb, var(--dsw-alias-state-warn-primary) 50%, transparent); background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 7%, transparent); font-size: 12px; line-height: 1.5; }
+.ow-fish-degraded p { margin: 0; }
+.ow-source-picker { display: flex; gap: 6px; flex-wrap: wrap; }
+.ow-source-picker .ow-btn[aria-pressed="true"] { border-color: var(--dsw-alias-brand-primary); color: var(--dsw-alias-brand-primary); background: color-mix(in srgb, var(--dsw-alias-brand-primary) 8%, transparent); }
+.ow-source-chip { display: inline-flex; align-items: center; gap: 4px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--dsw-alias-border-l1); font-size: 10px; line-height: 16px; white-space: nowrap; background: var(--dsw-alias-bg-layer-1); }
+.ow-source-dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+.ow-source-swarm { color: var(--dsw-alias-brand-primary); border-color: color-mix(in srgb, var(--dsw-alias-brand-primary) 40%, transparent); }
+.ow-source-pressure { color: var(--dsw-alias-state-warn-primary); border-color: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 40%, transparent); }
+.ow-source-watch { color: var(--dsw-alias-state-success-primary); border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 40%, transparent); }
+.ow-source-fish { color: var(--dsw-alias-label-secondary); }
+.ow-source-unknown { color: var(--dsw-alias-label-secondary); }
+.ow-legend { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.ow-legend-item { display: inline-flex; align-items: center; gap: 4px; }
+.ow-doctor { margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--dsw-alias-border-l1); }
+.ow-doctor .ow-card-head { margin-bottom: 6px; }
+.ow-dialog { width: min(720px, 100%); max-height: 100%; overflow: auto; margin: auto; padding: 18px 20px 24px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px; background: var(--dsw-alias-bg-overlay, var(--dsw-alias-bg-layer-1)); border: 1px solid var(--dsw-alias-border-l1); border-radius: 14px; color: var(--dsw-alias-label-primary); box-shadow: 0 12px 40px color-mix(in srgb, #000 30%, transparent); }
+.ow-dialog:focus { outline: none; }
+.ow-dialog-head { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+.ow-dialog-body { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ow-backdrop-center { align-items: center; justify-content: center; padding: 16px; }
+.ow-steps { display: flex; gap: 8px; list-style: none; margin: 0; padding: 0; flex-wrap: wrap; }
+.ow-step { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--dsw-alias-label-secondary); padding: 3px 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; }
+.ow-step-index { display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border-radius: 50%; font-size: 9px; background: var(--dsw-alias-bg-layer-2); }
+.ow-step-current { color: var(--dsw-alias-label-primary); border-color: var(--dsw-alias-brand-primary); }
+.ow-step-done { color: var(--dsw-alias-state-success-primary); border-color: color-mix(in srgb, var(--dsw-alias-state-success-primary) 40%, transparent); }
+.ow-safety { padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 35%, transparent); border-radius: 10px; background: color-mix(in srgb, var(--dsw-alias-state-warn-primary) 6%, transparent); }
+.ow-safety h3 { margin: 0 0 6px; }
+.ow-safety-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; font-size: 11px; line-height: 1.6; }
+.ow-restore-warnings { padding: 8px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-warn-primary) 40%, transparent); font-size: 12px; line-height: 1.5; }
+.ow-restore-warnings ul { margin: 4px 0 0; padding-left: 18px; overflow-wrap: anywhere; }
+.ow-restore-stale { display: flex; flex-direction: column; gap: 4px; padding: 8px 10px; border-radius: 8px; border: 1px solid color-mix(in srgb, var(--dsw-alias-state-error-primary) 45%, transparent); background: color-mix(in srgb, var(--dsw-alias-state-error-primary) 7%, transparent); font-size: 12px; line-height: 1.5; }
+.ow-restore-stale ul { margin: 0; padding-left: 18px; overflow-wrap: anywhere; }
+.ow-check { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.ow-dialog-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; flex-wrap: wrap; }
+.ow-dialog-actions .ow-hint { margin-right: auto; }
+.ow-state-inline { margin: 0; font-size: 12px; color: var(--dsw-alias-label-secondary); }
+.ow-restore-intent-error { display: flex; flex-direction: column; gap: 6px; }
+.ow-restore-result { border-top: 1px solid var(--dsw-alias-border-l1); padding-top: 10px; }
+.ow-replay { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.ow-replay-foot { display: flex; justify-content: center; margin-top: 10px; }
+.ow-replay-table td { vertical-align: top; }
 @media (max-width: 980px) { .ow-room-grid { grid-template-columns: minmax(0, 1fr); } .ow-overview-grid { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 620px) {
   .ow-root { padding: 14px 12px 28px; }
@@ -2703,6 +4523,7 @@ window.__ModuleLoader__.load({
   .ow-sev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .ow-dl-row { grid-template-columns: minmax(0, 1fr); gap: 2px; }
   .ow-drawer { width: 100vw; padding: 14px 14px 24px; }
+  .ow-dialog { width: 100%; padding: 14px 14px 20px; }
   .ow-table th, .ow-table td { padding: 6px; }
 }
 @media (prefers-reduced-motion: reduce) { .ow-budget-fill { transition: none; } }

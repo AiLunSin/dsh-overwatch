@@ -977,12 +977,13 @@ export class RunSupervisor {
   }
 
   /**
-   * Merge watch events and swarm events into one timeline. The cursor is the
-   * index into the merged list, which is stable while the lists only append.
-   * @param {{ since?: number, limit?: number }} [query]
+   * Merge swarm events, pressure samples and watch events into one timeline.
+   * `since` is an opaque cursor: the first call uses 0, later calls echo the
+   * previous `nextSince`. Entries are ordered by (at, source rank, seq).
+   * @param {{ since?: number | string, limit?: number }} [query]
    */
   timeline(query = {}) {
-    const since = Math.max(0, Math.trunc(query.since ?? 0))
+    const since = query.since ?? 0
     const limit = Math.min(Math.max(query.limit ?? 100, 1), 500)
     const watch = this.store.read({ since: 0 }).map(event => ({
       seq: event.seq,
@@ -1000,15 +1001,71 @@ export class RunSupervisor {
       actor: event.actor,
       summary: event.summary,
     }))
+    const pressure = this.probe.pressureEvents(this.runId).map((sample, index) => ({
+      seq: index + 1,
+      source: 'pressure',
+      type: 'pressure/sample',
+      at: sample.at,
+      actor: 'pressure',
+      summary: `member=${sample.memberId} context=${typeof sample.ratio === 'number' ? sample.ratio.toFixed(2) : 'n/a'} failures=${sample.failures}`,
+    }))
     const rank = { swarm: 0, pressure: 1, fish: 2, watch: 3 }
-    const merged = [...swarm, ...watch].sort((a, b) => {
-      const byTime = String(a.at).localeCompare(String(b.at))
+    const merged = [...swarm, ...pressure, ...watch].map(entry => ({
+      ...entry,
+      orderKey: `${entry.at ?? ''}|${rank[entry.source] ?? 9}|${entry.source}:${entry.seq}`,
+    }))
+    merged.sort((left, right) => {
+      const byTime = String(left.at ?? '').localeCompare(String(right.at ?? ''))
       if (byTime !== 0) return byTime
-      const byRank = (rank[a.source] ?? 9) - (rank[b.source] ?? 9)
-      return byRank !== 0 ? byRank : a.seq - b.seq
+      const byRank = (rank[left.source] ?? 9) - (rank[right.source] ?? 9)
+      return byRank !== 0 ? byRank : left.seq - right.seq
     })
-    const events = merged.slice(since, since + limit)
-    return { events, nextSince: since + events.length, total: merged.length }
+    let start = 0
+    if (typeof since === 'string' && since !== '' && since !== '0') {
+      const exact = merged.findIndex(entry => entry.orderKey === since)
+      if (exact >= 0) start = exact + 1
+      else {
+        const next = merged.findIndex(entry => entry.orderKey > since)
+        start = next < 0 ? merged.length : next
+      }
+    } else {
+      start = Math.max(0, Math.trunc(Number(since) || 0))
+    }
+    const page = merged.slice(start, start + limit)
+    return {
+      events: page.map(({ orderKey: _orderKey, ...entry }) => entry),
+      nextSince: page.at(-1)?.orderKey ?? (typeof since === 'string' ? since : 0),
+      total: merged.length,
+    }
+  }
+
+  /**
+   * Record a fishkeeper restore intent/result. Overwatch never accepts or stores
+   * the fishkeeper confirm token: the browser performs the restore, and this path
+   * only records that it happened.
+   * @param {any} input
+   */
+  recordRestore(input) {
+    if (input === null || typeof input !== 'object' || Array.isArray(input)) throw fail('INVALID_RESTORE', 'restore payload must be an object')
+    if (containsKey(input, 'confirmToken')) throw fail('RESTORE_TOKEN_REJECTED', 'confirmToken must never be sent to overwatch')
+    const phase = input.phase
+    if (phase !== 'intent' && phase !== 'result') throw fail('INVALID_PHASE', 'phase must be intent or result')
+    const sourceId = validRestoreId(input.sourceId, 'sourceId')
+    const checkpointId = validRestoreId(input.checkpointId, 'checkpointId')
+    const payload = {
+      sourceId,
+      checkpointId,
+      phase,
+      files: normalizeRestoreFiles(input.files),
+      warnings: Array.isArray(input.warnings) ? input.warnings.filter(item => typeof item === 'string').slice(0, 20).map(item => item.slice(0, 200)) : [],
+      result: normalizeRestoreResult(input.result),
+    }
+    this.store.append({
+      type: phase === 'intent' ? 'watch/restore/intent' : 'watch/restore/result',
+      actor: 'human',
+      payload,
+    })
+    return { recorded: true, phase, sourceId, checkpointId }
   }
 
   /**
@@ -1125,9 +1182,69 @@ export class RunSupervisor {
   }
 }
 
+/**
+ * @param {unknown} value
+ * @param {string} key
+ * @param {number} [depth]
+ */
+function containsKey(value, key, depth = 0) {
+  if (depth > 4 || value === null || typeof value !== 'object') return false
+  if (Array.isArray(value)) return value.some(item => containsKey(item, key, depth + 1))
+  for (const [name, child] of Object.entries(value)) {
+    if (name === key) return true
+    if (containsKey(child, key, depth + 1)) return true
+  }
+  return false
+}
+
+/** @param {unknown} value @param {string} name */
+function validRestoreId(value, name) {
+  if (typeof value !== 'string' || !/^[A-Za-z0-9._:-]{1,200}$/.test(value)) {
+    throw fail('INVALID_RESTORE', `${name} must match [A-Za-z0-9._:-]{1,200}`)
+  }
+  return value
+}
+
+/** @param {unknown} files */
+function normalizeRestoreFiles(files) {
+  if (!Array.isArray(files)) return []
+  /** @type {any[]} */
+  const out = []
+  for (const item of files.slice(0, 50)) {
+    if (typeof item === 'string') {
+      out.push({ path: item.slice(0, 300) })
+      continue
+    }
+    if (item === null || typeof item !== 'object') continue
+    out.push({
+      path: String(item.path ?? '').slice(0, 300),
+      action: typeof item.action === 'string' ? item.action : null,
+      stale: item.stale === true,
+      bytes: typeof item.bytes === 'number' && Number.isFinite(item.bytes) ? item.bytes : null,
+    })
+  }
+  return out
+}
+
+/** @param {unknown} result */
+function normalizeRestoreResult(result) {
+  if (result === null || typeof result !== 'object' || Array.isArray(result)) return null
+  const record = /** @type {Record<string, unknown>} */ (result)
+  return {
+    ok: record.ok === true,
+    error: typeof record.error === 'string' ? record.error.slice(0, 300) : null,
+    files: Array.isArray(record.files)
+      ? record.files.slice(0, 50).map(file => ({
+          path: String(/** @type {any} */ (file)?.path ?? '').slice(0, 300),
+          ok: /** @type {any} */ (file)?.ok === true,
+          sha256: typeof /** @type {any} */ (file)?.sha256 === 'string' ? String(/** @type {any} */ (file).sha256).slice(0, 80) : null,
+        }))
+      : [],
+  }
+}
+
 /** @param {any} event */
-function summarizeWatchEvent(event) {
-  const payload = event?.payload ?? {}
+function summarizeWatchEvent(event) {  const payload = event?.payload ?? {}
   const id = payload.caseId ?? payload.actionId ?? payload.runId ?? null
   const code = payload.code ?? payload.kind ?? null
   const bits = [event.type]

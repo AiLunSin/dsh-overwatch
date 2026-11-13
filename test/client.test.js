@@ -4,6 +4,7 @@ import test from 'node:test'
 import vm from 'node:vm'
 
 const SOURCE = readFileSync(new URL('../client.js', import.meta.url), 'utf8')
+const TOKEN_KEY = 'dsh-overwatch.write-token'
 
 function loadDefinition() {
   let definition = null
@@ -136,7 +137,7 @@ test('registers the dshOverwatch namespace with complete zh/en dictionaries', ()
   }
 })
 
-test('covers panel, table, button, empty, error, and write-state copy', () => {
+test('covers panel, tab, table, button, empty, error, fish, replay, and doctor copy', () => {
   const required = [
     'navLabel',
     'pageTitle',
@@ -144,6 +145,8 @@ test('covers panel, table, button, empty, error, and write-state copy', () => {
     'guardOnlyHint',
     'tabRoom',
     'tabCases',
+    'tabFish',
+    'tabReplay',
     'filterOpen',
     'filterAll',
     'colSeverity',
@@ -169,6 +172,7 @@ test('covers panel, table, button, empty, error, and write-state copy', () => {
     'source.swarm',
     'source.pressure',
     'source.fish',
+    'source.watch',
     'fresh.ok',
     'fresh.stale',
     'fresh.unavailable',
@@ -189,6 +193,48 @@ test('covers panel, table, button, empty, error, and write-state copy', () => {
     'errorForbidden',
     'errorNotFound',
     'errorConflict',
+    'fishTitle',
+    'fishHostIndex',
+    'fishIndexAvailable',
+    'fishIndexPartial',
+    'fishIndexMissing',
+    'fishBrowser',
+    'fishBrowserAvailable',
+    'fishBrowserIndexOnly',
+    'fishBrowserUnauthorized',
+    'fishBrowserNotFound',
+    'fishBrowserNetwork',
+    'fishCheckpoints',
+    'fishAudit',
+    'fishTrigger',
+    'fishPinned',
+    'fishRestoreAction',
+    'fishRestoreTitle',
+    'fishRestorePreflight',
+    'fishRestoreExecute',
+    'fishRestoreOverride',
+    'fishRestoreSafety',
+    'fishRestoreSafetyCheckpoint',
+    'fishRestoreSafetyGit',
+    'fishRestoreIntentFailed',
+    'fishRestoreResultTitle',
+    'fishRestoreRecorded',
+    'fishRestoreNeedRun',
+    'fishRestoreNeedToken',
+    'replayTitle',
+    'replayLegend',
+    'replayEvents',
+    'replayLoadMore',
+    'replayEmpty',
+    'replayAutoHint',
+    'doctorTitle',
+    'doctorStatus.pass',
+    'doctorStatus.warn',
+    'doctorStatus.fail',
+    'trigger.baseline',
+    'trigger.pre-restore',
+    'auditAction.restore',
+    'auditResult.failed',
   ]
   for (const key of required) assert.ok(keysOf('zh').has(key), `missing i18n key ${key}`)
   assert.match(dictionary.zh.guardOnlyBanner, /guard-only/)
@@ -197,14 +243,26 @@ test('covers panel, table, button, empty, error, and write-state copy', () => {
   assert.match(dictionary.en.supervisedHint, /M2/)
   assert.match(dictionary.zh.emptyToolBody, /watch_arm/)
   assert.match(dictionary.zh.emptyHttpBody, /x-overwatch-token/)
+  assert.match(dictionary.zh.fishRestoreSafety, /confirmToken/)
+  assert.match(dictionary.en.fishRestoreSafety, /confirmToken/)
+  assert.match(dictionary.zh.fishRestoreSafetyGit, /git/)
+  assert.match(dictionary.en.tabReplay, /Replay/)
+  assert.match(dictionary.zh.tabFish, /鱼缸/)
 })
 
-test('uses the documented same-origin /overwatch/api contract', () => {
+test('uses the documented same-origin /overwatch/api and fishkeeper contract', () => {
   assert.match(SOURCE, /const API = '\/overwatch\/api'/)
   assert.ok(SOURCE.includes('apiGet(`/runs/${encodeURIComponent(selectedRunId)}`'))
   assert.ok(SOURCE.includes('/cases?state=${encodeURIComponent(caseFilter)}&limit=100'))
   assert.ok(SOURCE.includes('/cases/${encodeURIComponent(selectedCaseId)}`'))
-  assert.ok(SOURCE.includes('/timeline?since=${encodeURIComponent(String(since))}&limit=${TIMELINE_PAGE_LIMIT}'))
+  assert.ok(SOURCE.includes('/timeline?since=${encodeURIComponent(cursor)}&limit=${TIMELINE_PAGE_LIMIT}'))
+  assert.ok(SOURCE.includes('/timeline?since=${encodeURIComponent(timelineCursorRef.current)}&limit=${TIMELINE_PAGE_LIMIT}'))
+  assert.ok(SOURCE.includes("apiGet('/fish'"))
+  assert.ok(SOURCE.includes("apiGetRaw('/doctor'"))
+  assert.ok(SOURCE.includes("fishkeeperRequest('/overview'"))
+  assert.ok(SOURCE.includes('/checkpoints?source=${encodeURIComponent(fishSourceId)}'))
+  assert.ok(SOURCE.includes("fishkeeperRequest('/checkpoint/restore'"))
+  assert.ok(SOURCE.includes('/restores`'))
   assert.ok(SOURCE.includes('/arm`'))
   assert.ok(SOURCE.includes('/disarm`'))
   assert.ok(SOURCE.includes('/ack`'))
@@ -212,15 +270,25 @@ test('uses the documented same-origin /overwatch/api contract', () => {
   assert.ok(SOURCE.includes("method: 'POST'"))
 })
 
-test('keeps the write token in sessionStorage and never prints or persists it elsewhere', () => {
+test('keeps the write token in sessionStorage and never persists the fishkeeper confirmToken', () => {
   assert.ok(SOURCE.includes('sessionStorage'))
   assert.ok(SOURCE.includes('TOKEN_KEY'))
-  assert.ok(SOURCE.includes('type: \'password\''))
-  assert.ok(!SOURCE.includes('localStorage'), 'token must not use localStorage')
-  assert.ok(!SOURCE.includes("document.cookie"), 'token must not be written to cookies')
+  assert.ok(SOURCE.includes("sessionStorage.setItem(TOKEN_KEY, value)"))
+  assert.equal((SOURCE.match(/sessionStorage\.setItem\(/g) ?? []).length, 1, 'only the write token may be stored')
+  assert.ok(SOURCE.includes("type: 'password'"))
+  assert.ok(!SOURCE.includes('localStorage.'), 'token must not use localStorage')
+  assert.ok(!SOURCE.includes('document.cookie'), 'token must not be written to cookies')
   assert.ok(!SOURCE.includes('console.'), 'the client must not log')
   assert.ok(!SOURCE.includes('dangerouslySetInnerHTML'))
   assert.ok(!SOURCE.includes('innerHTML'))
+  // confirmToken must never reach storage, a URL, the DOM, or a log call.
+  const confirmLines = SOURCE.split('\n').filter((line) => line.includes('confirmToken'))
+  assert.ok(confirmLines.length >= 2, 'the restore flow must handle the fishkeeper confirmToken')
+  for (const line of confirmLines) {
+    assert.doesNotMatch(line, /sessionStorage|localStorage|console\.|encodeURIComponent|history\.|href|URLSearchParams/,
+      `confirmToken must not be persisted or placed in a URL: ${line.trim()}`)
+  }
+  assert.ok(!SOURCE.includes('sessionStorage.setItem(TOKEN_KEY, confirmToken)'))
 })
 
 test('pauses polling while hidden and cleans up timers, listeners, and requests', () => {
@@ -232,6 +300,8 @@ test('pauses polling while hidden and cleans up timers, listeners, and requests'
   assert.ok(SOURCE.includes('clearTimeout'))
   assert.ok(SOURCE.includes('setTimeout'))
   assert.ok(SOURCE.includes('writeAbortRef.current.abort()'))
+  assert.ok(SOURCE.includes('timelineManualAbortRef.current.abort()'))
+  assert.ok(SOURCE.includes('restoreAbortRef.current.abort()'))
 })
 
 test('renders through translated labels and does not invent unknown event times', () => {
@@ -254,7 +324,58 @@ test('exposes both the guard-only and the supervised M2 surface', () => {
   assert.ok(!SOURCE.includes('/shift/latest'), 'the panel must not depend on the shift route')
 })
 
-function makeFixture() {
+test('wires M3 fish, replay, doctor, restore, opaque cursors, and tablist keyboard', () => {
+  // Tabs and accessible tab semantics.
+  assert.ok(SOURCE.includes("const TAB_ORDER = ['room', 'cases', 'fish', 'replay']"))
+  assert.ok(SOURCE.includes("'aria-selected': tab === key"))
+  assert.ok(SOURCE.includes("role: 'tablist'"))
+  assert.ok(SOURCE.includes("role: 'tab'"))
+  assert.ok(SOURCE.includes("role: 'tabpanel'"))
+  for (const key of ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Home', 'End']) {
+    assert.ok(SOURCE.includes(`'${key}'`), `tablist keyboard must handle ${key}`)
+  }
+  // Opaque cursor: echo `nextSince` verbatim, never parse it or re-sort.
+  assert.ok(SOURCE.includes("typeof data.nextSince === 'string' ? data.nextSince : String(data.nextSince ?? cursor)"))
+  assert.ok(SOURCE.includes("typeof data.nextSince === 'string' ? data.nextSince : String(data.nextSince ?? timelineCursorRef.current)"))
+  assert.ok(!SOURCE.includes('Number(data.nextSince)'), 'nextSince must stay opaque')
+  assert.ok(!SOURCE.includes('timeline.sort'), 'the panel must not sort the server timeline')
+  assert.ok(!SOURCE.includes('collected.sort'), 'the panel must not sort the server timeline')
+  // Source chips for the merged timeline.
+  assert.ok(SOURCE.includes('ow-source-chip'))
+  assert.ok(SOURCE.includes('function sourceChip'))
+  assert.ok(SOURCE.includes("['swarm', 'pressure', 'watch']"))
+  // Fish and replay poll at their documented intervals.
+  assert.match(SOURCE, /FISH_POLL_MS = 15000/)
+  assert.match(SOURCE, /TIMELINE_POLL_MS = 5000/)
+  assert.match(SOURCE, /DOCTOR_POLL_MS = 15000/)
+  // Restore evidence: intent before execution and result after it.
+  assert.ok(SOURCE.includes("postRestoreRecord('intent'"))
+  assert.ok(SOURCE.includes("postRestoreRecord('result'"))
+  assert.ok(SOURCE.includes('phase,'))
+  assert.ok(SOURCE.includes("phase === 'result'"))
+  assert.ok(SOURCE.includes('body.result = {'))
+  assert.match(SOURCE, /phase,\n\s+files:/)
+  // Fish degradation and doctor handling.
+  assert.ok(SOURCE.includes("error?.status === 401"))
+  assert.ok(SOURCE.includes('function browserFailureKind'))
+  assert.ok(SOURCE.includes("apiGetRaw('/doctor'"))
+  assert.ok(SOURCE.includes('doctorStatusLabel'))
+  assert.ok(SOURCE.includes('summarizeDetail'))
+  // Restore dialog accessibility.
+  assert.ok(SOURCE.includes("'aria-modal': 'true'"))
+  assert.ok(SOURCE.includes('ow-steps'))
+  assert.ok(SOURCE.includes("event.key === 'Escape'"))
+  assert.ok(SOURCE.includes("event.key !== 'Tab'"))
+  assert.ok(SOURCE.includes('previous.focus()'))
+  assert.ok(SOURCE.includes('restoreDialogRef'))
+  assert.ok(SOURCE.includes('restoreTokenRef'))
+})
+
+// ---------------------------------------------------------------------------
+// Render fixtures and harness
+// ---------------------------------------------------------------------------
+
+function makeFixture(options = {}) {
   const now = Date.now()
   const at = (minutesAgo) => new Date(now - minutesAgo * 60_000).toISOString()
   const freshness = {
@@ -325,17 +446,107 @@ function makeFixture() {
     timeline: [],
     asOf: at(0),
   }
-  const timeline = [
-    { seq: 1, source: 'watch', type: 'watch/armed', at: at(30), actor: 'human', summary: 'watch/armed run_1' },
-    { seq: 1, source: 'swarm', type: 'dispatch/started', at: at(25), actor: 'swarm', summary: 'dispatch started' },
-    { seq: 2, source: 'watch', type: 'case/opened', at: at(20), actor: 'guard', summary: 'case/opened case_1' },
-    { seq: 3, source: 'watch', type: 'action/verified', at: at(7), actor: 'guard', summary: 'action/verified act_1' },
+  const timeline = options.timelineCount === undefined
+    ? [
+        { seq: 1, source: 'watch', type: 'watch/armed', at: at(30), actor: 'human', summary: 'watch/armed run_1' },
+        { seq: 1, source: 'swarm', type: 'dispatch/started', at: at(25), actor: 'swarm', summary: 'dispatch started' },
+        { seq: 2, source: 'watch', type: 'case/opened', at: at(20), actor: 'guard', summary: 'case/opened case_1' },
+        { seq: 3, source: 'watch', type: 'action/verified', at: at(7), actor: 'guard', summary: 'action/verified act_1' },
+      ]
+    : Array.from({ length: options.timelineCount }, (_, index) => ({
+        seq: index + 1,
+        source: index % 3 === 0 ? 'watch' : index % 3 === 1 ? 'swarm' : 'pressure',
+        type: `flow/event-${index}`,
+        at: index === 3 ? null : new Date(now - (options.timelineCount - index) * 60_000).toISOString(),
+        actor: 'system',
+        summary: `event ${index}`,
+      }))
+  const fishIndex = {
+    available: true,
+    dataDir: 'C:/Users/fish/.dsh/fishkeeper',
+    sources: [{
+      sourceId: 'fish_1',
+      checkpoints: [
+        { id: 'ck_1', createdAt: at(60), trigger: 'baseline', files: 3, storedBytes: 4096, pinned: true, baseline: true },
+        { id: 'ck_2', createdAt: at(30), trigger: 'pre-restore', files: 2, storedBytes: 1024, pinned: false, baseline: false },
+      ],
+      audit: [
+        { at: at(20), action: 'restore', checkpointId: 'ck_2', result: 'ok', error: null },
+        { at: at(40), action: 'pin', checkpointId: 'ck_1', result: null, error: null },
+      ],
+    }],
+    errors: [],
+  }
+  const fishOverview = {
+    generatedAt: at(0),
+    mode: 'writer',
+    sources: [{
+      id: 'fish_1',
+      displayName: 'Diary fish',
+      adapter: 'file',
+      readOnly: false,
+      status: 'ok',
+      capabilities: { restore: true },
+    }],
+  }
+  const fishCheckpoints = {
+    sourceId: 'fish_1',
+    readOnly: false,
+    restoreSupported: true,
+    items: [
+      { id: 'ck_1', createdAt: at(60), trigger: 'baseline', files: 3, storedBytes: 4096, logicalBytes: 8192, pinned: true, baseline: true },
+      { id: 'ck_2', createdAt: at(30), trigger: 'pre-restore', files: 2, storedBytes: 1024, logicalBytes: 2048, pinned: false, baseline: false },
+    ],
+  }
+  const restorePlan = {
+    checkpointId: 'ck_2',
+    sourceId: 'fish_1',
+    sourceName: 'Diary fish',
+    warnings: ['notes/diary.md changed after the checkpoint.'],
+    files: [
+      { path: 'notes/diary.md', role: 'diary', action: 'restore', stale: true, bytes: 2048 },
+      { path: 'profile/persona.md', role: 'persona', action: 'restore', stale: false, bytes: 512 },
+      { path: 'events.jsonl', role: 'events', action: 'skip', reason: 'not-restorable' },
+    ],
+    confirmToken: 'confirm-secret-token',
+  }
+  const restoreResult = {
+    ok: true,
+    checkpointId: 'ck_2',
+    safetyCheckpointId: 'ck_pre_2',
+    restored: 2,
+    files: [
+      { path: 'notes/diary.md', ok: true, sha256: 'sha-diary' },
+      { path: 'profile/persona.md', ok: true, sha256: 'sha-persona' },
+    ],
+  }
+  const doctor = [
+    { id: 'data-dir', status: 'pass', detail: { path: 'C:/tmp/overwatch', writable: true } },
+    { id: 'fish-index', status: 'warn', detail: { available: true, sources: 1 } },
   ]
-  return { now, at, freshness, runSummary, runDetail, caseSummary, caseDetail, timeline }
+  return {
+    now,
+    at,
+    freshness,
+    runSummary,
+    runDetail,
+    caseSummary,
+    caseDetail,
+    timeline,
+    fishIndex,
+    fishOverview,
+    fishCheckpoints,
+    restorePlan,
+    restoreResult,
+    doctor,
+  }
 }
 
 function installSandbox(target, fixture, calls, options = {}) {
   const empty = options.empty === true
+  const fishkeeperMode = options.fishkeeper ?? 'ok'
+  const doctorMode = options.doctor ?? 'ok'
+  const restoreExecuteFails = options.restoreExecuteFails === true
   const storage = new Map()
   let timerId = 0
   const document = {
@@ -353,6 +564,19 @@ function installSandbox(target, fixture, calls, options = {}) {
     status,
     json: async () => payload,
   })
+  const fail = (payload, status) => ({
+    ok: false,
+    status,
+    json: async () => payload,
+  })
+  const fishkeeperFailure = () => {
+    if (fishkeeperMode === 'network') throw new TypeError('Failed to fetch')
+    if (fishkeeperMode === 'unauthorized') {
+      return fail({ error: { code: 'fishkeeper/source-unauthorized', message: 'browser credentials required' } }, 401)
+    }
+    if (fishkeeperMode === 'not-found') return fail({ error: { code: 'fishkeeper/not-found', message: 'route not found' } }, 404)
+    return null
+  }
   target.AbortController = AbortController
   target.document = document
   target.window.document = document
@@ -378,8 +602,25 @@ function installSandbox(target, fixture, calls, options = {}) {
     const url = String(input)
     const parsed = new URL(url, 'http://127.0.0.1:56819')
     const path = parsed.pathname
-    calls.push({ method, url, headers: options.headers ?? {} })
+    let body
+    try {
+      body = typeof options.body === 'string' ? JSON.parse(options.body) : undefined
+    } catch {
+      body = undefined
+    }
+    calls.push({ method, url, path, headers: options.headers ?? {}, body })
     if (method === 'POST') {
+      if (path === '/api/fishkeeper/checkpoint/restore') {
+        const failure = fishkeeperFailure()
+        if (failure !== null) return failure
+        if (body?.dryRun === false) {
+          if (restoreExecuteFails) {
+            return fail({ error: { code: 'fishkeeper/restore-stale', message: 'Files changed after the checkpoint.' } }, 409)
+          }
+          return ok(fixture.restoreResult)
+        }
+        return ok(fixture.restorePlan)
+      }
       if (path.endsWith('/arm')) {
         fixture.runSummary.armed = true
         fixture.runSummary.state = 'watching'
@@ -399,7 +640,41 @@ function installSandbox(target, fixture, calls, options = {}) {
         fixture.caseDetail.case.state = 'acknowledged'
         return ok({ ok: true, data: { case: { ...fixture.caseSummary, state: 'acknowledged' } } })
       }
+      if (path === '/overwatch/api/runs/run_1/restores') {
+        return ok({
+          ok: true,
+          data: {
+            recorded: true,
+            phase: body?.phase,
+            sourceId: body?.sourceId,
+            checkpointId: body?.checkpointId,
+          },
+        })
+      }
       return ok({ ok: false, code: 'NOT_FOUND', message: 'unknown write route' }, 404)
+    }
+    if (path === '/api/fishkeeper/overview') {
+      const failure = fishkeeperFailure()
+      if (failure !== null) return failure
+      return ok(fixture.fishOverview)
+    }
+    if (path === '/api/fishkeeper/checkpoints') {
+      const failure = fishkeeperFailure()
+      if (failure !== null) return failure
+      return ok({ ...fixture.fishCheckpoints, sourceId: parsed.searchParams.get('source') ?? fixture.fishCheckpoints.sourceId })
+    }
+    if (path === '/overwatch/api/fish') {
+      return ok({ ok: true, data: fixture.fishIndex, asOf: new Date().toISOString() })
+    }
+    if (path === '/overwatch/api/doctor') {
+      if (doctorMode === 'error') return fail({ ok: false, code: 'INTERNAL', message: 'doctor failed' }, 500)
+      return ok({
+        ok: doctorMode === 'warn' ? false : true,
+        version: '0.1.0',
+        dataDir: 'C:/tmp/overwatch',
+        checks: fixture.doctor,
+        asOf: new Date().toISOString(),
+      })
     }
     if (path === '/overwatch/api/health') {
       return ok({
@@ -422,10 +697,22 @@ function installSandbox(target, fixture, calls, options = {}) {
       return ok({ ok: true, data: { runs: empty ? [] : [fixture.runSummary], asOf: new Date().toISOString() } })
     }
     if (path === '/overwatch/api/runs/run_1/timeline') {
-      const since = Number(parsed.searchParams.get('since') ?? '0')
-      const limit = Number(parsed.searchParams.get('limit') ?? '200')
-      const events = fixture.timeline.slice(since, since + limit)
-      return ok({ ok: true, data: { events, nextSince: since + events.length, total: fixture.timeline.length, asOf: new Date().toISOString() } })
+      const rawSince = parsed.searchParams.get('since') ?? '0'
+      const limit = Number(parsed.searchParams.get('limit') ?? '100')
+      const start = rawSince === '' || rawSince === '0'
+        ? 0
+        : (rawSince.startsWith('c:') && Number.isFinite(Number(rawSince.slice(2))) ? Number(rawSince.slice(2)) : 0)
+      const events = fixture.timeline.slice(start, start + limit)
+      const nextSince = events.length > 0 ? `c:${start + events.length}` : (rawSince === '' ? '0' : rawSince)
+      return ok({
+        ok: true,
+        data: {
+          events,
+          nextSince,
+          total: fixture.timeline.length,
+          asOf: new Date().toISOString(),
+        },
+      })
     }
     if (path === '/overwatch/api/runs/run_1/cases') {
       const state = parsed.searchParams.get('state') ?? 'all'
@@ -618,7 +905,7 @@ function createRenderHarness(moduleDefinition, target) {
     return tree
   }
 
-  async function flush(rounds = 25) {
+  async function flush(rounds = 40) {
     for (let round = 0; round < rounds; round += 1) {
       if (dirty) {
         dirty = false
@@ -647,6 +934,16 @@ function createRenderHarness(moduleDefinition, target) {
   return { flush, unmount, getTree: () => tree, dictionaries, slots }
 }
 
+function tabButton(tree, label) {
+  return findOne(tree, (element) => element.type === 'button'
+    && element.props.role === 'tab'
+    && textOf(element).includes(label))
+}
+
+// ---------------------------------------------------------------------------
+// Render smoke tests
+// ---------------------------------------------------------------------------
+
 test('render smoke: watch room, freshness, cases, detail drawer, and gated writes', async () => {
   const fixture = makeFixture()
   const calls = []
@@ -666,10 +963,15 @@ test('render smoke: watch room, freshness, cases, detail drawer, and gated write
   assert.match(text, /case\/opened/)
   assert.match(text, /校验通过/)
   assert.match(text, /运行锁/)
+  assert.match(text, /自检（doctor）/)
+  assert.match(text, /fish-index/)
+  assert.match(text, /警告/)
   assert.ok(calls.some((call) => call.method === 'GET' && call.url === '/overwatch/api/health'))
   assert.ok(calls.some((call) => call.method === 'GET' && call.url === '/overwatch/api/runs'))
+  assert.ok(calls.some((call) => call.method === 'GET' && call.url === '/overwatch/api/doctor'))
+  assert.ok(calls.some((call) => call.method === 'GET' && call.url.includes('/runs/run_1/timeline?since=0')))
 
-  const casesTab = findOne(tree, (element) => element.type === 'button' && element.props.role === 'tab' && textOf(element).includes('事件单'))
+  const casesTab = tabButton(tree, '事件单')
   assert.notEqual(casesTab, null)
   casesTab.props.onClick({})
   tree = await harness.flush()
@@ -706,7 +1008,7 @@ test('render smoke: watch room, freshness, cases, detail drawer, and gated write
   text = textOf(tree)
   assert.match(text, /写操作已解锁/)
   assert.match(text, /Token 已设置/)
-  assert.equal(env.storage.get('dsh-overwatch.write-token'), 'secret-token')
+  assert.equal(env.storage.get(TOKEN_KEY), 'secret-token')
   assert.ok(!text.includes('secret-token'), 'the token must never be rendered in plain text')
   const passwordAfterSave = findOne(tree, (element) => element.type === 'input' && element.props.type === 'password')
   assert.equal(passwordAfterSave.props.value, '')
@@ -741,5 +1043,254 @@ test('render smoke: empty state explains the agent tool and HTTP entry points', 
   assert.match(text, /POST \/overwatch\/api\/runs\/:id\/arm/)
   assert.match(text, /x-overwatch-token/)
   assert.ok(calls.some((call) => call.url === '/overwatch/api/runs'))
+  harness.unmount()
+})
+
+test('render smoke: fish host index and the fishkeeper browser surface', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  installSandbox(sandbox, fixture, calls)
+  const harness = createRenderHarness(definition, sandbox)
+
+  let tree = await harness.flush()
+  const fishTab = tabButton(tree, '鱼缸')
+  assert.notEqual(fishTab, null)
+  fishTab.props.onClick({})
+  tree = await harness.flush()
+  const text = textOf(tree)
+  assert.match(text, /鱼缸/)
+  assert.match(text, /宿主索引/)
+  assert.match(text, /fishkeeper 数据目录/)
+  assert.match(text, /fish_1/)
+  assert.match(text, /ck_1/)
+  assert.match(text, /已固定/)
+  assert.match(text, /基线/)
+  assert.match(text, /恢复前/)
+  assert.match(text, /最近审计/)
+  assert.match(text, /浏览器面可用/)
+  assert.match(text, /Diary fish/)
+  assert.match(text, /支持恢复/)
+  const restoreButton = findOne(tree, (element) => element.type === 'button' && element.props['aria-label'] === '恢复 ck_1')
+  assert.notEqual(restoreButton, null)
+  assert.equal(restoreButton.props.disabled, true, 'restore is gated until a write token is set')
+  assert.match(text, /先设置 overwatch 写 token/)
+  assert.ok(calls.some((call) => call.method === 'GET' && call.url === '/overwatch/api/fish'))
+  assert.ok(calls.some((call) => call.method === 'GET' && call.url === '/api/fishkeeper/overview'))
+  assert.ok(calls.some((call) => call.method === 'GET' && call.url.includes('/api/fishkeeper/checkpoints?source=fish_1')))
+  harness.unmount()
+})
+
+test('render smoke: fish degrades to the host index when fishkeeper returns 401', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  installSandbox(sandbox, fixture, calls, { fishkeeper: 'unauthorized' })
+  const harness = createRenderHarness(definition, sandbox)
+
+  let tree = await harness.flush()
+  const fishTab = tabButton(tree, '鱼缸')
+  assert.notEqual(fishTab, null)
+  fishTab.props.onClick({})
+  tree = await harness.flush()
+  const text = textOf(tree)
+  assert.match(text, /仅宿主索引可用/)
+  assert.match(text, /401/)
+  assert.match(text, /浏览器凭据/)
+  assert.match(text, /ck_1/)
+  assert.match(text, /已固定/)
+  assert.match(text, /基线/)
+  const restoreButton = findOne(tree, (element) => element.type === 'button' && element.props['aria-label'] === '恢复 ck_1')
+  assert.notEqual(restoreButton, null)
+  assert.equal(restoreButton.props.disabled, true)
+  harness.unmount()
+})
+
+test('render smoke: replay paginates with nextSince and marks unknown times', async () => {
+  const fixture = makeFixture({ timelineCount: 820 })
+  const calls = []
+  installSandbox(sandbox, fixture, calls)
+  const harness = createRenderHarness(definition, sandbox)
+
+  let tree = await harness.flush()
+  const replayTab = tabButton(tree, '回放')
+  assert.notEqual(replayTab, null)
+  replayTab.props.onClick({})
+  tree = await harness.flush()
+  let text = textOf(tree)
+  assert.match(text, /回放/)
+  assert.match(text, /蜂群/)
+  assert.match(text, /压力表/)
+  assert.match(text, /值班员/)
+  assert.match(text, /时间未知/)
+  assert.match(text, /flow\/event-799/)
+  assert.ok(!text.includes('flow/event-800'))
+  assert.match(text, /已加载 800 \/ 820/)
+  const loadMore = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '加载更多')
+  assert.notEqual(loadMore, null)
+  const lastPageRequest = calls.filter((call) => call.path === '/overwatch/api/runs/run_1/timeline').at(-1)
+  assert.equal(new URL(lastPageRequest.url, 'http://127.0.0.1').searchParams.get('since'), 'c:700')
+  loadMore.props.onClick({})
+  tree = await harness.flush()
+  text = textOf(tree)
+  assert.match(text, /flow\/event-800/)
+  assert.match(text, /flow\/event-819/)
+  assert.match(text, /已加载 820 \/ 820/)
+  assert.match(text, /已全部加载/)
+  const requests = calls.filter((call) => call.path === '/overwatch/api/runs/run_1/timeline')
+  assert.ok(requests.some((call) => new URL(call.url, 'http://127.0.0.1').searchParams.get('since') === 'c:800'),
+    'load more must echo the opaque nextSince cursor')
+  harness.unmount()
+})
+
+test('render smoke: doctor warns and a failing doctor can be retried', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  installSandbox(sandbox, fixture, calls)
+  const harness = createRenderHarness(definition, sandbox)
+  let tree = await harness.flush()
+  let text = textOf(tree)
+  assert.match(text, /自检（doctor）/)
+  assert.match(text, /fish-index/)
+  assert.match(text, /警告/)
+  assert.match(text, /通过/)
+  harness.unmount()
+
+  const failedCalls = []
+  installSandbox(sandbox, fixture, failedCalls, { doctor: 'error' })
+  const failedHarness = createRenderHarness(definition, sandbox)
+  tree = await failedHarness.flush()
+  text = textOf(tree)
+  assert.match(text, /自检请求失败/)
+  const retryButton = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '重试')
+  assert.notEqual(retryButton, null)
+  retryButton.props.onClick({})
+  await failedHarness.flush()
+  assert.ok(failedCalls.filter((call) => call.path === '/overwatch/api/doctor').length >= 2)
+  failedHarness.unmount()
+})
+
+test('render smoke: restore preflight, confirm, execute, and per-file result', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  const env = installSandbox(sandbox, fixture, calls)
+  env.storage.set(TOKEN_KEY, 'secret-token')
+  const harness = createRenderHarness(definition, sandbox)
+
+  let tree = await harness.flush()
+  const fishTab = tabButton(tree, '鱼缸')
+  assert.notEqual(fishTab, null)
+  fishTab.props.onClick({})
+  tree = await harness.flush()
+
+  const restoreButton = findOne(tree, (element) => element.type === 'button' && element.props['aria-label'] === '恢复 ck_1')
+  assert.notEqual(restoreButton, null)
+  assert.equal(restoreButton.props.disabled, false)
+  restoreButton.props.onClick({})
+  tree = await harness.flush()
+  let text = textOf(tree)
+  assert.match(text, /恢复检查点/)
+  assert.match(text, /影响预览/)
+  assert.match(text, /notes\/diary\.md/)
+  assert.match(text, /events\.jsonl/)
+  assert.match(text, /Diary fish/)
+  assert.match(text, /changed after the checkpoint/)
+  assert.match(text, /覆盖较新内容/)
+  assert.match(text, /pre-restore 安全检查点/)
+  assert.match(text, /代码回滚不在此流程/)
+  assert.ok(!text.includes('confirm-secret-token'), 'the confirmToken must never be rendered')
+
+  const intentCalls = calls.filter((call) => call.path === '/overwatch/api/runs/run_1/restores' && call.body?.phase === 'intent')
+  assert.equal(intentCalls.length, 1)
+  assert.equal(intentCalls[0].headers['x-overwatch-token'], 'secret-token')
+  assert.deepEqual(intentCalls[0].body.files, ['notes/diary.md', 'profile/persona.md'])
+  assert.equal(intentCalls[0].body.checkpointId, 'ck_2')
+  assert.equal(intentCalls[0].body.sourceId, 'fish_1')
+  assert.ok(Array.isArray(intentCalls[0].body.warnings))
+  assert.ok(!JSON.stringify(intentCalls[0].body).includes('confirmToken'))
+
+  const executeBefore = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '执行恢复')
+  assert.notEqual(executeBefore, null)
+  assert.equal(executeBefore.props.disabled, true, 'stale files require the override before execution')
+
+  const override = findOne(tree, (element) => element.type === 'input' && element.props.type === 'checkbox')
+  assert.notEqual(override, null)
+  assert.equal(override.props.checked, false)
+  override.props.onChange({ target: { checked: true } })
+  tree = await harness.flush()
+  const executeAfter = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '执行恢复')
+  assert.notEqual(executeAfter, null)
+  assert.equal(executeAfter.props.disabled, false)
+  executeAfter.props.onClick({})
+  tree = await harness.flush()
+  text = textOf(tree)
+  assert.match(text, /恢复成功/)
+  assert.match(text, /已恢复 2 个文件/)
+  assert.match(text, /逐文件结果/)
+  assert.match(text, /ck_pre_2/)
+  assert.match(text, /结果已写入 overwatch 日志/)
+  assert.ok(!text.includes('confirm-secret-token'), 'the confirmToken must never be rendered')
+
+  const executeCalls = calls.filter((call) => call.method === 'POST'
+    && call.path === '/api/fishkeeper/checkpoint/restore'
+    && call.body?.dryRun === false)
+  assert.equal(executeCalls.length, 1)
+  assert.equal(executeCalls[0].body.confirmToken, 'confirm-secret-token')
+  assert.equal(executeCalls[0].body.overrideStale, true)
+  assert.deepEqual(executeCalls[0].body.files, ['notes/diary.md', 'profile/persona.md'])
+  assert.ok(!executeCalls[0].url.includes('confirm-secret-token'))
+
+  const resultCalls = calls.filter((call) => call.path === '/overwatch/api/runs/run_1/restores' && call.body?.phase === 'result')
+  assert.equal(resultCalls.length, 1)
+  assert.equal(resultCalls[0].body.result.ok, true)
+  assert.equal(resultCalls[0].body.result.files.length, 2)
+  assert.ok(!JSON.stringify(resultCalls[0].body).includes('confirmToken'))
+  assert.ok(!JSON.stringify(Array.from(env.storage.entries())).includes('confirm-secret-token'))
+  assert.equal(env.storage.get(TOKEN_KEY), 'secret-token')
+
+  const closeButton = findOne(tree, (element) => element.type === 'button' && element.props['aria-label'] === '关闭')
+  assert.notEqual(closeButton, null)
+  closeButton.props.onClick({})
+  tree = await harness.flush()
+  assert.ok(!textOf(tree).includes('影响预览'))
+  harness.unmount()
+})
+
+test('render smoke: a failed restore records a failed result and forces a new preflight', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  const env = installSandbox(sandbox, fixture, calls, { restoreExecuteFails: true })
+  env.storage.set(TOKEN_KEY, 'secret-token')
+  const harness = createRenderHarness(definition, sandbox)
+
+  let tree = await harness.flush()
+  const fishTab = tabButton(tree, '鱼缸')
+  assert.notEqual(fishTab, null)
+  fishTab.props.onClick({})
+  tree = await harness.flush()
+
+  const restoreButton = findOne(tree, (element) => element.type === 'button' && element.props['aria-label'] === '恢复 ck_1')
+  assert.notEqual(restoreButton, null)
+  restoreButton.props.onClick({})
+  tree = await harness.flush()
+
+  const override = findOne(tree, (element) => element.type === 'input' && element.props.type === 'checkbox')
+  assert.notEqual(override, null)
+  override.props.onChange({ target: { checked: true } })
+  tree = await harness.flush()
+
+  const execute = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '执行恢复')
+  assert.notEqual(execute, null)
+  execute.props.onClick({})
+  tree = await harness.flush()
+  const text = textOf(tree)
+  assert.match(text, /恢复失败/)
+  assert.match(text, /目标已变化/)
+  assert.match(text, /重试/)
+  assert.ok(!text.includes('confirm-secret-token'))
+
+  const resultCalls = calls.filter((call) => call.path === '/overwatch/api/runs/run_1/restores' && call.body?.phase === 'result')
+  assert.equal(resultCalls.length, 1)
+  assert.equal(resultCalls[0].body.result.ok, false)
+  assert.match(resultCalls[0].body.result.error, /Files changed/)
+  assert.ok(!JSON.stringify(resultCalls[0].body).includes('confirmToken'))
   harness.unmount()
 })

@@ -107,6 +107,15 @@ export class Probe {
     return state.events.filter(event => event.seq > since).slice(0, limit)
   }
 
+  /**
+   * Recorded pressure samples, oldest first, for the merged timeline. Bounded to
+   * the last 500 readings.
+   * @param {string} runId
+   */
+  pressureEvents(runId) {
+    return this.runs.get(runId)?.pressureSamples ?? []
+  }
+
   /** @param {string} runId */
   close(runId) {
     if (runId !== undefined) this.runs.delete(runId)
@@ -128,6 +137,7 @@ export class Probe {
         last: { swarm: fresh(), pressure: fresh(), fish: fresh() },
         childByMember: new Map(),
         pressureByChild: new Map(),
+        pressureSamples: [],
         raw: null,
         snapshot: emptySnapshot(runId, new Date(this.clock()).toISOString()),
       }
@@ -214,7 +224,8 @@ export class Probe {
         const response = await this.ports.pressure.live(childId)
         return { memberId, childId, response }
       }))
-      for (const { memberId, response } of results) {
+      for (const { memberId, childId, response } of results) {
+        if (process.env.OW_DEBUG) console.error('[probe] pressure resp', memberId, response.ok)
         if (response.ok !== true) {
           lastError = errorOf(response)
           continue
@@ -230,6 +241,14 @@ export class Probe {
           at: new Date(now).toISOString(),
           source: 'pressure',
         })
+        state.pressureSamples.push({
+          at: new Date(now).toISOString(),
+          memberId,
+          childId,
+          ratio: pressure,
+          failures: toNumber(view?.tools?.failures) ?? 0,
+        })
+        if (state.pressureSamples.length > 500) state.pressureSamples.splice(0, state.pressureSamples.length - 500)
         anyOk = true
       }
     }

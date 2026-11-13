@@ -1,0 +1,20 @@
+{
+  "id": "ck_m3",
+  "sourceId": "fish-a",
+  "createdAt": "2026-11-14T02:30:00.000Z",
+  "trigger": {
+    "kind": "diary"
+  },
+  "pinned": true,
+  "baseline": false,
+  "files": [
+    {
+      "path": "a.md",
+      "restorable": true
+    }
+  ],
+  "totals": {
+    "storedBytes": 42,
+    "logicalBytes": 80
+  }
+}

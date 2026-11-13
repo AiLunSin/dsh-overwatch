@@ -14,7 +14,7 @@
     http:
       token: m2-token
     ports:
-      origin: http://127.0.0.1:53906
+      origin: http://127.0.0.1:56467
       swarmToken: m2-swarm-token
     sampling:
       swarmEventMs: 500
@@ -40,5 +40,5 @@
         abortOnHardLimit: true
 - id: dsh-overwatch-m2-harness
   config:
-    port: 53906
+    port: 56467
     token: m2-swarm-token

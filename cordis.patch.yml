@@ -53,6 +53,10 @@
           dataDir: ''
           retentionDays: 90
           maxBytesPerRun: 52428800
+        ports:
+          swarmToken: ''
+        fish:
+          dataDir: ''
         http:
           enabled: true
           token: ''

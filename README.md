@@ -4,11 +4,11 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M2 值班员完成（experimental），M1 硬闸门是它的安全底座。** 仓库现在包含
-Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1/M2 探针与证据。`supervised` 编队
-会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的子代理；它提交
-结构化决定，由代码校验、执行、验证并记账。硬限（预算 80/95/100%、事件流缺口）
-始终由确定性 Guard 执行，不经过模型。
+**状态：M3 鱼缸/回放完成（恢复演练需浏览器凭据），M2 值班员 experimental，M1 是安全底座。**
+仓库包含 Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1/M2/M3 探针与证据。
+`supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
+子代理；它提交结构化决定，由代码校验、执行、验证并记账。硬限（预算 80/95/100%、
+事件流缺口）始终由确定性 Guard 执行，不经过模型。
 
 ---
 
@@ -25,14 +25,15 @@ Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1/M2 探针与证据。`sup
 | `src/guard.js` | ✅ | 无模型硬规则：throttle、hard pause、abort、log integrity |
 | `src/watch.js` | ✅ M2 | 值班员生命周期：懒启动、冷恢复唤醒、三工具注册、超时/预算/代际 |
 | `src/card.js` | ✅ M2 | ≤8KB 案情卡、按引用取证据、按严重度限定动作 |
+| `src/fish-index.js` | ✅ M3 | 只读 fishkeeper 检查点索引/manifest/audit 尾部；不读 blob |
 | `src/policy.js` | ✅ | 决定/guard plan 校验、授权矩阵、置信度门槛、幂等键 |
 | `src/executor.js` | ✅ | 校验→授权→执行→验证→记账；串行、幂等、崩溃恢复 |
 | `src/run.js` | ✅ | 每 run 状态机、锁、采样、Guard+Watch 调度、disarm 归档与交接班 |
 | `src/service.js` | ✅ | 多 run 注册、arm/disarm、历史归档、agent/created 与 usage 转发 |
 | `src/tools.js` | ✅ | 根 agent 的 `watch_arm/disarm/status/report` |
-| `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack |
-| `client.js` | ✅ | Web 面板：值班室（含值班员状态）+ 事件单 |
-| M3 鱼缸/回放、M4 基准发布 | ❌ | 下一步 |
+| `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/restores；doctor |
+| `client.js` | ✅ M3 | 值班室、事件单、鱼缸（检查点/恢复）、回放时间轴、doctor |
+| M4 基准与发布 | ❌ | 下一步 |
 
 ### 两层如何分工
 
@@ -48,6 +49,18 @@ Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1/M2 探针与证据。`sup
 `autopilot.pause` 只控制**值班员**的暂停建议；硬闸门用独立的
 `autopilot.pauseOnHardLimit`。值班员的工具表只有 `watch_case`、`watch_evidence`、
 `watch_decide`：`restrict` 在串行 `agent/created` 监听里同步施加，冷恢复时幂等重施。
+
+### M3 鱼缸 / 回放 / 恢复
+
+- **鱼缸**：Host 只读 `~/.dsh/fishkeeper`（`fish.dataDir` 可覆盖）的检查点索引、
+  manifest 摘要与 audit 尾部；面板同时走 fishkeeper 浏览器面（存在时）展示完整状态。
+- **恢复**：面板执行 fishkeeper 的 dryRun 预检 → 展示 files/warnings → 二次确认 →
+  执行；overwatch 只记录 `watch/restore/intent|result`，**拒绝任何 confirmToken**。
+- **回放**：`/runs/:id/timeline` 合并 swarm、pressure 采样与 watch 事件；
+  游标 `nextSince` 不透明，按 `(at, sourceRank, seq)` 固定顺序。
+- **doctor**：`/overwatch/api/doctor` 检查数据目录、服务链、上游、写 token、
+  鱼缸索引、每 run 锁/链/值班员与磁盘。
+- 鱼缸自动检查点/恢复仍不落 Host：fishkeeper 写路由只在浏览器面，Host fetch 401。
 
 ---
 
@@ -75,6 +88,8 @@ Web 面板需要 web profile；装好后侧边栏出现「瞭望塔」，
     ports:
       swarmToken: change-me    # 空 = 复用 http.token；必须与 swarm 的 http.token 一致
       origin: ''               # 空 = Host web server；headless/外部可用 http://127.0.0.1:PORT
+    fish:
+      dataDir: ''              # 空 = ~/.dsh/fishkeeper（fishkeeper 默认）
     supervisor:
       reserveRatio: 0.05       # R = clamp(B * ratio, 0, min(maxReserve, B*0.2))
       wakeTimeoutMs: 90000
@@ -110,20 +125,23 @@ HTTP 只读接口：
 curl http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx
 curl 'http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/cases?state=open'
 curl 'http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/timeline?since=0'
+curl http://127.0.0.1:PORT/overwatch/api/fish
+curl http://127.0.0.1:PORT/overwatch/api/doctor
 ```
 
-写接口需 `x-overwatch-token`：arm/disarm/ack。面板会展示值班员状态、唤醒次数、
-S/R token、超时和子会话，并区分 guard-only / supervised 横幅。
+写接口需 `x-overwatch-token`：arm/disarm/ack/restores。面板会展示值班员状态、
+唤醒次数、S/R token、超时和子会话，并区分 guard-only / supervised 横幅；
+鱼缸页展示检查点/审计与恢复流程，回放页展示合并时间轴。
 
 ---
 
 ## 4. 验证
 
 ```powershell
-npm test        # 99 个测试：链/锁/信号/事件单/Guard/Watch/卡/执行器/HTTP/服务/面板
+npm test        # 112 个测试：链/锁/信号/事件单/Guard/Watch/卡/鱼缸/执行器/HTTP/服务/面板
 npm run lint    # node --check 48 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
-npm run m1      # M1 硬闸门 web 端到端（25/25）
+npm run m1      # M1/M3 web 端到端（33/33）
 npm run m2      # M2 值班员 headless 端到端（12/12）
 ```
 
@@ -132,6 +150,8 @@ npm run m2      # M2 值班员 headless 端到端（12/12）
 - M0 证据：`e2e/m0/results/`；结论 [docs/spike-m0.md](./docs/spike-m0.md)。
 - M1 证据：`e2e/m1/results/`；结论 [docs/m1.md](./docs/m1.md)。
 - M2 证据：`e2e/m2/results/`；结论 [docs/m2.md](./docs/m2.md)。
+- M3 证据：`e2e/m1/results/`（33 项含 doctor/fish/timeline/restore）；
+  结论 [docs/m3.md](./docs/m3.md)。
 
 M2 真实宿主结果（脚本化 provider + 进程内假 swarm）：值班员 4 次模型请求的工具表
 始终只有三件套、`watch_decide(coach)` 被执行并写入 `steer`、S=26160/50000 tokens、
@@ -149,7 +169,10 @@ case `mitigated`、交接班 `shift-0001`、13 条 watch 哈希链全连续。
   到期 resume。没有"人类 resume"HTTP 路由（M3 面板动作）。
 - **"0 超支"以监管层存活为前提**：总支出上界是 `B + S`（S ≤ 5% × B）。
 - **值班员只做判断**：不写代码、不合并、不修 bug；没有 swarm/fs/bash/subagent 工具。
-- **鱼数据检查点/恢复**仍为 P1：需要浏览器凭据或新 Host 路由。
+- **鱼数据自动检查点/恢复仍是 P1**：fishkeeper 写路由只在浏览器面，Host fetch 401；
+  面板的浏览器恢复流程已实现，但**真实恢复演练未验收**（本环境没有可自动化的浏览器）。
+- **回放时间轴**只合并有 `at` 的 swarm/pressure/watch 条目；fishkeeper 的日记审计
+  在鱼缸页单独展示，未强绑到 run。
 - **面板未做真实浏览器自动化验收**（headless Edge 在本机会挂起）；HTTP 面有端到端。
 - **fake swarm 不是 dsh-swarm**：M1/M2 e2e 只验证 overwatch 的读写契约。
 
@@ -159,13 +182,13 @@ case `mitigated`、交接班 `shift-0001`、13 条 watch 哈希链全连续。
 
 ```text
 overwatch/
-├── src/                 # Host 半（Guard + Watch + Evidence）
-├── client.js            # Web 面板（值班室 + 事件单）
+├── src/                 # Host 半（Guard + Watch + Evidence + 鱼缸索引）
+├── client.js            # Web 面板（值班室 + 事件单 + 鱼缸 + 回放）
 ├── e2e/m0/              # M0 能力探针与结果
-├── e2e/m1/              # M1 假 swarm + web 探针 + 结果
+├── e2e/m1/              # M1/M3 假 swarm + web 探针 + 结果
 ├── e2e/m2/              # M2 进程内假 swarm + 脚本化 provider + headless runner + 结果
 ├── test/                # 单元/路由/服务/装配/面板测试
-├── docs/                # spike-m0.md、m1.md、m2.md、DETAIL.md
+├── docs/                # spike-m0.md、m1.md、m2.md、m3.md、DETAIL.md
 ├── cordis.patch.yml     # 组合包 patch 层
 └── scripts/             # 语法检查入口
 ```

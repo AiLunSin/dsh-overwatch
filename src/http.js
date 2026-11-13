@@ -103,6 +103,21 @@ async function handleRead(input) {
     sendJson(res, 200, { ...service.health(), asOf: asOf }, head)
     return
   }
+  if (rest.length === 1 && rest[0] === 'doctor') {
+    const doctor = await service.doctor()
+    sendJson(res, 200, { ...doctor, asOf: doctor.asOf ?? asOf }, head)
+    return
+  }
+  if (rest.length >= 1 && rest[0] === 'fish' && rest.length <= 2) {
+    const sourceId = rest.length === 2 ? validateFishSourceId(rest[1]) : undefined
+    const index = service.fishIndex(sourceId)
+    if (sourceId !== undefined && index.sources.length === 0) {
+      sendJson(res, 404, errorBody('FISH_SOURCE_NOT_FOUND', `fish source ${sourceId} not found`), head)
+      return
+    }
+    sendJson(res, 200, { ok: true, data: index, asOf: index.asOf ?? asOf }, head)
+    return
+  }
   if (rest.length === 2 && rest[0] === 'watch' && rest[1] === 'verify') {
     sendJson(res, 200, { ok: true, data: service.health().service.watch, asOf }, head)
     return
@@ -141,7 +156,7 @@ async function handleRead(input) {
     return
   }
   if (rest.length === 3 && rest[2] === 'timeline') {
-    const since = intParam(url, 'since', 0, 0)
+    const since = sinceParam(url)
     const limit = intParam(url, 'limit', 100, 1, 500)
     const page = service.timeline(runId, { since, limit })
     sendJson(res, 200, { ok: true, data: { ...page, asOf: asOfForRun } }, head)
@@ -214,6 +229,11 @@ async function handleWrite(input) {
     sendJson(res, 501, errorBody('NOT_IMPLEMENTED', 'purge is not implemented in M1; data is retained'))
     return
   }
+  if (action === 'restores' && rest.length === 3) {
+    const result = service.recordRestore(runId, body)
+    sendJson(res, 200, { ok: true, data: result })
+    return
+  }
   sendJson(res, 404, errorBody('NOT_FOUND', 'unknown overwatch write route'))
 }
 
@@ -248,6 +268,31 @@ function validateParam(raw, name) {
   return value
 }
 
+/**
+ * Timeline cursor: 0/absent or a legacy index for the first call, then the
+ * opaque `nextSince` string produced by the server.
+ * @param {URL} url
+ * @returns {number | string}
+ */
+function sinceParam(url) {
+  const raw = url.searchParams.get('since')
+  if (raw === null || raw === '' || raw === '0') return 0
+  if (raw.length > 300) throw badRequest('since must be at most 300 characters')
+  if (/^\d+$/.test(raw)) {
+    const value = Number.parseInt(raw, 10)
+    if (!Number.isSafeInteger(value) || value < 0) throw badRequest('since must be a non-negative integer or an opaque cursor')
+    return value
+  }
+  return raw
+}
+
+/** fishkeeper source ids allow dots and colons as well. @param {string} raw */
+function validateFishSourceId(raw) {
+  const value = decodeURIComponent(raw)
+  if (!/^[A-Za-z0-9._:-]{1,200}$/.test(value)) throw badRequest('sourceId must match [A-Za-z0-9._:-]{1,200}')
+  return value
+}
+
 /** @param {URL} url @param {string} name @param {number} fallback @param {number} min @param {number} [max] */
 function intParam(url, name, fallback, min, max = Number.MAX_SAFE_INTEGER) {
   const raw = url.searchParams.get(name)
@@ -260,7 +305,8 @@ function intParam(url, name, fallback, min, max = Number.MAX_SAFE_INTEGER) {
 /** @param {string} code */
 function statusFor(code) {
   if (code === 'INVALID_ARGUMENT' || code === 'INVALID_BODY' || code.startsWith('INVALID_')) return 400
-  if (code === 'NOT_FOUND' || code === 'RUN_NOT_FOUND' || code === 'CASE_NOT_FOUND') return 404
+  if (code === 'RESTORE_TOKEN_REJECTED' || code === 'INVALID_RESTORE') return 400
+  if (code === 'NOT_FOUND' || code === 'RUN_NOT_FOUND' || code === 'CASE_NOT_FOUND' || code === 'FISH_SOURCE_NOT_FOUND') return 404
   if (code === 'ALREADY_ARMED' || code === 'RUN_NOT_ARMED' || code === 'RUN_NOT_RUNNING' || code === 'CASE_CLOSED' || code === 'ELOCKED' || code === 'SUPERVISOR_UNAVAILABLE') return 409
   if (code === 'SWARM_UNAVAILABLE' || code === 'WEB_UNAVAILABLE' || code === 'SERVICE_LOG_CLOSED') return 503
   if (code === 'BODY_TOO_LARGE') return 413

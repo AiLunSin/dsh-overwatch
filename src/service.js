@@ -7,8 +7,9 @@
  * @module dsh-overwatch/service
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statfsSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { readFishIndex, resolveFishDataDir } from './fish-index.js'
 import { createPorts } from './ports/index.js'
 import { RunSupervisor } from './run.js'
 import { readWatchLog } from './store.js'
@@ -46,6 +47,7 @@ export class OverwatchService {
     }))
     this.dataDir = resolveDataDir(options.config.storage)
     this.runsDir = path.join(this.dataDir, 'runs')
+    this.fishDir = resolveFishDataDir(this.config.fish)
     this.instanceId = newId('ow')
     /** @type {Map<string, RunSupervisor>} */
     this.runs = new Map()
@@ -305,6 +307,91 @@ export class OverwatchService {
     return supervisor.acknowledge(caseId, note)
   }
 
+  /**
+   * Record a browser-performed fishkeeper restore. The browser owns the
+   * confirmToken; overwatch only records the intent/result for evidence.
+   * @param {string} runId
+   * @param {any} input
+   */
+  recordRestore(runId, input) {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; restore evidence needs a live watch log')
+    return supervisor.recordRestore(input)
+  }
+
+  /**
+   * Read-only host index of fishkeeper checkpoints and audit tails.
+   * @param {string} [sourceId]
+   */
+  fishIndex(sourceId) {
+    return readFishIndex({ dataDir: this.fishDir, sourceId })
+  }
+
+  /**
+   * Doctor: configuration-independent checks with pass/warn/fail. Never writes
+   * into fishkeeper or the swarm; only probes the overwatch data directory.
+   */
+  async doctor() {
+    /** @type {Array<{ id: string, status: 'pass'|'warn'|'fail', detail: any }>} */
+    const checks = []
+    const add = (id, status, detail) => checks.push({ id, status, detail })
+    try {
+      ensureDir(path.join(this.dataDir, 'tmp'))
+      const probe = path.join(this.dataDir, 'tmp', `doctor-${process.pid}-${Date.now()}.tmp`)
+      writeFileSync(probe, 'ok', 'utf8')
+      unlinkSync(probe)
+      add('data-dir', 'pass', { path: this.dataDir, writable: true })
+    } catch (error) {
+      add('data-dir', 'fail', { path: this.dataDir, error: messageOf(error) })
+    }
+    const log = this.serviceLog.verify()
+    add('service-log', log.ok ? 'pass' : 'fail', log)
+    add('write-token', this.config.http.token === '' ? 'warn' : 'pass', { configured: this.config.http.token !== '' })
+    if (this.ports === null) {
+      add('upstreams', 'fail', { error: 'ports are not attached; no Host web server or ports.origin' })
+    } else {
+      const [swarm, pressure, fish] = await Promise.all([
+        this.ports.swarm.health(),
+        this.ports.pressure.health(),
+        this.ports.fish.overview(),
+      ])
+      add('swarm', swarm.ok === true ? 'pass' : 'fail', { status: swarm.status, error: swarm.error })
+      add('pressure', pressure.ok === true ? 'pass' : 'warn', { status: pressure.status, error: pressure.error })
+      add('fishkeeper-write', fish.ok === true ? 'pass' : 'warn', {
+        status: fish.status,
+        error: fish.error,
+        note: fish.ok === true ? null : 'fishkeeper routes are browser-authenticated; automatic restore stays P1',
+      })
+    }
+    const fishIndex = readFishIndex({ dataDir: this.fishDir, maxCheckpoints: 20, maxAudit: 5 })
+    add('fish-index', fishIndex.available ? (fishIndex.errors.length === 0 ? 'pass' : 'warn') : 'warn', {
+      path: this.fishDir,
+      available: fishIndex.available,
+      sources: fishIndex.sources.length,
+      checkpoints: fishIndex.checkpoints,
+      errors: fishIndex.errors.slice(0, 5),
+    })
+    for (const [runId, supervisor] of this.runs) {
+      const health = supervisor.health()
+      add(`run:${runId}`, health.log.ok ? (health.lock.held ? 'pass' : 'warn') : 'fail', {
+        state: health.state,
+        mode: health.mode,
+        lock: health.lock,
+        log: { ok: health.log.ok, count: health.log.count, error: health.log.error },
+        watch: health.watch?.state ?? 'disabled',
+      })
+    }
+    try {
+      const stats = statfsSync(this.dataDir)
+      const freeBytes = stats.bavail * stats.bsize
+      add('disk-free', freeBytes > 200 * 1024 * 1024 ? 'pass' : 'warn', { freeBytes })
+    } catch (error) {
+      add('disk-free', 'warn', { error: messageOf(error) })
+    }
+    const ok = checks.every(check => check.status !== 'fail')
+    return { ok, version: this.version, dataDir: this.dataDir, checks, asOf: new Date(this.clock()).toISOString() }
+  }
+
   /** @param {string} runId */
   report(runId) {
     const supervisor = this.runs.get(runId)
@@ -350,6 +437,10 @@ export class OverwatchService {
       service: { watch: { ok: verify.ok, events: verify.count, lastHash: verify.lastHash, error: verify.error } },
       http: { enabled: this.config.http.enabled, write: this.config.http.token !== '' },
       capabilities: this.capabilities(),
+      fish: (() => {
+        const index = readFishIndex({ dataDir: this.fishDir, maxCheckpoints: 10, maxAudit: 1 })
+        return { available: index.available, sources: index.sources.length, checkpoints: index.checkpoints, errors: index.errors.length }
+      })(),
       runs,
     }
   }
@@ -575,10 +666,10 @@ function filterCases(records, query) {
     .slice(0, limit)
 }
 
-/** @param {string} dir @param {string} runId @param {{ since?: number, limit?: number }} query */
+/** @param {string} dir @param {string} runId @param {{ since?: number | string, limit?: number }} query */
 function archiveTimeline(dir, runId, query) {
   const { events } = readWatchLog(dir, runId)
-  const since = Math.max(0, Math.trunc(query.since ?? 0))
+  const since = query.since ?? 0
   const limit = Math.min(Math.max(query.limit ?? 100, 1), 500)
   const normalized = events.map(event => ({
     seq: event.seq,
@@ -587,9 +678,30 @@ function archiveTimeline(dir, runId, query) {
     at: event.at,
     actor: event.actor,
     summary: summarizeWatchEvent(event),
+    orderKey: `${event.at}|3|watch:${event.seq}`,
   }))
-  const page = normalized.slice(since, since + limit)
-  return { events: page, nextSince: since + page.length, total: normalized.length }
+  let start = 0
+  if (typeof since === 'string' && since !== '' && since !== '0') {
+    const exact = normalized.findIndex(entry => entry.orderKey === since)
+    if (exact >= 0) start = exact + 1
+    else {
+      const next = normalized.findIndex(entry => entry.orderKey > since)
+      start = next < 0 ? normalized.length : next
+    }
+  } else {
+    start = Math.max(0, Math.trunc(Number(since) || 0))
+  }
+  const page = normalized.slice(start, start + limit)
+  return {
+    events: page.map(({ orderKey: _orderKey, ...entry }) => entry),
+    nextSince: page.at(-1)?.orderKey ?? (typeof since === 'string' ? since : 0),
+    total: normalized.length,
+  }
+}
+
+/** @param {unknown} error */
+function messageOf(error) {
+  return error instanceof Error ? error.message : String(error)
 }
 
 /** @param {any} event */

@@ -42,10 +42,38 @@ const temp = mkdtempSync(path.join(os.tmpdir(), 'overwatch-m1-'))
 const home = path.join(temp, 'home')
 const work = path.join(temp, 'work')
 const resultsDir = path.join(temp, 'results')
+const fishDir = path.join(temp, 'fish-data')
 const publishedDir = path.join(repoRoot, 'e2e', 'm1', 'results')
 mkdirSync(home, { recursive: true })
 mkdirSync(work, { recursive: true })
 mkdirSync(resultsDir, { recursive: true })
+mkdirSync(path.join(fishDir, 'checkpoints', 'fish-a', 'ck_m3'), { recursive: true })
+mkdirSync(path.join(fishDir, 'audit'), { recursive: true })
+writeFileSync(path.join(fishDir, 'checkpoints', 'fish-a', 'index.jsonl'), `${JSON.stringify({
+  schemaVersion: 1,
+  id: 'ck_m3',
+  createdAt: '2026-11-14T02:30:00.000Z',
+  trigger: 'diary',
+  files: 1,
+  storedBytes: 42,
+  pinned: false,
+})}\n`, 'utf8')
+writeFileSync(path.join(fishDir, 'checkpoints', 'fish-a', 'ck_m3', 'manifest.json'), `${JSON.stringify({
+  id: 'ck_m3',
+  sourceId: 'fish-a',
+  createdAt: '2026-11-14T02:30:00.000Z',
+  trigger: { kind: 'diary' },
+  pinned: true,
+  baseline: false,
+  files: [{ path: 'a.md', restorable: true }],
+  totals: { storedBytes: 42, logicalBytes: 80 },
+}, null, 2)}\n`, 'utf8')
+writeFileSync(path.join(fishDir, 'audit', 'fish-a.actions.jsonl'), `${JSON.stringify({
+  schemaVersion: 1,
+  at: '2026-11-14T02:31:00.000Z',
+  action: 'pin',
+  checkpointId: 'ck_m3',
+})}\n`, 'utf8')
 
 // The runner itself may be launched from a DSH session; do not leak that
 // session's profile, install anchor, permission mode, or previous M1 env.
@@ -124,6 +152,8 @@ function createProfile() {
     '      token: m1-token',
     '    ports:',
     '      swarmToken: m1-swarm-token',
+    '    fish:',
+    `      dataDir: '${fishDir.replaceAll('\\', '/')}'`,
     '    sampling:',
     '      swarmEventMs: 500',
     '      swarmSnapshotMs: 500',
@@ -386,6 +416,9 @@ async function main() {
         if (existsSync(path.join(resultsDir, 'report.json'))) {
           copyFileSync(path.join(resultsDir, 'report.json'), path.join(publishedDir, 'report.json'))
         }
+        copyFileSync(path.join(fishDir, 'checkpoints', 'fish-a', 'index.jsonl'), path.join(publishedDir, 'fish-index.jsonl'))
+        copyFileSync(path.join(fishDir, 'checkpoints', 'fish-a', 'ck_m3', 'manifest.json'), path.join(publishedDir, 'fish-manifest.json'))
+        copyFileSync(path.join(fishDir, 'audit', 'fish-a.actions.jsonl'), path.join(publishedDir, 'fish-audit.jsonl'))
         summary.watchFiles = publishWatchFiles(run.dataDir, publishedDir)
       } catch (error) {
         publishErrors.push(`evidence: ${error instanceof Error ? error.message : String(error)}`)

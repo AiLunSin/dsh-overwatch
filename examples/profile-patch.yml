@@ -8,6 +8,8 @@
     ports:
       swarmToken: change-me   # optional; defaults to http.token (must match swarm http.token)
       origin: ''              # optional; empty = Host web server, e.g. http://127.0.0.1:3000
+    fish:
+      dataDir: ''             # empty = ~/.dsh/fishkeeper (fishkeeper's default)
     supervisor:
       enabled: true
       agentPreset: ''         # optional preset id for the watch child
