@@ -1,0 +1,4 @@
+# M0 test-only bundle: the probe that verifies the assumptions in the plan.
+- insert:
+    - id: dsh-overwatch-m0-probe
+      name: dsh-overwatch-m0-probe

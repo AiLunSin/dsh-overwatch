@@ -1,0 +1,51 @@
+{
+  "name": "dsh-overwatch",
+  "version": "0.1.0",
+  "description": "Supervised swarm for DeepSeek Harness: a watch officer agent, deterministic hard guards, and cross-source evidence.",
+  "license": "MIT",
+  "author": "dsh-overwatch contributors",
+  "type": "module",
+  "keywords": [
+    "deepseek",
+    "dsh",
+    "dsh-plugin",
+    "dsh-bundle",
+    "agents",
+    "supervision",
+    "observability",
+    "budget"
+  ],
+  "exports": {
+    ".": "./src/index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg"
+  },
+  "files": [
+    "src",
+    "cordis.patch.yml",
+    "locale",
+    "icon.svg",
+    "docs",
+    "examples",
+    "scripts",
+    "README.md",
+    "LICENSE",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "lint": "node scripts/check-syntax.mjs",
+    "check": "npm run lint && npm test",
+    "m0": "node e2e/m0/run.mjs"
+  },
+  "engines": {
+    "node": ">=22",
+    "dsh": ">=0.2.2-rc.3 <0.3.0"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

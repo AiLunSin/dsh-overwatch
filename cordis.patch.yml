@@ -1,0 +1,55 @@
+# dsh-overwatch bundle layer.
+# A profile-level patch can override this row by id (mode, thresholds, autopilot).
+- insert:
+    - id: dsh-overwatch
+      name: dsh-overwatch
+      config:
+        enabled: true
+        mode: guard
+        supervisor:
+          enabled: true
+          provider: spawn
+          model: inherit
+          reserveRatio: 0.05
+          maxReserveTokens: 200000
+          maxWakes: 30
+          maxWakesPerHour: 6
+          wakeTimeoutMs: 90000
+          maxEvidenceBytes: 8192
+          maxEvidenceCalls: 3
+          maxTokensPerWake: 20000
+        sampling:
+          swarmEventMs: 1000
+          swarmSnapshotMs: 5000
+          pressureMs: 3000
+          fishMs: 15000
+          staleMs: 30000
+          requestTimeoutMs: 3000
+          maxInflight: 4
+        policy:
+          cooldownMs: 900000
+          maxAutoInterventions: 5
+          twoSignalRule: true
+          autopilot:
+            throttle: true
+            pause: false
+            abortOnHardLimit: true
+            budgetAdjust: false
+            restore: false
+        thresholds:
+          contextPressure: 0.85
+          contextExit: 0.70
+          budgetPressure: 0.80
+          budgetPause: 0.95
+          failureStreak: 3
+          stallMs: 600000
+          reviewDeadlockMs: 900000
+          maxResultTokens: 12000
+          maxOpenCases: 20
+        storage:
+          dataDir: ''
+          retentionDays: 90
+          maxBytesPerRun: 52428800
+        http:
+          enabled: true
+          token: ''

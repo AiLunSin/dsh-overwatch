@@ -1,0 +1,14 @@
+# Example profile override for dsh-overwatch.
+# Merge this row into the profile's own cordis.patch.yml, then restart DSH.
+- id: dsh-overwatch
+  config:
+    mode: supervised          # observe | guard | supervised
+    http:
+      token: change-me        # empty disables writes
+    policy:
+      autopilot:
+        throttle: true
+        pause: false          # pause stays human-only in v1
+        abortOnHardLimit: true
+        budgetAdjust: false
+        restore: false

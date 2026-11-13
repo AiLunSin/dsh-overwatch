@@ -1,0 +1,15 @@
+{
+  "name": "dsh-fake-llm",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Offline scripted LLM adapter for the dsh-overwatch M0 probe. Test only; never published.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

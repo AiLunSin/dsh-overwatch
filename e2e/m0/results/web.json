@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "stage": "web",
+  "startedAt": "2026-11-13T17:17:28.494Z",
+  "finishedAt": "2026-11-13T17:17:30.930Z",
+  "env": {
+    "node": "v24.21.0",
+    "platform": "win32",
+    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home",
+    "profile": null
+  },
+  "checks": {
+    "A-4": {
+      "status": "pass",
+      "evidence": {
+        "url": "http://127.0.0.1:54213/swarm/api/health",
+        "httpStatus": 200,
+        "error": null,
+        "body": {
+          "ok": true,
+          "runs": 0,
+          "baseDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home\\swarm"
+        }
+      },
+      "at": "2026-11-13T17:17:30.916Z"
+    },
+    "A-5": {
+      "status": "pass",
+      "evidence": {
+        "url": "http://127.0.0.1:54213/api/fishkeeper/overview",
+        "httpStatus": 401,
+        "reachableFromHost": false,
+        "interpretation": "host fetch was rejected; automatic fishkeeper writes need the browser credential or a new host route",
+        "body": "unauthorized"
+      },
+      "at": "2026-11-13T17:17:30.919Z"
+    },
+    "A-8": {
+      "status": "pass",
+      "evidence": {
+        "registered": true,
+        "handlerCalls": 2,
+        "results": {
+          "crossOrigin": {
+            "status": 200,
+            "body": "{\"calls\":1,\"origin\":\"https://evil.example\",\"token\":null}"
+          },
+          "noHeaders": {
+            "status": 200,
+            "body": "{\"calls\":2,\"origin\":null,\"token\":null}"
+          }
+        },
+        "interpretation": "the Host web server applies no origin/token policy of its own; the route owner must (overwatch does)"
+      },
+      "at": "2026-11-13T17:17:30.925Z"
+    },
+    "A-8-OVERWATCH": {
+      "status": "pass",
+      "evidence": {
+        "getHealth": 200,
+        "postWithoutToken": 403,
+        "postWithWrongToken": 403,
+        "expected": "GET 200; POST 403 WRITE_DISABLED with an empty token"
+      },
+      "at": "2026-11-13T17:17:30.930Z"
+    }
+  },
+  "loop": null,
+  "watch": null,
+  "errors": []
+}

@@ -1,0 +1,9 @@
+node_modules/
+.tmp/
+*.log
+coverage/
+.DS_Store
+
+# The web run log contains a launch token URL; never commit it.
+e2e/m0/results/web-run.log
+e2e/m0/results/web-run.err.log

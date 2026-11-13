@@ -1,0 +1,4 @@
+# M0 test-only bundle: the scripted provider used by the headless probe.
+- insert:
+    - id: dsh-fake-llm
+      name: dsh-fake-llm

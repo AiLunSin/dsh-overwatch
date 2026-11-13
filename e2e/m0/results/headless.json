@@ -1,0 +1,220 @@
+{
+  "schemaVersion": 1,
+  "stage": "headless",
+  "startedAt": "2026-11-13T17:17:24.582Z",
+  "finishedAt": "2026-11-13T17:17:26.353Z",
+  "env": {
+    "node": "v24.21.0",
+    "platform": "win32",
+    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-fFYjJY\\home",
+    "profile": null
+  },
+  "checks": {
+    "A-1": {
+      "status": "pass",
+      "evidence": {
+        "globalToolsBefore": [
+          "job_output",
+          "job_list",
+          "job_kill",
+          "web_search",
+          "web_fetch",
+          "todo_write",
+          "exit_plan_mode",
+          "get_goal",
+          "create_goal",
+          "update_goal",
+          "read",
+          "write",
+          "edit",
+          "glob",
+          "grep",
+          "skill",
+          "working_directory",
+          "pwsh",
+          "read_image",
+          "list_agents",
+          "wait_agent",
+          "send_message",
+          "workflow",
+          "subagent",
+          "subagent_fork",
+          "team_task_create",
+          "team_task_list",
+          "team_task_get",
+          "team_task_update",
+          "swarm_start",
+          "swarm_status",
+          "swarm_task",
+          "swarm_bid",
+          "swarm_submit",
+          "swarm_dispatch",
+          "swarm_review",
+          "swarm_merge",
+          "swarm_board",
+          "swarm_message",
+          "swarm_inbox",
+          "swarm_intervene"
+        ],
+        "afterRestrict": [],
+        "visibleAfterScopedRegister": [
+          "watch_decide",
+          "m0_hold"
+        ],
+        "firstModelRequestTools": [
+          "m0_hold",
+          "watch_decide"
+        ],
+        "globalToolsStillVisible": [],
+        "llmRequests": 2
+      },
+      "at": "2026-11-13T17:17:24.905Z"
+    },
+    "A-3": {
+      "status": "pass",
+      "evidence": {
+        "usage": {
+          "input": 5000,
+          "output": 160,
+          "calls": 4
+        },
+        "assistantMessages": 2
+      },
+      "at": "2026-11-13T17:17:24.906Z"
+    },
+    "LOOP": {
+      "status": "pass",
+      "evidence": {
+        "caseId": "case-m0",
+        "evidenceRef": "ev-budget-1",
+        "action": "throttle",
+        "decisionCalls": 1,
+        "portState": {
+          "applies": 1,
+          "throttled": true
+        },
+        "watchEvents": [
+          {
+            "seq": 1,
+            "type": "watch/case/opened"
+          },
+          {
+            "seq": 2,
+            "type": "watch/action/intended"
+          },
+          {
+            "seq": 3,
+            "type": "watch/action/executed"
+          },
+          {
+            "seq": 4,
+            "type": "watch/action/verified"
+          }
+        ],
+        "chainOk": true,
+        "ok": true
+      },
+      "at": "2026-11-13T17:17:24.907Z"
+    },
+    "A-9": {
+      "status": "pass",
+      "evidence": {
+        "maxActiveSubagents": 3,
+        "anchorOccupies": 1,
+        "admitted": 2,
+        "expectedAdmitted": 2,
+        "rejected": [
+          {
+            "code": "ACTIVATION_LIMIT_REACHED"
+          }
+        ],
+        "interpretation": "the anchor child occupies one slot; the root is not counted, so capacity 3 admits two capacity-probe children"
+      },
+      "at": "2026-11-13T17:17:26.158Z"
+    },
+    "A-7": {
+      "status": "pass",
+      "evidence": {
+        "preset": "m0-watch",
+        "stopReason": "completed"
+      },
+      "at": "2026-11-13T17:17:26.183Z"
+    },
+    "A-2": {
+      "status": "pass",
+      "evidence": {
+        "residentBeforeSend": false,
+        "pings": [
+          {
+            "n": 1,
+            "replied": true,
+            "assistantMessages": 3
+          },
+          {
+            "n": 2,
+            "replied": true,
+            "assistantMessages": 4
+          }
+        ]
+      },
+      "at": "2026-11-13T17:17:26.323Z"
+    },
+    "A-4": {
+      "status": "blocked",
+      "evidence": {
+        "reason": "headless stage has no Host web server; see the web-stage report"
+      },
+      "at": "2026-11-13T17:17:26.351Z"
+    },
+    "A-5": {
+      "status": "blocked",
+      "evidence": {
+        "reason": "headless stage has no Host web server; see the web-stage report"
+      },
+      "at": "2026-11-13T17:17:26.352Z"
+    },
+    "A-8": {
+      "status": "blocked",
+      "evidence": {
+        "reason": "headless stage has no Host web server; see the web-stage report"
+      },
+      "at": "2026-11-13T17:17:26.353Z"
+    }
+  },
+  "loop": {
+    "caseId": "case-m0",
+    "evidenceRef": "ev-budget-1",
+    "action": "throttle",
+    "decisionCalls": 1,
+    "portState": {
+      "applies": 1,
+      "throttled": true
+    },
+    "watchEvents": [
+      {
+        "seq": 1,
+        "type": "watch/case/opened"
+      },
+      {
+        "seq": 2,
+        "type": "watch/action/intended"
+      },
+      {
+        "seq": 3,
+        "type": "watch/action/executed"
+      },
+      {
+        "seq": 4,
+        "type": "watch/action/verified"
+      }
+    ],
+    "chainOk": true,
+    "ok": true
+  },
+  "watch": {
+    "childId": "4fdb0864-29e1-4973-a62c-281581049ae9",
+    "name": "m0-watch",
+    "stopReason": "completed"
+  },
+  "errors": []
+}

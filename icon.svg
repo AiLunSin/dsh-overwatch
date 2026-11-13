@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Overwatch watchtower">
+  <defs>
+    <linearGradient id="dsho-bg" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#b45309"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="16" fill="url(#dsho-bg)"/>
+  <path d="M22 20h20l-2.4 8H24.4Z" fill="#ffffff" fill-opacity=".92"/>
+  <path d="M25 30h14l4 18H21Z" fill="none" stroke="#ffffff" stroke-opacity=".9" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M28 36h8M26.8 43h10.4" stroke="#ffffff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="32" cy="20" r="3.1" fill="#fbbf24"/>
+  <path d="M32 14.6c5.2 0 9.4 2.4 9.4 5.4S37.2 25.4 32 25.4s-9.4-2.4-9.4-5.4 4.2-5.4 9.4-5.4Z" fill="none" stroke="#fbbf24" stroke-opacity=".7" stroke-width="1.6"/>
+</svg>
