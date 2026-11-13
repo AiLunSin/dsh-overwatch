@@ -15,7 +15,7 @@ import { CaseManager } from './cases.js'
 import { Executor } from './executor.js'
 import { evaluateGuard } from './guard.js'
 import { Probe } from './probe.js'
-import { evaluateSnapshot, contextPressureSignal, failureStreakSignal, stallSignal } from './signals.js'
+import { evaluateSnapshot, conflictStormSignal, contextPressureSignal, failureStreakSignal, gatePingpongSignal, reviewDeadlockSignal, stallSignal } from './signals.js'
 import { WatchStore } from './store.js'
 import { atomicWriteJson, clamp, ensureDir, sha256 } from './util.js'
 import { WatchOfficer } from './watch.js'
@@ -59,6 +59,8 @@ export class RunSupervisor {
     this.lastSampleRatio = -1
     this.lastSampleStatus = null
     this.lastErrorAt = 0
+    this.lastTickAt = null
+    this.clockJumpAt = null
     this.noticeAt = new Map()
     /** @type {{ active: boolean, actionId: string, caseId: string, dueAt: number, minutes: number } | null} */
     this.throttle = null
@@ -239,6 +241,22 @@ export class RunSupervisor {
     if (this.ticking) return
     this.ticking = true
     try {
+      if (this.lastTickAt !== null) {
+        const delta = now - this.lastTickAt
+        if (delta > 60_000 || delta < -1_000) {
+          this.clockJumpAt = now
+          this.noticeAt.clear()
+          this.guardState.lastActions.clear()
+          this.wakeTimes = []
+          this.lastSampleAt = 0
+          this.store.append({
+            type: 'watch/clock/jump',
+            actor: 'system',
+            payload: { deltaMs: delta, from: new Date(this.lastTickAt).toISOString(), to: new Date(now).toISOString() },
+          })
+        }
+      }
+      this.lastTickAt = now
       const sampled = await this.probe.tick(this.runId, now)
       const snapshot = sampled.snapshot
       const signals = this.#signals(snapshot, now)
@@ -314,11 +332,6 @@ export class RunSupervisor {
         ref: { runId: this.runId },
         at: snapshot.asOf,
       },
-      run: {
-        status: String(snapshot.status ?? 'unknown'),
-        lastEventAt: String(snapshot.lastEventAt ?? snapshot.asOf),
-        ref: { runId: this.runId },
-      },
       eventGap: snapshot.eventGap ?? undefined,
     }, this.config)
 
@@ -341,14 +354,36 @@ export class RunSupervisor {
         if (signal !== null) signals.push(signal)
       }
     }
+    // Event-history rules: gate ping-pong, review deadlock, conflict storm.
+    const counters = this.probe.runCounters(this.runId, now)
+    for (const gate of counters.gateFailures) {
+      const signal = gatePingpongSignal(gate, this.config.thresholds)
+      if (signal !== null) signals.push(signal)
+    }
+    for (const review of counters.reviews) {
+      if (review.merged === true) continue
+      const signal = reviewDeadlockSignal(review, this.config.thresholds)
+      if (signal !== null) signals.push(signal)
+    }
+    if (counters.conflicts.length > 0) {
+      const last = counters.conflicts.at(-1)
+      const signal = conflictStormSignal(
+        { count: counters.conflicts.length, files: last?.files ?? [], at: last?.at },
+        this.config.thresholds,
+      )
+      if (signal !== null) signals.push(signal)
+    }
     // A run that is still open but silent for the stall window is worth a case
-    // even though the guard does not act on it in M1.
-    const stall = stallSignal({
-      status: String(snapshot.status ?? 'unknown'),
-      lastEventAt: String(snapshot.lastEventAt ?? snapshot.asOf),
-      now,
-      ref: { runId: this.runId },
-    }, this.config.thresholds)
+    // even though the guard does not act on it in M1. A wall-clock jump must not
+    // fabricate a stall in the same tick.
+    const stall = this.clockJumpAt !== null && now - this.clockJumpAt <= 60_000
+      ? null
+      : stallSignal({
+          status: String(snapshot.status ?? 'unknown'),
+          lastEventAt: String(snapshot.lastEventAt ?? snapshot.asOf),
+          now,
+          ref: { runId: this.runId },
+        }, this.config.thresholds)
     if (stall !== null) signals.push(stall)
     return signals
   }

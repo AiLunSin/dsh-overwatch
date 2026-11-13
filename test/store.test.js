@@ -86,6 +86,41 @@ test('a torn final line is truncated, a corruption before it is not', async () =
   await assert.rejects(() => corrupt.open(), /corrupt at line 2/)
 })
 
+test('payloads are scrubbed before they enter the hash chain', async () => {
+  const dir = tempDir()
+  const store = new WatchStore({ dir, runId: 'run-secret', lockWaitMs: 10 })
+  await store.open()
+  store.append({
+    type: 'watch/restore/result',
+    payload: {
+      note: 'contact ops@example.com or use sk-abcdefghijklmnopqrstuvwx',
+      authorization: 'Bearer abcdefghijklmnop',
+      nested: { token: 'secret-token-value', count: 3 },
+    },
+  })
+  const [event] = store.read()
+  const text = JSON.stringify(event.payload)
+  assert.match(text, /<email>/)
+  assert.match(text, /<key>/)
+  assert.match(text, /Bearer <redacted>/)
+  assert.match(text, /<redacted>/)
+  assert.equal(event.payload.nested.count, 3)
+  assert.equal(store.verify().ok, true)
+  store.close()
+})
+
+test('the size cap stops the writer with EWATCHFULL', async () => {
+  const dir = tempDir()
+  const store = new WatchStore({ dir, runId: 'run-full', maxBytes: 200, lockWaitMs: 10 })
+  await store.open()
+  store.append({ type: 'watch/armed', payload: { pad: 'x'.repeat(500) } })
+  assert.throws(
+    () => store.append({ type: 'watch/sample', payload: { pad: 'x'.repeat(500) } }),
+    error => error.code === 'EWATCHFULL',
+  )
+  store.close()
+})
+
 test('a second writer is refused while the first holds the lock', async () => {
   const dir = tempDir()
   const first = new WatchStore({ dir, runId: 'run-e', lockWaitMs: 10 })

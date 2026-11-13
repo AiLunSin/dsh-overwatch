@@ -347,6 +347,17 @@ test('a watch timeout is recorded, the case stays open, and the guard remains in
   assert.match(shift.id, /^shift-/)
 })
 
+test('a wall-clock jump is recorded and does not fabricate a stall', async () => {
+  const h = await harness(0.1)
+  await h.supervisor.arm({ mode: 'guard' })
+  h.advance(90 * 60_000)
+  await h.supervisor.tick()
+  assert.ok(h.supervisor.store.read().some(event => event.type === 'watch/clock/jump'))
+  assert.equal(h.supervisor.cases({ state: 'open' }).filter(record => record.code === 'stalled_dispatch').length, 0)
+  assert.equal(h.supervisor.store.verify().ok, true)
+  await h.supervisor.disarm('test over')
+})
+
 test('the merged timeline includes swarm, pressure and watch with an opaque cursor', async () => {
   const h = await harness(0.1)
   await h.supervisor.arm({ mode: 'guard' })

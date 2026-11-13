@@ -202,6 +202,81 @@ export function eventGapSignal(input = {}) {
 }
 
 /**
+ * The same task keeps failing its gate. L2: stop re-dispatching and escalate,
+ * but do not kill the run.
+ * @param {{ taskId: string, failures: number, at?: string }} input
+ * @param {{ gateFailures: number }} thresholds
+ * @returns {Signal | null}
+ */
+export function gatePingpongSignal(input, thresholds) {
+  if (input.failures < thresholds.gateFailures) return null
+  return {
+    code: 'gate_pingpong',
+    severity: 'L2',
+    summary: `task ${input.taskId} failed its gate ${input.failures} times (threshold ${thresholds.gateFailures})`,
+    suggestedAction: 'escalate',
+    evidence: {
+      id: evidenceId('swarm', 'gate_pingpong', `${input.taskId}:${input.failures}`),
+      source: 'swarm',
+      kind: 'gate',
+      at: input.at ?? new Date(0).toISOString(),
+      ref: { taskId: input.taskId },
+      observed: { taskId: input.taskId, failures: input.failures, threshold: thresholds.gateFailures },
+    },
+  }
+}
+
+/**
+ * A review has been open longer than the deadlock window without quorum.
+ * @param {{ patchId: string, taskId: string, ageMs: number, reviewers: number, votes: number, at?: string }} input
+ * @param {{ reviewDeadlockMs: number }} thresholds
+ * @returns {Signal | null}
+ */
+export function reviewDeadlockSignal(input, thresholds) {
+  if (!(input.ageMs >= thresholds.reviewDeadlockMs)) return null
+  if (input.votes >= input.reviewers) return null
+  return {
+    code: 'review_deadlock',
+    severity: 'L2',
+    summary: `review ${input.patchId} has been open ${Math.round(input.ageMs / 1000)}s (${input.votes}/${input.reviewers} votes)`,
+    suggestedAction: 'escalate',
+    evidence: {
+      id: evidenceId('swarm', 'review_deadlock', `${input.patchId}:${Math.floor(input.ageMs / thresholds.reviewDeadlockMs)}`),
+      source: 'swarm',
+      kind: 'review',
+      at: input.at ?? new Date(0).toISOString(),
+      ref: { patchId: input.patchId, taskId: input.taskId },
+      observed: { patchId: input.patchId, taskId: input.taskId, ageMs: input.ageMs, reviewers: input.reviewers, votes: input.votes, threshold: thresholds.reviewDeadlockMs },
+    },
+  }
+}
+
+/**
+ * Several merge conflicts in one run. The guard cannot resolve them; it opens a
+ * case so the run is visible and a human/watch officer can serialize the merge.
+ * @param {{ count: number, files?: string[], at?: string }} input
+ * @param {{ conflictStorm: number }} thresholds
+ * @returns {Signal | null}
+ */
+export function conflictStormSignal(input, thresholds) {
+  if (input.count < thresholds.conflictStorm) return null
+  return {
+    code: 'conflict_storm',
+    severity: 'L2',
+    summary: `${input.count} merge conflicts (threshold ${thresholds.conflictStorm})`,
+    suggestedAction: 'escalate',
+    evidence: {
+      id: evidenceId('swarm', 'conflict_storm', `${input.count}:${(input.files ?? []).slice(0, 3).join(',')}`),
+      source: 'swarm',
+      kind: 'merge_conflict',
+      at: input.at ?? new Date(0).toISOString(),
+      ref: { files: (input.files ?? []).slice(0, 5) },
+      observed: { count: input.count, files: (input.files ?? []).slice(0, 5), threshold: thresholds.conflictStorm },
+    },
+  }
+}
+
+/**
  * Evaluate every rule against one sampled snapshot.
  * @param {object} snapshot
  * @param {{ budget?: { used: number, limit: number, scope?: string, ref?: unknown, at?: string }, failures?: number, lastFailureAt?: string, run?: { status: string, lastEventAt: string, ref?: unknown }, context?: { ratio: number, sessionId?: string, at?: string }, eventGap?: { expectedSeq?: number, actualSeq?: number, at?: string, ref?: unknown }, now: number }} input

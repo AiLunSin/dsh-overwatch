@@ -108,6 +108,31 @@ export class Probe {
   }
 
   /**
+   * Derived counters for signals that need event history rather than one
+   * snapshot (gate ping-pong, review deadlock, conflict storm).
+   * @param {string} runId
+   * @param {number} now
+   */
+  runCounters(runId, now) {
+    const state = this.runs.get(runId)
+    if (state === undefined) return { gateFailures: [], reviews: [], conflicts: [] }
+    const gateFailures = [...state.gateFailures.entries()].map(([taskId, value]) => ({
+      taskId,
+      failures: value.count,
+      at: value.at,
+    }))
+    const reviews = [...state.reviewsOpen.entries()].map(([patchId, value]) => ({
+      patchId,
+      taskId: value.taskId,
+      reviewers: value.reviewers,
+      votes: value.votes,
+      at: value.at,
+      ageMs: value.at === null ? 0 : Math.max(0, now - Date.parse(value.at)),
+    }))
+    return { gateFailures, reviews, conflicts: [...state.conflicts] }
+  }
+
+  /**
    * Recorded pressure samples, oldest first, for the merged timeline. Bounded to
    * the last 500 readings.
    * @param {string} runId
@@ -138,6 +163,9 @@ export class Probe {
         childByMember: new Map(),
         pressureByChild: new Map(),
         pressureSamples: [],
+        gateFailures: new Map(),
+        reviewsOpen: new Map(),
+        conflicts: [],
         raw: null,
         snapshot: emptySnapshot(runId, new Date(this.clock()).toISOString()),
       }
@@ -156,12 +184,16 @@ export class Probe {
       }
       const list = response.data.events
       if (list.length === 0) break
-      const firstSeq = Number(list[0]?.seq)
-      if (state.cursor > 0 && Number.isFinite(firstSeq) && firstSeq !== state.cursor + 1 && state.gap === null) {
-        state.gap = { expectedSeq: state.cursor + 1, actualSeq: firstSeq, at: new Date(now).toISOString() }
-        this.logger?.warn?.(`[overwatch] swarm event gap in ${state.runId}: expected ${state.cursor + 1}, got ${firstSeq}`)
+      let expected = state.cursor + 1
+      for (const event of list) {
+        const seq = Number(event?.seq)
+        if (Number.isFinite(seq) && seq !== expected && state.gap === null) {
+          state.gap = { expectedSeq: expected, actualSeq: seq, at: new Date(now).toISOString() }
+          this.logger?.warn?.(`[overwatch] swarm event gap in ${state.runId}: expected ${expected}, got ${seq}`)
+        }
+        if (Number.isFinite(seq)) expected = seq + 1
+        this.#ingestEvent(state, event)
       }
-      for (const event of list) this.#ingestEvent(state, event)
       const lastSeq = Number(list.at(-1)?.seq)
       if (!Number.isFinite(lastSeq) || lastSeq <= state.cursor) {
         this.#fail(state, 'events', now, 'event cursor did not advance')
@@ -279,6 +311,34 @@ export class Probe {
   /** @param {RunProbeState} state @param {any} event */
   #ingestEvent(state, event) {
     const payload = event?.payload ?? {}
+    const at = isoOf(event.at) ?? new Date(this.clock()).toISOString()
+    if (event?.type === 'swarm/task/gate' && payload?.gate?.passed === false && typeof payload.taskId === 'string') {
+      const previous = state.gateFailures.get(payload.taskId) ?? { count: 0, at }
+      state.gateFailures.set(payload.taskId, { count: previous.count + 1, at })
+    }
+    if (event?.type === 'swarm/review/opened' && typeof payload.patchId === 'string') {
+      state.reviewsOpen.set(payload.patchId, {
+        taskId: typeof payload.taskId === 'string' ? payload.taskId : '',
+        reviewers: Array.isArray(payload.reviewers) ? payload.reviewers.length : 0,
+        votes: 0,
+        at,
+      })
+    }
+    if (event?.type === 'swarm/vote/cast' && typeof payload?.review?.patchId === 'string') {
+      const review = state.reviewsOpen.get(payload.review.patchId)
+      if (review !== undefined) review.votes += 1
+    }
+    if (event?.type === 'swarm/merge/conflict') {
+      state.conflicts.push({
+        taskId: typeof payload.taskId === 'string' ? payload.taskId : null,
+        files: Array.isArray(payload.files) ? payload.files.slice(0, 10).map(String) : [],
+        at,
+      })
+      if (state.conflicts.length > 100) state.conflicts.shift()
+    }
+    if (event?.type === 'swarm/task/merged' && typeof payload.taskId === 'string') {
+      for (const [, review] of state.reviewsOpen) if (review.taskId === payload.taskId) review.merged = true
+    }
     if (typeof payload.memberId === 'string' && typeof payload.childId === 'string') {
       state.childByMember.set(payload.memberId, payload.childId)
     }

@@ -58,6 +58,8 @@ export const DEFAULT_CONFIG = Object.freeze({
     budgetPressure: 0.80,
     budgetPause: 0.95,
     failureStreak: 3,
+    gateFailures: 3,
+    conflictStorm: 3,
     stallMs: 600_000,
     reviewDeadlockMs: 900_000,
     maxResultTokens: 12_000,
@@ -138,7 +140,7 @@ export function resolveConfig(raw, options = {}) {
   for (const key of ['contextPressure', 'contextExit', 'budgetPressure', 'budgetPause']) {
     assertNumber(config.thresholds, key, 0, 1)
   }
-  for (const key of ['failureStreak', 'stallMs', 'reviewDeadlockMs', 'maxResultTokens', 'maxOpenCases']) {
+  for (const key of ['failureStreak', 'gateFailures', 'conflictStorm', 'stallMs', 'reviewDeadlockMs', 'maxResultTokens', 'maxOpenCases']) {
     assertInteger(config.thresholds, key, 1)
   }
   if (config.thresholds.budgetPressure > config.thresholds.budgetPause) {

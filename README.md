@@ -4,8 +4,9 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M3 鱼缸/回放完成（恢复演练需浏览器凭据），M2 值班员 experimental，M1 是安全底座。**
-仓库包含 Host + Web 面板、真实 DSH 0.2.2-rc.3 上的 M0/M1/M2/M3 探针与证据。
+**状态：M0–M4 发布候选（值班员 experimental；真实模型 A/B、浏览器恢复演练与
+npm 发布受外部条件阻塞）。** 仓库包含 Host + Web 面板、真实 DSH 0.2.2-rc.3 上的
+M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例与 scoped 发布产物。
 `supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
 子代理；它提交结构化决定，由代码校验、执行、验证并记账。硬限（预算 80/95/100%、
 事件流缺口）始终由确定性 Guard 执行，不经过模型。
@@ -33,7 +34,8 @@
 | `src/tools.js` | ✅ | 根 agent 的 `watch_arm/disarm/status/report` |
 | `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/restores；doctor |
 | `client.js` | ✅ M3 | 值班室、事件单、鱼缸（检查点/恢复）、回放时间轴、doctor |
-| M4 基准与发布 | ❌ | 下一步 |
+| 发布产物 | ✅ M4 | scoped 构建、目录/tarball 安装冒烟、CI；npm 发布待 OTP |
+| 真实模型 A/B | ⛔ | 需要模型凭据与费用授权；协议见 docs/m4.md |
 
 ### 两层如何分工
 
@@ -138,7 +140,7 @@ curl http://127.0.0.1:PORT/overwatch/api/doctor
 ## 4. 验证
 
 ```powershell
-npm test        # 112 个测试：链/锁/信号/事件单/Guard/Watch/卡/鱼缸/执行器/HTTP/服务/面板
+npm test        # 124 个测试：链/锁/场景/信号/事件单/Guard/Watch/卡/鱼缸/执行器/HTTP/服务/面板
 npm run lint    # node --check 48 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1/M3 web 端到端（33/33）
@@ -152,6 +154,7 @@ npm run m2      # M2 值班员 headless 端到端（12/12）
 - M2 证据：`e2e/m2/results/`；结论 [docs/m2.md](./docs/m2.md)。
 - M3 证据：`e2e/m1/results/`（33 项含 doctor/fish/timeline/restore）；
   结论 [docs/m3.md](./docs/m3.md)。
+- M4 硬化与发布：[docs/m4.md](./docs/m4.md)。
 
 M2 真实宿主结果（脚本化 provider + 进程内假 swarm）：值班员 4 次模型请求的工具表
 始终只有三件套、`watch_decide(coach)` 被执行并写入 `steer`、S=26160/50000 tokens、

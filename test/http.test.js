@@ -253,3 +253,37 @@ test('HEAD returns headers without a body', async () => {
     assert.ok(Number(response.headers.get('content-length')) > 0)
   })
 })
+
+test('path traversal, oversized bodies and wrong methods are rejected', async () => {
+  await withServer(async ({ base, service }) => {
+    const traversal = await fetch(`${base}/overwatch/api/runs/${encodeURIComponent('../etc')}`)
+    assert.equal(traversal.status, 400)
+
+    const fishTraversal = await fetch(`${base}/overwatch/api/fish/${encodeURIComponent('../../etc/passwd')}`)
+    assert.equal(fishTraversal.status, 400)
+
+    const oversized = await fetch(`${base}/overwatch/api/runs/run-1/restores`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ sourceId: 'fish-a', checkpointId: 'ck_1', phase: 'intent', pad: 'x'.repeat(70_000) }),
+    })
+    assert.equal(oversized.status, 413)
+    assert.equal((await oversized.json()).code, 'BODY_TOO_LARGE')
+
+    const put = await fetch(`${base}/overwatch/api/runs/run-1/arm`, {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: '{}',
+    })
+    assert.equal(put.status, 405)
+
+    const badJson = await fetch(`${base}/overwatch/api/runs/run-1/restores`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: '{not json',
+    })
+    assert.equal(badJson.status, 400)
+    assert.equal((await badJson.json()).code, 'INVALID_ARGUMENT')
+    assert.equal(service.calls.length, 0)
+  })
+})

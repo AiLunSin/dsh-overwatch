@@ -31,6 +31,7 @@
     "examples",
     "scripts",
     "README.md",
+    "README.en.md",
     "LICENSE",
     "SECURITY.md",
     "CHANGELOG.md"
@@ -41,7 +42,9 @@
     "check": "npm run lint && npm test",
     "m0": "node e2e/m0/run.mjs",
     "m1": "node e2e/m1/run.mjs",
-    "m2": "node e2e/m2/run.mjs"
+    "m2": "node e2e/m2/run.mjs",
+    "build:release": "node scripts/build-release.mjs --name @ailunsin/dsh-overwatch",
+    "smoke:install": "node scripts/smoke-install.mjs"
   },
   "engines": {
     "node": ">=22",

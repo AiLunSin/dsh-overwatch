@@ -1,39 +1,39 @@
 {
   "schemaVersion": 1,
   "stage": "web",
-  "startedAt": "2026-11-13T18:08:39.473Z",
-  "finishedAt": "2026-11-13T18:08:41.939Z",
+  "startedAt": "2026-11-13T18:47:13.252Z",
+  "finishedAt": "2026-11-13T18:47:15.738Z",
   "env": {
     "node": "v24.21.0",
     "platform": "win32",
-    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home",
+    "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-KbIoX1\\home",
     "profile": null
   },
   "checks": {
     "A-4": {
       "status": "pass",
       "evidence": {
-        "url": "http://127.0.0.1:53848/swarm/api/health",
+        "url": "http://127.0.0.1:56289/swarm/api/health",
         "httpStatus": 200,
         "error": null,
         "body": {
           "ok": true,
           "runs": 0,
-          "baseDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-e8678M\\home\\swarm"
+          "baseDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m0-KbIoX1\\home\\swarm"
         }
       },
-      "at": "2026-11-13T18:08:41.922Z"
+      "at": "2026-11-13T18:47:15.707Z"
     },
     "A-5": {
       "status": "pass",
       "evidence": {
-        "url": "http://127.0.0.1:53848/api/fishkeeper/overview",
+        "url": "http://127.0.0.1:56289/api/fishkeeper/overview",
         "httpStatus": 401,
         "reachableFromHost": false,
         "interpretation": "host fetch was rejected; automatic fishkeeper writes need the browser credential or a new host route",
         "body": "unauthorized"
       },
-      "at": "2026-11-13T18:08:41.926Z"
+      "at": "2026-11-13T18:47:15.710Z"
     },
     "A-8": {
       "status": "pass",
@@ -52,7 +52,7 @@
         },
         "interpretation": "the Host web server applies no origin/token policy of its own; the route owner must (overwatch does)"
       },
-      "at": "2026-11-13T18:08:41.931Z"
+      "at": "2026-11-13T18:47:15.716Z"
     },
     "A-8-OVERWATCH": {
       "status": "pass",
@@ -62,7 +62,7 @@
         "postWithWrongToken": 403,
         "expected": "GET 200; POST 403 WRITE_DISABLED with an empty token"
       },
-      "at": "2026-11-13T18:08:41.937Z"
+      "at": "2026-11-13T18:47:15.738Z"
     }
   },
   "loop": null,

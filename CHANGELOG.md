@@ -5,6 +5,19 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — M4 hardening and release tooling
+
+- Eight deterministic incident scenarios (I-1..I-8) including review deadlock,
+  gate ping-pong and conflict storm signal rules with configurable thresholds.
+- Clock-jump detection (no fabricated stalls), event-stream internal gap
+  detection, store size cap test, payload scrubbing test.
+- Security regression: token/origin, path traversal, oversized body, malformed
+  JSON/method, confirmToken rejection, tool restriction.
+- `scripts/build-release.mjs` (scoped package + bundle row + client id rewrite),
+  `scripts/smoke-install.mjs` (directory and tarball installs), CI workflow.
+- README.en, docs/config.md, docs/compatibility.md, docs/troubleshooting.md,
+  docs/m4.md.
+
 ### Added — M3 fish tank, replay, restore evidence
 
 - `fish-index.js`: read-only fishkeeper checkpoint index, manifest summaries and
