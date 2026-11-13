@@ -4,12 +4,12 @@
 >
 > Memory hook: **the model may judge but never act; hard limits never depend on a model; no evidence, no action.**
 
-**Status: M0–M3 complete (watch officer experimental).** The bundle ships a Host
+**Status: M0–M4 release candidate (watch officer experimental).** The bundle ships a Host
 half and a Web panel, with real-DeepSeek-Harness 0.2.2-rc.3 probes for capability
-(M0), guard-only supervision (M1), the watch officer (M2), and fish tank / replay
-/ doctor / restore evidence (M3). M4 hardening is tracked in
-[docs/m4.md](./docs/m4.md). The real-model A/B benchmark and npm publication
-depend on external credentials/approval.
+(M0), guard-only supervision (M1), the watch officer (M2), fish tank / replay / doctor
+/ restore evidence (M3), and eight-scenario hardening plus release tooling (M4).
+The real-model A/B benchmark, browser restore drill, and npm publication depend on
+external credentials/approval; `npm publish` currently stops at EOTP.
 
 ## What it does
 

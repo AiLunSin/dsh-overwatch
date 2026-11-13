@@ -145,6 +145,8 @@ npm run lint    # node --check 48 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1/M3 web 端到端（33/33）
 npm run m2      # M2 值班员 headless 端到端（12/12）
+npm run build:release   # scoped 发布副本
+npm run smoke:install   # 目录安装冒烟（tarball 见 docs/m4.md）
 ```
 
 沙箱/CI 无法 spawn 子进程时：`node --test --test-isolation=none "test/*.test.js"`。
@@ -155,6 +157,10 @@ npm run m2      # M2 值班员 headless 端到端（12/12）
 - M3 证据：`e2e/m1/results/`（33 项含 doctor/fish/timeline/restore）；
   结论 [docs/m3.md](./docs/m3.md)。
 - M4 硬化与发布：[docs/m4.md](./docs/m4.md)。
+
+配置、兼容与排障：[docs/config.md](./docs/config.md)、
+[docs/compatibility.md](./docs/compatibility.md)、
+[docs/troubleshooting.md](./docs/troubleshooting.md)。
 
 M2 真实宿主结果（脚本化 provider + 进程内假 swarm）：值班员 4 次模型请求的工具表
 始终只有三件套、`watch_decide(coach)` 被执行并写入 `steer`、S=26160/50000 tokens、
