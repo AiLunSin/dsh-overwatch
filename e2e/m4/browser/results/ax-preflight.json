@@ -1,0 +1,696 @@
+[
+  {
+    "role": "button",
+    "name": "新建会话",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "keyshortcuts": "Control+Alt+N"
+    }
+  },
+  {
+    "role": "button",
+    "name": "收起侧边栏",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "keyshortcuts": "Control+Alt+B"
+    }
+  },
+  {
+    "role": "button",
+    "name": "新建会话",
+    "text": "新会话",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "keyshortcuts": "Control+Alt+N"
+    }
+  },
+  {
+    "role": "tablist",
+    "name": "瞭望塔",
+    "text": "值班室 事件单 0 鱼缸 回放",
+    "props": {
+      "multiselectable": false,
+      "orientation": "horizontal"
+    }
+  },
+  {
+    "role": "tabpanel",
+    "name": "鱼缸",
+    "text": "鱼缸 只读的 fishkeeper 检查点、审计尾部与人工确认的恢复流程；文件正文不会进入本面板。 索引可用 刷新 宿主索引 从 fishkeeper 数据目录只读构建的检查点摘要与审计尾部。 fishkeeper 数据目录 C:\\Users\\11403\\AppData\\Local\\Temp\\ow-browser-drill\\fishkeeper-data 数据时间 {time} 2026/11/14 12:55:27 fishkeeper 浏览器面 同源浏览器面可用：可以查",
+    "props": {}
+  },
+  {
+    "role": "heading",
+    "name": "瞭望塔",
+    "text": "瞭望塔",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "button",
+    "name": "刷新",
+    "text": "刷新",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "收起写操作",
+    "text": "收起写操作",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "expanded": true,
+      "controls": "ow-write-panel"
+    }
+  },
+  {
+    "role": "heading",
+    "name": "写操作",
+    "text": "写操作",
+    "props": {
+      "level": 2
+    }
+  },
+  {
+    "role": "button",
+    "name": "收起写操作",
+    "text": "收起写操作",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "status",
+    "name": "",
+    "text": "Token 已保存到本次会话。",
+    "props": {
+      "live": "polite",
+      "atomic": true,
+      "relevant": "additions text"
+    }
+  },
+  {
+    "role": "heading",
+    "name": "写操作",
+    "text": "写操作",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "button",
+    "name": "解散",
+    "text": "解散",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "tab",
+    "name": "值班室",
+    "text": "值班室",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "selected": false
+    }
+  },
+  {
+    "role": "tab",
+    "name": "事件单 0",
+    "text": "事件单 0",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "selected": false
+    }
+  },
+  {
+    "role": "tab",
+    "name": "鱼缸",
+    "text": "鱼缸",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "selected": true,
+      "controls": "ow-panel-fish"
+    }
+  },
+  {
+    "role": "tab",
+    "name": "回放",
+    "text": "回放",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "selected": false
+    }
+  },
+  {
+    "role": "dialog",
+    "name": "恢复检查点",
+    "text": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 预检 确认 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。 将写入 3 个文件，跳过 0 个。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 影响预",
+    "props": {
+      "focusable": true,
+      "focused": true,
+      "modal": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "更多",
+    "text": "更多",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "hasPopup": "menu",
+      "expanded": false
+    }
+  },
+  {
+    "role": "button",
+    "name": "视图选项",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "添加工作区",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "keyshortcuts": "Control+Alt+O"
+    }
+  },
+  {
+    "role": "button",
+    "name": "保存到本次会话",
+    "text": "保存到本次会话",
+    "props": {
+      "disabled": true,
+      "invalid": "false"
+    }
+  },
+  {
+    "role": "button",
+    "name": "清除 token",
+    "text": "清除 token",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "heading",
+    "name": "鱼缸",
+    "text": "鱼缸",
+    "props": {
+      "level": 2
+    }
+  },
+  {
+    "role": "button",
+    "name": "刷新",
+    "text": "刷新",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "heading",
+    "name": "宿主索引",
+    "text": "宿主索引",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "heading",
+    "name": "fishkeeper 浏览器面",
+    "text": "fishkeeper 浏览器面",
+    "props": {
+      "level": 2
+    }
+  },
+  {
+    "role": "heading",
+    "name": "demo-a",
+    "text": "demo-a",
+    "props": {
+      "level": 2
+    }
+  },
+  {
+    "role": "status",
+    "name": "",
+    "text": "恢复会先预检，并在执行前把 intent 写入 overwatch 日志。",
+    "props": {
+      "live": "polite",
+      "atomic": true,
+      "relevant": "additions text"
+    }
+  },
+  {
+    "role": "heading",
+    "name": "检查点",
+    "text": "检查点",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "table",
+    "name": "检查点 · demo-a",
+    "text": "检查点 · demo-a 触发 时间 文件数 占用 已固定 恢复 基线 基线 2026/11/11 14:06:30 3 776 B 未固定 恢复",
+    "props": {}
+  },
+  {
+    "role": "heading",
+    "name": "最近审计",
+    "text": "最近审计",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "heading",
+    "name": "恢复检查点",
+    "text": "恢复检查点",
+    "props": {
+      "level": 2
+    }
+  },
+  {
+    "role": "button",
+    "name": "关闭",
+    "text": "关闭",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "list",
+    "name": "恢复检查点",
+    "text": "预检 确认 结果",
+    "props": {}
+  },
+  {
+    "role": "button",
+    "name": "插件",
+    "text": "插件",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "自动化任务",
+    "text": "自动化任务",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "从侧边栏取消固定自动化任务",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "养鱼人控制台",
+    "text": "养鱼人控制台",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "从侧边栏取消固定养鱼人控制台",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "瞭望塔",
+    "text": "瞭望塔",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "从侧边栏取消固定瞭望塔",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "搜索会话",
+    "text": "",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "expanded": false,
+      "keyshortcuts": "Control+Alt+K"
+    }
+  },
+  {
+    "role": "button",
+    "name": "账号菜单",
+    "text": "更多",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "hasPopup": "menu",
+      "expanded": false
+    }
+  },
+  {
+    "role": "button",
+    "name": "demo-a",
+    "text": "demo-a",
+    "props": {
+      "invalid": "false",
+      "focusable": true,
+      "pressed": "true"
+    }
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "基线 基线 2026/11/11 14:06:30 3 776 B 未固定 恢复",
+    "props": {}
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "预检",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "确认",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "结果",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "heading",
+    "name": "影响预览",
+    "text": "影响预览",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "alert",
+    "name": "",
+    "text": "警告 diary/2026-11-11.jsonl changed after the checkpoint.",
+    "props": {
+      "live": "assertive",
+      "atomic": true,
+      "relevant": "additions text"
+    }
+  },
+  {
+    "role": "alert",
+    "name": "",
+    "text": "目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl",
+    "props": {
+      "live": "assertive",
+      "atomic": true,
+      "relevant": "additions text"
+    }
+  },
+  {
+    "role": "table",
+    "name": "影响预览",
+    "text": "影响预览 文件 动作 已变化 字节 diary/2026-11-10.jsonl 恢复 否 382 B diary/2026-11-11.jsonl 恢复 是 432 B self.json 恢复 否 165 B",
+    "props": {}
+  },
+  {
+    "role": "heading",
+    "name": "安全说明",
+    "text": "安全说明",
+    "props": {
+      "level": 3
+    }
+  },
+  {
+    "role": "list",
+    "name": "",
+    "text": "overwatch 不生成、不伪造 fishkeeper 的 confirmToken；确认令牌只存在于这个对话框的内存中。 写入任何文件之前，fishkeeper 会自己创建一个 pre-restore 安全检查点。 代码回滚不在此流程：请用 swarm 的 worktree/分支与 git。",
+    "props": {}
+  },
+  {
+    "role": "status",
+    "name": "",
+    "text": "恢复意图已写入 overwatch 日志。",
+    "props": {
+      "live": "polite",
+      "atomic": true,
+      "relevant": "additions text"
+    }
+  },
+  {
+    "role": "button",
+    "name": "取消",
+    "text": "取消",
+    "props": {
+      "invalid": "false",
+      "focusable": true
+    }
+  },
+  {
+    "role": "button",
+    "name": "执行恢复",
+    "text": "执行恢复",
+    "props": {
+      "disabled": true,
+      "invalid": "false"
+    }
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "触发 时间 文件数 占用 已固定 恢复",
+    "props": {}
+  },
+  {
+    "role": "list",
+    "name": "",
+    "text": "diary/2026-11-11.jsonl changed after the checkpoint.",
+    "props": {}
+  },
+  {
+    "role": "list",
+    "name": "",
+    "text": "diary/2026-11-11.jsonl",
+    "props": {}
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "diary/2026-11-10.jsonl 恢复 否 382 B",
+    "props": {}
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "diary/2026-11-11.jsonl 恢复 是 432 B",
+    "props": {}
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "self.json 恢复 否 165 B",
+    "props": {}
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "overwatch 不生成、不伪造 fishkeeper 的 confirmToken；确认令牌只存在于这个对话框的内存中。",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "写入任何文件之前，fishkeeper 会自己创建一个 pre-restore 安全检查点。",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "代码回滚不在此流程：请用 swarm 的 worktree/分支与 git。",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "触发",
+    "text": "触发",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "时间",
+    "text": "时间",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "文件数",
+    "text": "文件数",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "占用",
+    "text": "占用",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "已固定",
+    "text": "已固定",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "恢复",
+    "text": "恢复",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "button",
+    "name": "恢复 ck_mwbpul1s_e83bf1c79a",
+    "text": "恢复",
+    "props": {
+      "disabled": true,
+      "invalid": "false"
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "diary/2026-11-11.jsonl changed after the checkpoint.",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "listitem",
+    "name": "",
+    "text": "diary/2026-11-11.jsonl",
+    "props": {
+      "level": 1
+    }
+  },
+  {
+    "role": "row",
+    "name": "",
+    "text": "文件 动作 已变化 字节",
+    "props": {}
+  },
+  {
+    "role": "columnheader",
+    "name": "文件",
+    "text": "文件",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "动作",
+    "text": "动作",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "已变化",
+    "text": "已变化",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  },
+  {
+    "role": "columnheader",
+    "name": "字节",
+    "text": "字节",
+    "props": {
+      "readonly": false,
+      "required": false
+    }
+  }
+]

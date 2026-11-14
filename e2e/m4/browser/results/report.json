@@ -1,0 +1,864 @@
+{
+  "startedAt": "2026-11-14T04:55:11.040Z",
+  "root": "C:\\Users\\11403\\AppData\\Local\\Temp\\ow-browser-drill",
+  "host": {
+    "origin": "http://127.0.0.1:56884",
+    "tokenPresent": true,
+    "health": {
+      "ok": true,
+      "version": "0.1.0",
+      "mode": "guard",
+      "watch": {
+        "ok": true,
+        "events": 1,
+        "lastHash": "d2ad24ca8163d8812dec8e2c316cdce8df0ce52fc3e9e3d62aff3c6aa3833bcf",
+        "error": null
+      }
+    },
+    "directFishStatus": 401,
+    "browserFishStatus": 200
+  },
+  "steps": [
+    {
+      "name": "browser opens host with token URL",
+      "status": "pass",
+      "at": "2026-11-14T04:55:22.232Z",
+      "detail": "{\"url\":\"http://127.0.0.1:56884/\",\"title\":\"DeepSeek Harness\"}"
+    },
+    {
+      "name": "Host fetch 401 reproduced, browser fetch 200",
+      "status": "pass",
+      "at": "2026-11-14T04:55:22.243Z",
+      "detail": {
+        "direct": 401,
+        "browser": 200
+      }
+    },
+    {
+      "name": "seed a live armed run for restore evidence",
+      "status": "pass",
+      "at": "2026-11-14T04:55:22.244Z",
+      "detail": {
+        "runId": "swarm_m1",
+        "mode": "guard",
+        "state": "watching",
+        "armed": true,
+        "armedAt": "2026-11-14T04:55:22.267Z",
+        "reserve": 50000
+      }
+    },
+    {
+      "name": "panel opened in a real conversation",
+      "status": "pass",
+      "at": "2026-11-14T04:55:27.960Z",
+      "detail": "sidebar panel → main slot"
+    },
+    {
+      "name": "fish tab lists real fishkeeper checkpoint",
+      "status": "pass",
+      "at": "2026-11-14T04:55:28.346Z",
+      "detail": "ck_mwbpul1s_e83bf1c79a"
+    },
+    {
+      "name": "write token set through the panel (sessionStorage only)",
+      "status": "pass",
+      "at": "2026-11-14T04:55:29.910Z",
+      "detail": "写操作已解锁"
+    },
+    {
+      "name": "preflight: dryRun plan with stale warning",
+      "status": "pass",
+      "at": "2026-11-14T04:55:30.401Z",
+      "detail": {
+        "checkpoint": "ck_mwbpul1s_e83bf1c79a",
+        "restoreName": "恢复 ck_mwbpul1s_e83bf1c79a"
+      }
+    },
+    {
+      "name": "screen-reader surface: dialog/tabs/table/status exposed in AX tree",
+      "status": "pass",
+      "at": "2026-11-14T04:55:30.419Z",
+      "detail": {
+        "dialog": {
+          "role": "dialog",
+          "name": "恢复检查点",
+          "text": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 预检 确认 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。 将写入 3 个文件，跳过 0 个。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 影响预",
+          "props": {
+            "focusable": true,
+            "focused": true,
+            "modal": true
+          }
+        },
+        "tabs": [
+          {
+            "role": "tab",
+            "name": "值班室",
+            "text": "值班室",
+            "props": {
+              "invalid": "false",
+              "focusable": true,
+              "selected": false
+            }
+          },
+          {
+            "role": "tab",
+            "name": "事件单 0",
+            "text": "事件单 0",
+            "props": {
+              "invalid": "false",
+              "focusable": true,
+              "selected": false
+            }
+          },
+          {
+            "role": "tab",
+            "name": "鱼缸",
+            "text": "鱼缸",
+            "props": {
+              "invalid": "false",
+              "focusable": true,
+              "selected": true,
+              "controls": "ow-panel-fish"
+            }
+          },
+          {
+            "role": "tab",
+            "name": "回放",
+            "text": "回放",
+            "props": {
+              "invalid": "false",
+              "focusable": true,
+              "selected": false
+            }
+          }
+        ],
+        "restoreButton": {
+          "role": "button",
+          "name": "恢复 ck_mwbpul1s_e83bf1c79a",
+          "text": "恢复",
+          "props": {
+            "disabled": true,
+            "invalid": "false"
+          }
+        },
+        "tableHeaders": [
+          "触发",
+          "时间",
+          "文件数",
+          "占用",
+          "已固定",
+          "恢复",
+          "文件",
+          "动作",
+          "已变化",
+          "字节"
+        ],
+        "status": [
+          {
+            "role": "status",
+            "name": "",
+            "text": "Token 已保存到本次会话。"
+          },
+          {
+            "role": "status",
+            "name": "",
+            "text": "恢复会先预检，并在执行前把 intent 写入 overwatch 日志。"
+          },
+          {
+            "role": "alert",
+            "name": "",
+            "text": "警告 diary/2026-11-11.jsonl changed after the checkpoint."
+          },
+          {
+            "role": "alert",
+            "name": "",
+            "text": "目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl"
+          },
+          {
+            "role": "status",
+            "name": "",
+            "text": "恢复意图已写入 overwatch 日志。"
+          }
+        ]
+      }
+    },
+    {
+      "name": "keyboard: Tab focus stays inside the dialog",
+      "status": "pass",
+      "at": "2026-11-14T04:55:33.720Z",
+      "detail": {
+        "tabs": 14,
+        "unique": 3
+      }
+    },
+    {
+      "name": "keyboard: Escape closes and returns focus",
+      "status": "pass",
+      "at": "2026-11-14T04:55:33.950Z",
+      "detail": {
+        "tag": "BUTTON",
+        "type": "button",
+        "role": null,
+        "name": "恢复 ck_mwbpul1s_e83bf1c79a",
+        "id": null,
+        "cls": "ow-btn ow-btn-small",
+        "checked": null,
+        "disabled": false,
+        "insideDialog": false
+      }
+    },
+    {
+      "name": "keyboard: Space toggles overrideStale",
+      "status": "pass",
+      "at": "2026-11-14T04:55:36.555Z",
+      "detail": {
+        "outline": "rgb(65, 118, 230) auto 2px",
+        "boxShadow": "none",
+        "outlineOffset": "2px"
+      }
+    },
+    {
+      "name": "restore result: 3/3 files, safety checkpoint shown",
+      "status": "pass",
+      "at": "2026-11-14T04:55:37.819Z",
+      "detail": {
+        "safety": "ck_mwfxmzbe_911cececb7"
+      }
+    },
+    {
+      "name": "screen-reader surface: result dialog, table, status/alert",
+      "status": "pass",
+      "at": "2026-11-14T04:55:37.837Z",
+      "detail": {
+        "dialog": {
+          "role": "dialog",
+          "name": "恢复检查点",
+          "text": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 预检 确认 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。 将写入 3 个文件，跳过 0 个。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 影响预",
+          "props": {
+            "focusable": true,
+            "modal": true
+          }
+        },
+        "tableHeaders": [
+          "触发",
+          "时间",
+          "文件数",
+          "占用",
+          "已固定",
+          "恢复",
+          "文件",
+          "动作",
+          "已变化",
+          "字节",
+          "文件",
+          "结果"
+        ],
+        "status": [
+          {
+            "role": "status",
+            "name": "",
+            "text": "Token 已保存到本次会话。"
+          },
+          {
+            "role": "status",
+            "name": "",
+            "text": "恢复会先预检，并在执行前把 intent 写入 overwatch 日志。"
+          },
+          {
+            "role": "alert",
+            "name": "",
+            "text": "警告 diary/2026-11-11.jsonl changed after the checkpoint."
+          },
+          {
+            "role": "alert",
+            "name": "",
+            "text": "目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl"
+          },
+          {
+            "role": "status",
+            "name": "",
+            "text": "结果已写入 overwatch 日志。"
+          }
+        ]
+      }
+    },
+    {
+      "name": "pre-restore checkpoint visible in the panel list",
+      "status": "pass",
+      "at": "2026-11-14T04:55:39.626Z",
+      "detail": {
+        "checkpoints": 2,
+        "triggers": [
+          "pre-restore",
+          "baseline"
+        ]
+      }
+    },
+    {
+      "name": "source file restored byte-for-byte",
+      "status": "pass",
+      "at": "2026-11-14T04:55:39.627Z",
+      "detail": {
+        "file": "diary/2026-11-11.jsonl",
+        "bytes": 432
+      }
+    },
+    {
+      "name": "confirmToken never reaches storage/URL/log/DOM",
+      "status": "pass",
+      "at": "2026-11-14T04:55:39.677Z",
+      "detail": {
+        "captured": 1,
+        "searched": [
+          "overwatch-data/**",
+          "fishkeeper-data/**",
+          "document.html",
+          "localStorage",
+          "sessionStorage",
+          "console",
+          "request URLs"
+        ]
+      }
+    },
+    {
+      "name": "watch/restore/result recorded and hash chain valid",
+      "status": "pass",
+      "at": "2026-11-14T04:55:39.687Z",
+      "detail": {
+        "intent": 2,
+        "result": 1,
+        "lastHash": "aaa144dead1adf076fe867e787c388d168ccb8d59f64ea35404741f7770b88c6"
+      }
+    },
+    {
+      "name": "visual: screenshots, no horizontal overflow at 1440/1024, contrast sampled",
+      "status": "pass",
+      "at": "2026-11-14T04:55:40.344Z",
+      "detail": {
+        "overflow1440": true,
+        "overflow1024": true
+      }
+    }
+  ],
+  "keyboard": {
+    "focusTrap": {
+      "initial": {
+        "tag": "ASIDE",
+        "type": null,
+        "role": "dialog",
+        "name": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 1 预检 2 确认 3 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只",
+        "id": null,
+        "cls": "ow-dialog",
+        "checked": null,
+        "disabled": null,
+        "insideDialog": true
+      },
+      "sequence": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "关闭",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "role": null,
+          "name": "on",
+          "id": null,
+          "cls": "",
+          "checked": false,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "取消",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "关闭",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "role": null,
+          "name": "on",
+          "id": null,
+          "cls": "",
+          "checked": false,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "取消",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "关闭",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "role": null,
+          "name": "on",
+          "id": null,
+          "cls": "",
+          "checked": false,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "取消",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "关闭",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "role": null,
+          "name": "on",
+          "id": null,
+          "cls": "",
+          "checked": false,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "取消",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "role": null,
+          "name": "关闭",
+          "id": null,
+          "cls": "ow-btn ow-btn-small",
+          "checked": null,
+          "disabled": false,
+          "insideDialog": true
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "role": null,
+          "name": "on",
+          "id": null,
+          "cls": "",
+          "checked": false,
+          "disabled": false,
+          "insideDialog": true
+        }
+      ],
+      "allInside": true
+    },
+    "escape": {
+      "tag": "BUTTON",
+      "type": "button",
+      "role": null,
+      "name": "恢复 ck_mwbpul1s_e83bf1c79a",
+      "id": null,
+      "cls": "ow-btn ow-btn-small",
+      "checked": null,
+      "disabled": false,
+      "insideDialog": false
+    },
+    "checkboxSequence": [
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "role": null,
+        "name": "关闭",
+        "id": null,
+        "cls": "ow-btn ow-btn-small",
+        "checked": null,
+        "disabled": false,
+        "insideDialog": true
+      },
+      {
+        "tag": "INPUT",
+        "type": "checkbox",
+        "role": null,
+        "name": "on",
+        "id": null,
+        "cls": "",
+        "checked": false,
+        "disabled": false,
+        "insideDialog": true
+      }
+    ],
+    "executeSequence": [
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "role": null,
+        "name": "取消",
+        "id": null,
+        "cls": "ow-btn ow-btn-small",
+        "checked": null,
+        "disabled": false,
+        "insideDialog": true
+      },
+      {
+        "tag": "BUTTON",
+        "type": "button",
+        "role": null,
+        "name": "执行恢复",
+        "id": null,
+        "cls": "ow-btn ow-btn-primary",
+        "checked": null,
+        "disabled": false,
+        "insideDialog": true
+      }
+    ]
+  },
+  "a11y": {
+    "panelTitle": true,
+    "restoreButtonName": "恢复 ck_mwbpul1s_e83bf1c79a",
+    "preflight": {
+      "dialog": {
+        "role": "dialog",
+        "name": "恢复检查点",
+        "text": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 预检 确认 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。 将写入 3 个文件，跳过 0 个。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 影响预",
+        "props": {
+          "focusable": true,
+          "focused": true,
+          "modal": true
+        }
+      },
+      "tabs": [
+        {
+          "role": "tab",
+          "name": "值班室",
+          "text": "值班室",
+          "props": {
+            "invalid": "false",
+            "focusable": true,
+            "selected": false
+          }
+        },
+        {
+          "role": "tab",
+          "name": "事件单 0",
+          "text": "事件单 0",
+          "props": {
+            "invalid": "false",
+            "focusable": true,
+            "selected": false
+          }
+        },
+        {
+          "role": "tab",
+          "name": "鱼缸",
+          "text": "鱼缸",
+          "props": {
+            "invalid": "false",
+            "focusable": true,
+            "selected": true,
+            "controls": "ow-panel-fish"
+          }
+        },
+        {
+          "role": "tab",
+          "name": "回放",
+          "text": "回放",
+          "props": {
+            "invalid": "false",
+            "focusable": true,
+            "selected": false
+          }
+        }
+      ],
+      "restoreButton": {
+        "role": "button",
+        "name": "恢复 ck_mwbpul1s_e83bf1c79a",
+        "text": "恢复",
+        "props": {
+          "disabled": true,
+          "invalid": "false"
+        }
+      },
+      "tableHeaders": [
+        "触发",
+        "时间",
+        "文件数",
+        "占用",
+        "已固定",
+        "恢复",
+        "文件",
+        "动作",
+        "已变化",
+        "字节"
+      ],
+      "status": [
+        {
+          "role": "status",
+          "name": "",
+          "text": "Token 已保存到本次会话。"
+        },
+        {
+          "role": "status",
+          "name": "",
+          "text": "恢复会先预检，并在执行前把 intent 写入 overwatch 日志。"
+        },
+        {
+          "role": "alert",
+          "name": "",
+          "text": "警告 diary/2026-11-11.jsonl changed after the checkpoint."
+        },
+        {
+          "role": "alert",
+          "name": "",
+          "text": "目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl"
+        },
+        {
+          "role": "status",
+          "name": "",
+          "text": "恢复意图已写入 overwatch 日志。"
+        }
+      ]
+    },
+    "result": {
+      "dialog": {
+        "role": "dialog",
+        "name": "恢复检查点",
+        "text": "恢复检查点 ck_mwbpul1s_e83bf1c79a · 大肥鱼 A 关闭 预检 确认 结果 影响预览 fishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。 将写入 3 个文件，跳过 0 个。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 影响预",
+        "props": {
+          "focusable": true,
+          "modal": true
+        }
+      },
+      "tableHeaders": [
+        "触发",
+        "时间",
+        "文件数",
+        "占用",
+        "已固定",
+        "恢复",
+        "文件",
+        "动作",
+        "已变化",
+        "字节",
+        "文件",
+        "结果"
+      ],
+      "status": [
+        {
+          "role": "status",
+          "name": "",
+          "text": "Token 已保存到本次会话。"
+        },
+        {
+          "role": "status",
+          "name": "",
+          "text": "恢复会先预检，并在执行前把 intent 写入 overwatch 日志。"
+        },
+        {
+          "role": "alert",
+          "name": "",
+          "text": "警告 diary/2026-11-11.jsonl changed after the checkpoint."
+        },
+        {
+          "role": "alert",
+          "name": "",
+          "text": "目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl"
+        },
+        {
+          "role": "status",
+          "name": "",
+          "text": "结果已写入 overwatch 日志。"
+        }
+      ]
+    },
+    "liveRegionText": "Token 已保存到本次会话。 恢复会先预检，并在执行前把 intent 写入 overwatch 日志。 警告 diary/2026-11-11.jsonl changed after the checkpoint. 目标已变化 以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。 diary/2026-11-11.jsonl 结果已写入 overwatch 日志。",
+    "pass": true
+  },
+  "visual": {
+    "contrastDialog": {
+      "dialog": {
+        "fg": "rgb(15, 17, 21)",
+        "bg": "rgb(233, 236, 242)",
+        "size": "16px",
+        "ratio": 15.97
+      },
+      "warning": {
+        "fg": "rgb(245, 158, 11)",
+        "bg": "color(srgb 0.92549 0.0745098 0.0745098 / 0.07)",
+        "size": "12px",
+        "ratio": 9.76
+      },
+      "error": null,
+      "button": {
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(15, 17, 21)",
+        "size": "11px",
+        "ratio": 18.9
+      }
+    },
+    "focusStyle": {
+      "outline": "rgb(65, 118, 230) auto 2px",
+      "boxShadow": "none",
+      "outlineOffset": "2px"
+    },
+    "overflow1440": {
+      "iw": 1440,
+      "sw": 1440,
+      "root": {
+        "sw": 1155,
+        "cw": 1155
+      }
+    },
+    "contrast": {
+      "root": {
+        "fg": "rgb(15, 17, 21)",
+        "bg": "rgb(255, 255, 255)",
+        "size": "16px",
+        "ratio": 18.9
+      },
+      "card": {
+        "fg": "rgb(15, 17, 21)",
+        "bg": "rgb(255, 255, 255)",
+        "size": "16px",
+        "ratio": 18.9
+      },
+      "muted": {
+        "fg": "rgb(97, 102, 107)",
+        "bg": "rgb(255, 255, 255)",
+        "size": "11px",
+        "ratio": 5.8
+      },
+      "warning": null,
+      "button": {
+        "fg": "rgb(255, 255, 255)",
+        "bg": "rgb(15, 17, 21)",
+        "size": "11px",
+        "ratio": 18.9
+      }
+    },
+    "noHorizontalOverflow1440": true,
+    "overflow1024": {
+      "iw": 1024,
+      "sw": 1024,
+      "root": {
+        "sw": 739,
+        "cw": 739
+      }
+    },
+    "noHorizontalOverflow1024": true
+  },
+  "restore": {
+    "originalBytes": 432,
+    "driftedBytes": 522,
+    "run": {
+      "runId": "swarm_m1",
+      "mode": "guard",
+      "state": "watching",
+      "armed": true,
+      "armedAt": "2026-11-14T04:55:22.267Z",
+      "reserve": 50000
+    },
+    "safetyCheckpointId": "ck_mwfxmzbe_911cececb7",
+    "dialogText": "恢复检查点\n\nck_mwbpul1s_e83bf1c79a\n· 大肥鱼 A\n\n关闭\n1\n预检\n2\n确认\n3\n结果\n影响预览\n\nfishkeeper 会先为当前状态创建 pre-restore 检查点，然后只写声明可恢复的文件。\n\n将写入 3 个文件，跳过 0 个。\n\n警告\ndiary/2026-11-11.jsonl changed after the checkpoint.\n目标已变化\n\n以下文件在检查点之后又被修改；必须打开覆盖开关才能继续。\n\ndiary/2026-11-11.jsonl\n影响预览\n文件\t动作\t已变化\t字节\ndiary/2026-11-10.jsonl\t恢复\t否\t382 B\ndiary/2026-11-11.jsonl\t恢复\t是\t432 B\nself.json\t恢复\t否\t165 B\n安全说明\noverwatch 不生成、不伪造 fishkeeper 的 confirmToken；确认令牌只存在于这个对话框的内存中。\n写入任何文件之前，fishkeeper 会自己创建一个 pre-restore 安全检查点。\n代码回滚不在此流程：请用 swarm 的 worktree/分支与 git。\n恢复结果\n恢复成功\n\n已恢复 3 个文件\n\n恢复前安全检查点: ck_mwfxmzbe_911cececb7\n\n逐文件结果\n逐文件结果\n文件\t结果\ndiary/2026-11-10.jsonl\t成功\ndiary/2026-11-11.jsonl\t成功\nself.json\t成功\n\n结果已写入 overwatch 日志。\n\n关闭对话框会丢弃确认令牌。\n关闭",
+    "checkpointCount": 2,
+    "triggers": [
+      "pre-restore",
+      "baseline"
+    ],
+    "fileRestored": true,
+    "watch": {
+      "intent": 2,
+      "result": 1,
+      "lastHash": "aaa144dead1adf076fe867e787c388d168ccb8d59f64ea35404741f7770b88c6"
+    },
+    "hashChainOk": true
+  },
+  "token": {
+    "capturedCount": 1,
+    "leaked": false,
+    "hits": [],
+    "searched": [
+      "overwatch-data/**",
+      "fishkeeper-data/**",
+      "document.html",
+      "localStorage",
+      "sessionStorage",
+      "console",
+      "request URLs"
+    ]
+  },
+  "artifacts": [
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\01-room.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\02-fish-tab.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\02b-fish-tab-full.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\03-write-unlocked.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\04-preflight.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\08-keyboard-focus.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\05-confirm.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\06-result.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\07-checkpoints-after.png",
+    "C:\\Users\\11403\\Desktop\\overwatch\\e2e\\m4\\browser\\results\\09-1024.png"
+  ],
+  "errors": [],
+  "ok": true,
+  "finishedAt": "2026-11-14T04:55:41.212Z",
+  "durationMs": 30171
+}

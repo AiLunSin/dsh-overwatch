@@ -44,6 +44,7 @@
     "m1": "node e2e/m1/run.mjs",
     "m2": "node e2e/m2/run.mjs",
     "m4:real": "node e2e/m4/run.mjs",
+    "m4:browser": "node e2e/m4/browser/run.mjs",
     "build:release": "node scripts/build-release.mjs --name @ailunsin/dsh-overwatch",
     "smoke:install": "node scripts/smoke-install.mjs"
   },
