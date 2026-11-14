@@ -219,13 +219,20 @@ test('the evidence call budget is enforced', async () => {
 
 test('a wake without a decision times out and refuses a late decision', async () => {
   const { officer } = harness()
-  const waking = officer.wake({ caseId: 'case-1', generation: 1, card: {}, timeoutMs: 1_000 })
-  await tick()
-  const outcome = await waking
-  assert.equal(outcome.status, 'timeout')
-  assert.equal(officer.timeouts, 1)
-  const late = await decideToolCall(officer, decision)
-  assert.equal(late.code, 'NO_ACTIVE_CASE')
+  // The wake timer is unref'd so a shutting-down host can exit; the test must
+  // keep one ref'd handle alive itself, or Node 22 resolves the event loop.
+  const release = keepAlive(2_000)
+  try {
+    const waking = officer.wake({ caseId: 'case-1', generation: 1, card: {}, timeoutMs: 1_000 })
+    await tick()
+    const outcome = await waking
+    assert.equal(outcome.status, 'timeout')
+    assert.equal(officer.timeouts, 1)
+    const late = await decideToolCall(officer, decision)
+    assert.equal(late.code, 'NO_ACTIVE_CASE')
+  } finally {
+    release()
+  }
 })
 
 test('dispose resolves an in-flight wake and disposes the activation', async () => {
@@ -246,4 +253,10 @@ async function decideToolCall(officer, args) {
 
 function tick() {
   return new Promise(resolve => setTimeout(resolve, 0))
+}
+
+/** Keep the event loop alive while a test awaits an unref'd wake timer. */
+function keepAlive(ms) {
+  const timer = setTimeout(() => {}, ms)
+  return () => clearTimeout(timer)
 }
