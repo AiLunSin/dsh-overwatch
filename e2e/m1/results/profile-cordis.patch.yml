@@ -9,7 +9,7 @@
     ports:
       swarmToken: m1-swarm-token
     fish:
-      dataDir: 'C:/Users/11403/AppData/Local/Temp/overwatch-m1-pXrGN0/fish-data'
+      dataDir: 'C:/Users/11403/AppData/Local/Temp/overwatch-m1-tHTH3I/fish-data'
     sampling:
       swarmEventMs: 500
       swarmSnapshotMs: 500

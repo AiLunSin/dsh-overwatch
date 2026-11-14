@@ -30,6 +30,19 @@ export function evidenceId(source, kind, bucket) {
   return `ev_${source}_${kind}_${bucket}`
 }
 
+/** Stable key for an evidence ref that may be a string or a plain object. @param {unknown} ref */
+function refKey(ref) {
+  if (ref === null || ref === undefined) return 'run'
+  if (typeof ref === 'string' || typeof ref === 'number' || typeof ref === 'boolean') return String(ref)
+  if (typeof ref === 'object') {
+    const entries = Object.entries(/** @type {Record<string, unknown>} */ (ref))
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([key, value]) => `${key}=${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
+    return entries.length === 0 ? 'run' : entries.join(',')
+  }
+  return String(ref)
+}
+
 /**
  * Budget pressure, with the emergency threshold taking precedence.
  * @param {{ used: number, limit: number, scope?: string, ref?: unknown, at?: string }} input
@@ -49,7 +62,7 @@ export function budgetSignal(input, thresholds) {
       summary: `${scope} budget exhausted at ${formatPercent(ratio)} — hard stop`,
       suggestedAction: 'abort',
       evidence: {
-        id: evidenceId('swarm', 'budget', `${scope}:${String(input.ref ?? '')}:exhausted`),
+        id: evidenceId('swarm', 'budget', `${scope}:${refKey(input.ref)}:exhausted`),
         source: 'swarm',
         kind: 'budget',
         at,
@@ -65,7 +78,7 @@ export function budgetSignal(input, thresholds) {
       summary: `${scope} budget at ${formatPercent(ratio)} — hard pause threshold`,
       suggestedAction: 'abort',
       evidence: {
-        id: evidenceId('swarm', 'budget', `${scope}:${String(input.ref ?? '')}:pause`),
+        id: evidenceId('swarm', 'budget', `${scope}:${refKey(input.ref)}:pause`),
         source: 'swarm',
         kind: 'budget',
         at,
@@ -81,7 +94,7 @@ export function budgetSignal(input, thresholds) {
       summary: `${scope} budget at ${formatPercent(ratio)} — pressure threshold`,
       suggestedAction: 'throttle',
       evidence: {
-        id: evidenceId('swarm', 'budget', `${scope}:${String(input.ref ?? '')}:pressure`),
+        id: evidenceId('swarm', 'budget', `${scope}:${refKey(input.ref)}:pressure`),
         source: 'swarm',
         kind: 'budget',
         at,
@@ -140,7 +153,7 @@ export function stallSignal(input, thresholds) {
     summary: `no event for ${Math.round(quietMs / 1000)}s (threshold ${Math.round(thresholds.stallMs / 1000)}s)`,
     suggestedAction: 'throttle',
     evidence: {
-      id: evidenceId('swarm', 'stall', `${String(input.ref ?? 'run')}:${Math.floor(last / thresholds.stallMs)}`),
+      id: evidenceId('swarm', 'stall', `${refKey(input.ref)}:${Math.floor(last / thresholds.stallMs)}`),
       source: 'swarm',
       kind: 'stall',
       at: new Date(input.now).toISOString(),

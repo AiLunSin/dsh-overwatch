@@ -20,6 +20,7 @@ export const DEFAULT_CONFIG = Object.freeze({
     provider: 'spawn',
     model: 'inherit',
     agentPreset: '',
+    agentOptions: {},
     reserveRatio: 0.05,
     maxReserveTokens: 200_000,
     maxWakes: 30,
@@ -116,6 +117,15 @@ export function resolveConfig(raw, options = {}) {
   if (!MODELS.has(config.supervisor.model)) fail(`supervisor.model must be one of ${[...MODELS].join(', ')}`)
   assertString(config.supervisor, 'provider')
   assertString(config.supervisor, 'agentPreset')
+  if (!isPlainObject(config.supervisor.agentOptions)) fail('supervisor.agentOptions must be an object')
+  for (const [key, value] of Object.entries(config.supervisor.agentOptions)) {
+    if (!['provider', 'model', 'reasoningEffort', 'maxTokens'].includes(key)) fail(`supervisor.agentOptions.${key} is not supported`)
+    if (key === 'maxTokens') {
+      if (!Number.isSafeInteger(value) || value < 1) fail('supervisor.agentOptions.maxTokens must be a positive integer')
+    } else if (typeof value !== 'string' || value === '') {
+      fail(`supervisor.agentOptions.${key} must be a non-empty string`)
+    }
+  }
 
   assertNumber(config.supervisor, 'reserveRatio', 0, 0.5)
   assertInteger(config.supervisor, 'maxReserveTokens', 0)

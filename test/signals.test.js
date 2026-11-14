@@ -21,6 +21,10 @@ test('budget pressure and hard pause have stable codes', () => {
   assert.equal(pause.severity, 'L3')
   assert.equal(pause.suggestedAction, 'abort')
 
+  const withRef = budgetSignal({ used: 850, limit: 1_000, ref: { runId: 'run-1' } }, thresholds)
+  assert.match(withRef.evidence.id, /runId=run-1/)
+  assert.doesNotMatch(withRef.evidence.id, /\[object Object\]/)
+
   assert.equal(budgetSignal({ used: 100, limit: 1_000 }, thresholds), null)
   assert.equal(budgetSignal({ used: 10, limit: 0 }, thresholds), null)
 })

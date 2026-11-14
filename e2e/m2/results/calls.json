@@ -8,7 +8,7 @@
         "actor": "overwatch",
         "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
       },
-      "at": "2026-11-13T18:47:30.466Z",
+      "at": "2026-11-14T04:19:15.481Z",
       "status": "running"
     }
   ],
@@ -18,7 +18,7 @@
       "seq": 1,
       "id": "evt_1",
       "type": "swarm/created",
-      "at": "2026-11-13T18:47:29.807Z",
+      "at": "2026-11-14T04:19:14.839Z",
       "actor": "system",
       "payload": {
         "runId": "swarm_m2"
@@ -28,7 +28,7 @@
       "seq": 2,
       "id": "evt_2",
       "type": "swarm/dispatch/started",
-      "at": "2026-11-13T18:47:29.807Z",
+      "at": "2026-11-14T04:19:14.839Z",
       "actor": "system",
       "payload": {
         "memberId": "member_worker",
@@ -40,7 +40,7 @@
       "seq": 3,
       "id": "evt_3",
       "type": "swarm/intervened",
-      "at": "2026-11-13T18:47:30.466Z",
+      "at": "2026-11-14T04:19:15.481Z",
       "actor": "system",
       "payload": {
         "action": "steer",

@@ -3,11 +3,11 @@
   "stage": "web",
   "dshVersion": "0.2.2-rc.3",
   "desktopRoot": "C:\\Users\\11403\\AppData\\Local\\Programs\\DeepSeek Harness",
-  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0",
+  "temp": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I",
   "profile": "m1web",
-  "startedAt": "2026-11-13T18:47:17.304Z",
-  "finishedAt": "2026-11-13T18:47:26.259Z",
-  "durationMs": 8955,
+  "startedAt": "2026-11-14T04:19:18.988Z",
+  "finishedAt": "2026-11-14T04:19:27.928Z",
+  "durationMs": 8939,
   "error": null,
   "gate": {
     "ok": true,
@@ -24,14 +24,14 @@
           "ok": true,
           "version": "0.1.0",
           "mode": "guard",
-          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
-          "instanceId": "ow_6b47474199244c15",
-          "openedAt": "2026-11-13T18:47:19.839Z",
+          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
+          "instanceId": "ow_52cc55208760438f",
+          "openedAt": "2026-11-14T04:19:21.514Z",
           "service": {
             "watch": {
               "ok": true,
               "events": 1,
-              "lastHash": "c075a4061b6070b3eb1dedbab4a042eb86a88da76e3d0778f9c562adc0ac269c",
+              "lastHash": "86af9649dd898f458107adf86990d2f8b2464c230cf8d68c8f31ad0fb4e46c62",
               "error": null
             }
           },
@@ -59,10 +59,10 @@
             "errors": 0
           },
           "runs": [],
-          "asOf": "2026-11-13T18:47:20.012Z"
+          "asOf": "2026-11-14T04:19:21.678Z"
         }
       },
-      "at": "2026-11-13T18:47:20.041Z"
+      "at": "2026-11-14T04:19:21.737Z"
     },
     "swarm-health": {
       "status": "pass",
@@ -74,7 +74,7 @@
           "runs": 1
         }
       },
-      "at": "2026-11-13T18:47:20.049Z"
+      "at": "2026-11-14T04:19:21.745Z"
     },
     "arm-no-token": {
       "status": "pass",
@@ -86,7 +86,7 @@
           "message": "missing or invalid overwatch token"
         }
       },
-      "at": "2026-11-13T18:47:20.058Z"
+      "at": "2026-11-14T04:19:21.753Z"
     },
     "arm-wrong-token": {
       "status": "pass",
@@ -98,7 +98,7 @@
           "message": "missing or invalid overwatch token"
         }
       },
-      "at": "2026-11-13T18:47:20.068Z"
+      "at": "2026-11-14T04:19:21.762Z"
     },
     "arm-cross-origin": {
       "status": "pass",
@@ -110,7 +110,7 @@
           "message": "cross-origin writes are not allowed"
         }
       },
-      "at": "2026-11-13T18:47:20.075Z"
+      "at": "2026-11-14T04:19:21.767Z"
     },
     "arm-ok": {
       "status": "pass",
@@ -121,11 +121,11 @@
           "mode": "guard",
           "state": "watching",
           "armed": true,
-          "armedAt": "2026-11-13T18:47:20.374Z",
+          "armedAt": "2026-11-14T04:19:22.046Z",
           "reserve": 50000
         }
       },
-      "at": "2026-11-13T18:47:20.382Z"
+      "at": "2026-11-14T04:19:22.062Z"
     },
     "arm-duplicate": {
       "status": "pass",
@@ -137,19 +137,19 @@
           "message": "run swarm_m1 is already supervised by this process"
         }
       },
-      "at": "2026-11-13T18:47:20.386Z"
+      "at": "2026-11-14T04:19:22.066Z"
     },
     "budget-pressure-case": {
       "status": "pass",
       "evidence": {
         "case": {
-          "id": "case_3c5f17578e6541d9",
+          "id": "case_4137c97e55ef47ae",
           "code": "budget_pressure",
           "severity": "L2",
           "title": "run budget at 81.0% — pressure threshold",
           "state": "open",
-          "openedAt": "2026-11-13T18:47:21.398Z",
-          "updatedAt": "2026-11-13T18:47:21.398Z",
+          "openedAt": "2026-11-14T04:19:23.073Z",
+          "updatedAt": "2026-11-14T04:19:23.073Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -157,22 +157,22 @@
               "code": "budget_pressure",
               "severity": "L2",
               "value": 0.81,
-              "at": "2026-11-13T18:47:21.398Z"
+              "at": "2026-11-14T04:19:23.073Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pressure",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:21.398Z"
+              "at": "2026-11-14T04:19:23.073Z"
             }
           ],
           "actions": []
         },
         "ratio": 0.81
       },
-      "at": "2026-11-13T18:47:21.634Z"
+      "at": "2026-11-14T04:19:23.309Z"
     },
     "budget-pressure-no-action": {
       "status": "pass",
@@ -181,19 +181,19 @@
         "watchActionEvents": [],
         "caseActions": []
       },
-      "at": "2026-11-13T18:47:22.841Z"
+      "at": "2026-11-14T04:19:24.517Z"
     },
     "budget-pause-case": {
       "status": "pass",
       "evidence": {
         "case": {
-          "id": "case_802a27af4b3942db",
+          "id": "case_0a521d990c6941fb",
           "code": "budget_pause",
           "severity": "L3",
           "title": "run budget at 96.0% — hard pause threshold",
           "state": "verifying",
-          "openedAt": "2026-11-13T18:47:22.932Z",
-          "updatedAt": "2026-11-13T18:47:22.943Z",
+          "openedAt": "2026-11-14T04:19:24.609Z",
+          "updatedAt": "2026-11-14T04:19:24.619Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -201,38 +201,38 @@
               "code": "budget_pause",
               "severity": "L3",
               "value": 0.96,
-              "at": "2026-11-13T18:47:22.932Z"
+              "at": "2026-11-14T04:19:24.609Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pause",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:22.932Z"
+              "at": "2026-11-14T04:19:24.609Z"
             }
           ],
           "actions": [
             {
-              "id": "act_c9fea650fd12",
+              "id": "act_41413a3026e0",
               "kind": "pause",
               "state": "verified",
-              "at": "2026-11-13T18:47:22.940Z"
+              "at": "2026-11-14T04:19:24.617Z"
             }
           ]
         },
         "ratio": 0.96
       },
-      "at": "2026-11-13T18:47:24.052Z"
+      "at": "2026-11-14T04:19:25.726Z"
     },
     "budget-pause-call": {
       "status": "pass",
       "evidence": {
         "truncated": true,
         "bytes": 2098,
-        "preview": "{\"call\":{\"at\":\"2026-11-13T18:47:22.937Z\",\"action\":\"pause\",\"actor\":\"overwatch\",\"reason\":\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\",\"text\":\"\",\"target\":null,\"from\":\"running\",\"to\":\"paused\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":1636,\"preview\":\"{\\\"status\\\":\\\"paused\\\",\\\"budgetRatio\\\":0.96,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"from\\\":\\\"created\\\",\\\"to\\\":\\\"running\\\"}},{\\\"seq\\\":3,\\\"id\\\":\\\"evt_m1_3\\\",\\\"type\\\":\\\"swarm/dispatch/started\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"mem_worker_1\\\",\\\"payload\\\":{\\\"taskId\\\":\\\"task_m1_1\\\",\\\"memberId\\\":\\\"mem_worker_1\\\",\\\"childId\\\":\\\"child_m1_1\\\"}},{\\\"seq\\\":4,\\\""
+        "preview": "{\"call\":{\"at\":\"2026-11-14T04:19:24.614Z\",\"action\":\"pause\",\"actor\":\"overwatch\",\"reason\":\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\",\"text\":\"\",\"target\":null,\"from\":\"running\",\"to\":\"paused\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":1636,\"preview\":\"{\\\"status\\\":\\\"paused\\\",\\\"budgetRatio\\\":0.96,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"from\\\":\\\"created\\\",\\\"to\\\":\\\"running\\\"}},{\\\"seq\\\":3,\\\"id\\\":\\\"evt_m1_3\\\",\\\"type\\\":\\\"swarm/dispatch/started\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"mem_worker_1\\\",\\\"payload\\\":{\\\"taskId\\\":\\\"task_m1_1\\\",\\\"memberId\\\":\\\"mem_worker_1\\\",\\\"childId\\\":\\\"child_m1_1\\\"}},{\\\"seq\\\":4,\\\""
       },
-      "at": "2026-11-13T18:47:24.055Z"
+      "at": "2026-11-14T04:19:25.729Z"
     },
     "budget-pause-run": {
       "status": "pass",
@@ -241,28 +241,28 @@
         "status": "paused",
         "snapshotStatus": "paused"
       },
-      "at": "2026-11-13T18:47:24.057Z"
+      "at": "2026-11-14T04:19:25.731Z"
     },
     "budget-pause-watch": {
       "status": "pass",
       "evidence": {
         "truncated": true,
-        "bytes": 2049,
-        "preview": "{\"chain\":{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"c9fea650fd12a7c55d8a66e9719cf251\\\",\\\"actionId\\\":\\\"act_c9fea650fd12\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd"
+        "bytes": 2048,
+        "preview": "{\"chain\":{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"41413a3026e0960c974657c3bb382bb9\\\",\\\"actionId\\\":\\\"act_41413a3026e0\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e"
       },
-      "at": "2026-11-13T18:47:24.059Z"
+      "at": "2026-11-14T04:19:25.733Z"
     },
     "budget-exhausted-case": {
       "status": "pass",
       "evidence": {
         "case": {
-          "id": "case_948b29129c5e4c9b",
+          "id": "case_c451178ea13f404e",
           "code": "budget_exhausted",
           "severity": "L4",
           "title": "run budget exhausted at 101.0% — hard stop",
           "state": "open",
-          "openedAt": "2026-11-13T18:47:24.981Z",
-          "updatedAt": "2026-11-13T18:47:24.981Z",
+          "openedAt": "2026-11-14T04:19:26.651Z",
+          "updatedAt": "2026-11-14T04:19:26.651Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -270,31 +270,31 @@
               "code": "budget_exhausted",
               "severity": "L4",
               "value": 1.01,
-              "at": "2026-11-13T18:47:24.981Z"
+              "at": "2026-11-14T04:19:26.651Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:exhausted",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:24.981Z"
+              "at": "2026-11-14T04:19:26.651Z"
             }
           ],
           "actions": []
         },
         "ratio": 1.01
       },
-      "at": "2026-11-13T18:47:25.279Z"
+      "at": "2026-11-14T04:19:26.959Z"
     },
     "budget-exhausted-call": {
       "status": "pass",
       "evidence": {
         "truncated": true,
         "bytes": 2069,
-        "preview": "{\"call\":{\"at\":\"2026-11-13T18:47:24.473Z\",\"action\":\"abort\",\"actor\":\"overwatch\",\"reason\":\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\",\"text\":\"\",\"target\":null,\"from\":\"paused\",\"to\":\"aborted\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":2537,\"preview\":\"{\\\"status\\\":\\\"aborted\\\",\\\"budgetRatio\\\":1.01,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"},{\\\"at\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"action\\\":\\\"abort\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"paused\\\",\\\"to\\\":\\\"aborted\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"fro"
+        "preview": "{\"call\":{\"at\":\"2026-11-14T04:19:26.147Z\",\"action\":\"abort\",\"actor\":\"overwatch\",\"reason\":\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\",\"text\":\"\",\"target\":null,\"from\":\"paused\",\"to\":\"aborted\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":2537,\"preview\":\"{\\\"status\\\":\\\"aborted\\\",\\\"budgetRatio\\\":1.01,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"},{\\\"at\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"action\\\":\\\"abort\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"paused\\\",\\\"to\\\":\\\"aborted\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"fro"
       },
-      "at": "2026-11-13T18:47:25.282Z"
+      "at": "2026-11-14T04:19:26.964Z"
     },
     "budget-exhausted-run": {
       "status": "pass",
@@ -303,16 +303,16 @@
         "status": "aborted",
         "snapshotStatus": "aborted"
       },
-      "at": "2026-11-13T18:47:25.285Z"
+      "at": "2026-11-14T04:19:26.967Z"
     },
     "budget-exhausted-watch": {
       "status": "pass",
       "evidence": {
         "truncated": true,
-        "bytes": 2221,
-        "preview": "{\"chain\":{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc673\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"bfa5206dc67364f4148e1365a47fc283\\\",\\\"actionId\\\":\\\"act_bfa5206dc673\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"endedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_b"
+        "bytes": 2220,
+        "preview": "{\"chain\":{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9a\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"44e337b72d9a879082f5fd0a2acabbc1\\\",\\\"actionId\\\":\\\"act_44e337b72d9a\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"endedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44"
       },
-      "at": "2026-11-13T18:47:25.286Z"
+      "at": "2026-11-14T04:19:26.969Z"
     },
     "disarm": {
       "status": "pass",
@@ -322,14 +322,14 @@
           "runId": "swarm_m1",
           "state": "disarmed",
           "closedCases": [
-            "case_3c5f17578e6541d9",
-            "case_802a27af4b3942db",
-            "case_948b29129c5e4c9b"
+            "case_4137c97e55ef47ae",
+            "case_0a521d990c6941fb",
+            "case_c451178ea13f404e"
           ],
-          "disarmedAt": "2026-11-13T18:47:25.294Z"
+          "disarmedAt": "2026-11-14T04:19:26.982Z"
         }
       },
-      "at": "2026-11-13T18:47:25.300Z"
+      "at": "2026-11-14T04:19:26.996Z"
     },
     "disarm-run": {
       "status": "pass",
@@ -337,18 +337,18 @@
         "status": 200,
         "armed": false,
         "state": "disarmed",
-        "disarmedAt": "2026-11-13T18:47:25.294Z"
+        "disarmedAt": "2026-11-14T04:19:26.981Z"
       },
-      "at": "2026-11-13T18:47:25.309Z"
+      "at": "2026-11-14T04:19:27.010Z"
     },
     "disarm-cases": {
       "status": "pass",
       "evidence": {
         "truncated": true,
-        "bytes": 2559,
-        "preview": "{\"beforeStatus\":200,\"afterStatus\":200,\"pending\":[\"case_948b29129c5e4c9b\",\"case_802a27af4b3942db\",\"case_3c5f17578e6541d9\"],\"closedCases\":[\"case_3c5f17578e6541d9\",\"case_802a27af4b3942db\",\"case_948b29129c5e4c9b\"],\"missingOrNotAbandoned\":[],\"notListedByDisarm\":[],\"after\":[{\"id\":\"case_948b29129c5e4c9b\",\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"title\":\"run budget exhausted at 101.0% — hard stop\",\"state\":\"closed\",\"openedAt\":\"2026-11-13T18:47:24.981Z\",\"updatedAt\":\"2026-11-13T18:47:25.291Z\",\"closedAt\":\"2026-11-13T18:47:25.291Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"value\":1.01,\"at\":\"2026-11-13T18:47:24.981Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:[object Object]:exhausted\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-13T18:47:24.981Z\"}],\"actions\":[]},{\"id\":\"case_802a27af4b3942db\",\"code\":\"budget_pause\",\"severity\":\"L3\",\"title\":\"run budget at 96.0% — hard pause threshold\",\"state\":\"closed\",\"openedAt\":\"2026-11-13T18:47:22.932Z\",\"updatedAt\":\"2026-11-13T18:47:25.290Z\",\"closedAt\":\"2026-11-13T18:47:25.290Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_pause\",\"severity\":\"L3\",\"value\":0.96,\"at\":\"2026-11-13T18:47:22.932Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:[object Object]:pause\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-13T18:47:22.932Z\"}],\"actions\":[{\"id\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"state\":\"verified\",\"at\":\"2026-11-13T18:47:22.940Z\"}]},{\"id\":\"case_3c5f17578e6541d9\",\"code\":\"budget_pressure\",\"severity\":\"L2\",\"title\":\"run budget"
+        "bytes": 2555,
+        "preview": "{\"beforeStatus\":200,\"afterStatus\":200,\"pending\":[\"case_c451178ea13f404e\",\"case_0a521d990c6941fb\",\"case_4137c97e55ef47ae\"],\"closedCases\":[\"case_4137c97e55ef47ae\",\"case_0a521d990c6941fb\",\"case_c451178ea13f404e\"],\"missingOrNotAbandoned\":[],\"notListedByDisarm\":[],\"after\":[{\"id\":\"case_c451178ea13f404e\",\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"title\":\"run budget exhausted at 101.0% — hard stop\",\"state\":\"closed\",\"openedAt\":\"2026-11-14T04:19:26.651Z\",\"updatedAt\":\"2026-11-14T04:19:26.977Z\",\"closedAt\":\"2026-11-14T04:19:26.977Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"value\":1.01,\"at\":\"2026-11-14T04:19:26.651Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:runId=swarm_m1:exhausted\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-14T04:19:26.651Z\"}],\"actions\":[]},{\"id\":\"case_0a521d990c6941fb\",\"code\":\"budget_pause\",\"severity\":\"L3\",\"title\":\"run budget at 96.0% — hard pause threshold\",\"state\":\"closed\",\"openedAt\":\"2026-11-14T04:19:24.609Z\",\"updatedAt\":\"2026-11-14T04:19:26.975Z\",\"closedAt\":\"2026-11-14T04:19:26.975Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_pause\",\"severity\":\"L3\",\"value\":0.96,\"at\":\"2026-11-14T04:19:24.609Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:runId=swarm_m1:pause\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-14T04:19:24.609Z\"}],\"actions\":[{\"id\":\"act_41413a3026e0\",\"kind\":\"pause\",\"state\":\"verified\",\"at\":\"2026-11-14T04:19:24.617Z\"}]},{\"id\":\"case_4137c97e55ef47ae\",\"code\":\"budget_pressure\",\"severity\":\"L2\",\"title\":\"run budget a"
       },
-      "at": "2026-11-13T18:47:25.312Z"
+      "at": "2026-11-14T04:19:27.015Z"
     },
     "disarm-again": {
       "status": "pass",
@@ -360,16 +360,16 @@
           "message": "run swarm_m1 is not supervised by this process"
         }
       },
-      "at": "2026-11-13T18:47:25.315Z"
+      "at": "2026-11-14T04:19:27.019Z"
     },
     "watch-chain": {
       "status": "pass",
       "evidence": {
-        "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
+        "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
         "count": 25,
-        "lastHash": "9c81190bc596acf64aa1f99539f0f148928a209b970e875a397c09c43edb1c7c"
+        "lastHash": "df295e9de7ec95c0df8a3fe2f71479d1498128bb429f93f6c1f559eda0eed371"
       },
-      "at": "2026-11-13T18:47:25.318Z"
+      "at": "2026-11-14T04:19:27.023Z"
     },
     "watch-types": {
       "status": "pass",
@@ -402,25 +402,25 @@
           "watch/disarmed"
         ]
       },
-      "at": "2026-11-13T18:47:25.319Z"
+      "at": "2026-11-14T04:19:27.024Z"
     },
     "watch-pause-chain": {
       "status": "pass",
       "evidence": {
         "truncated": true,
-        "bytes": 1552,
-        "preview": "{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"c9fea650fd12a7c55d8a66e9719cf251\\\",\\\"actionId\\\":\\\"act_c9fea650fd12\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind"
+        "bytes": 1551,
+        "preview": "{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"41413a3026e0960c974657c3bb382bb9\\\",\\\"actionId\\\":\\\"act_41413a3026e0\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\""
       },
-      "at": "2026-11-13T18:47:25.320Z"
+      "at": "2026-11-14T04:19:27.026Z"
     },
     "watch-abort-chain": {
       "status": "pass",
       "evidence": {
         "truncated": true,
-        "bytes": 1562,
-        "preview": "{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc673\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"bfa5206dc67364f4148e1365a47fc283\\\",\\\"actionId\\\":\\\"act_bfa5206dc673\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"endedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc6"
+        "bytes": 1561,
+        "preview": "{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9a\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"44e337b72d9a879082f5fd0a2acabbc1\\\",\\\"actionId\\\":\\\"act_44e337b72d9a\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"endedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9"
       },
-      "at": "2026-11-13T18:47:25.321Z"
+      "at": "2026-11-14T04:19:27.028Z"
     },
     "doctor": {
       "status": "pass",
@@ -465,7 +465,7 @@
           }
         ]
       },
-      "at": "2026-11-13T18:47:20.395Z"
+      "at": "2026-11-14T04:19:22.075Z"
     },
     "fish-index": {
       "status": "pass",
@@ -482,14 +482,14 @@
           "baseline": false
         }
       },
-      "at": "2026-11-13T18:47:20.398Z"
+      "at": "2026-11-14T04:19:22.078Z"
     },
     "fish-source": {
       "status": "pass",
       "evidence": {
         "status": 200
       },
-      "at": "2026-11-13T18:47:20.403Z"
+      "at": "2026-11-14T04:19:22.083Z"
     },
     "fish-missing": {
       "status": "pass",
@@ -497,7 +497,7 @@
         "status": 404,
         "code": "FISH_SOURCE_NOT_FOUND"
       },
-      "at": "2026-11-13T18:47:20.404Z"
+      "at": "2026-11-14T04:19:22.084Z"
     },
     "timeline-page": {
       "status": "pass",
@@ -508,10 +508,10 @@
           "swarm",
           "watch"
         ],
-        "nextSince": "2026-11-13T18:47:19.605Z|0|swarm:2",
+        "nextSince": "2026-11-14T04:19:21.298Z|0|swarm:2",
         "secondCount": 2
       },
-      "at": "2026-11-13T18:47:20.409Z"
+      "at": "2026-11-14T04:19:22.091Z"
     },
     "restore-intent": {
       "status": "pass",
@@ -519,7 +519,7 @@
         "status": 200,
         "recorded": true
       },
-      "at": "2026-11-13T18:47:20.414Z"
+      "at": "2026-11-14T04:19:22.096Z"
     },
     "restore-token-rejected": {
       "status": "pass",
@@ -527,7 +527,7 @@
         "status": 400,
         "code": "RESTORE_TOKEN_REJECTED"
       },
-      "at": "2026-11-13T18:47:20.415Z"
+      "at": "2026-11-14T04:19:22.097Z"
     },
     "restore-evidence": {
       "status": "pass",
@@ -537,19 +537,19 @@
         "checkpointId": "ck_m3",
         "confirmTokenLeaked": false
       },
-      "at": "2026-11-13T18:47:25.322Z"
+      "at": "2026-11-14T04:19:27.030Z"
     }
   },
   "report": {
     "schemaVersion": 1,
     "stage": "web",
-    "startedAt": "2026-11-13T18:47:19.544Z",
+    "startedAt": "2026-11-14T04:19:21.240Z",
     "env": {
       "node": "v24.21.0",
       "platform": "win32",
-      "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home",
-      "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
-      "origin": "http://127.0.0.1:56303"
+      "dshHome": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home",
+      "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
+      "origin": "http://127.0.0.1:63239"
     },
     "checks": {
       "health": {
@@ -560,14 +560,14 @@
             "ok": true,
             "version": "0.1.0",
             "mode": "guard",
-            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
-            "instanceId": "ow_6b47474199244c15",
-            "openedAt": "2026-11-13T18:47:19.839Z",
+            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
+            "instanceId": "ow_52cc55208760438f",
+            "openedAt": "2026-11-14T04:19:21.514Z",
             "service": {
               "watch": {
                 "ok": true,
                 "events": 1,
-                "lastHash": "c075a4061b6070b3eb1dedbab4a042eb86a88da76e3d0778f9c562adc0ac269c",
+                "lastHash": "86af9649dd898f458107adf86990d2f8b2464c230cf8d68c8f31ad0fb4e46c62",
                 "error": null
               }
             },
@@ -595,10 +595,10 @@
               "errors": 0
             },
             "runs": [],
-            "asOf": "2026-11-13T18:47:20.012Z"
+            "asOf": "2026-11-14T04:19:21.678Z"
           }
         },
-        "at": "2026-11-13T18:47:20.041Z"
+        "at": "2026-11-14T04:19:21.737Z"
       },
       "swarm-health": {
         "status": "pass",
@@ -610,7 +610,7 @@
             "runs": 1
           }
         },
-        "at": "2026-11-13T18:47:20.049Z"
+        "at": "2026-11-14T04:19:21.745Z"
       },
       "arm-no-token": {
         "status": "pass",
@@ -622,7 +622,7 @@
             "message": "missing or invalid overwatch token"
           }
         },
-        "at": "2026-11-13T18:47:20.058Z"
+        "at": "2026-11-14T04:19:21.753Z"
       },
       "arm-wrong-token": {
         "status": "pass",
@@ -634,7 +634,7 @@
             "message": "missing or invalid overwatch token"
           }
         },
-        "at": "2026-11-13T18:47:20.068Z"
+        "at": "2026-11-14T04:19:21.762Z"
       },
       "arm-cross-origin": {
         "status": "pass",
@@ -646,7 +646,7 @@
             "message": "cross-origin writes are not allowed"
           }
         },
-        "at": "2026-11-13T18:47:20.075Z"
+        "at": "2026-11-14T04:19:21.767Z"
       },
       "arm-ok": {
         "status": "pass",
@@ -657,11 +657,11 @@
             "mode": "guard",
             "state": "watching",
             "armed": true,
-            "armedAt": "2026-11-13T18:47:20.374Z",
+            "armedAt": "2026-11-14T04:19:22.046Z",
             "reserve": 50000
           }
         },
-        "at": "2026-11-13T18:47:20.382Z"
+        "at": "2026-11-14T04:19:22.062Z"
       },
       "arm-duplicate": {
         "status": "pass",
@@ -673,19 +673,19 @@
             "message": "run swarm_m1 is already supervised by this process"
           }
         },
-        "at": "2026-11-13T18:47:20.386Z"
+        "at": "2026-11-14T04:19:22.066Z"
       },
       "budget-pressure-case": {
         "status": "pass",
         "evidence": {
           "case": {
-            "id": "case_3c5f17578e6541d9",
+            "id": "case_4137c97e55ef47ae",
             "code": "budget_pressure",
             "severity": "L2",
             "title": "run budget at 81.0% — pressure threshold",
             "state": "open",
-            "openedAt": "2026-11-13T18:47:21.398Z",
-            "updatedAt": "2026-11-13T18:47:21.398Z",
+            "openedAt": "2026-11-14T04:19:23.073Z",
+            "updatedAt": "2026-11-14T04:19:23.073Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -693,22 +693,22 @@
                 "code": "budget_pressure",
                 "severity": "L2",
                 "value": 0.81,
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pressure",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "actions": []
           },
           "ratio": 0.81
         },
-        "at": "2026-11-13T18:47:21.634Z"
+        "at": "2026-11-14T04:19:23.309Z"
       },
       "budget-pressure-no-action": {
         "status": "pass",
@@ -717,19 +717,19 @@
           "watchActionEvents": [],
           "caseActions": []
         },
-        "at": "2026-11-13T18:47:22.841Z"
+        "at": "2026-11-14T04:19:24.517Z"
       },
       "budget-pause-case": {
         "status": "pass",
         "evidence": {
           "case": {
-            "id": "case_802a27af4b3942db",
+            "id": "case_0a521d990c6941fb",
             "code": "budget_pause",
             "severity": "L3",
             "title": "run budget at 96.0% — hard pause threshold",
             "state": "verifying",
-            "openedAt": "2026-11-13T18:47:22.932Z",
-            "updatedAt": "2026-11-13T18:47:22.943Z",
+            "openedAt": "2026-11-14T04:19:24.609Z",
+            "updatedAt": "2026-11-14T04:19:24.619Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -737,38 +737,38 @@
                 "code": "budget_pause",
                 "severity": "L3",
                 "value": 0.96,
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pause",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "actions": [
               {
-                "id": "act_c9fea650fd12",
+                "id": "act_41413a3026e0",
                 "kind": "pause",
                 "state": "verified",
-                "at": "2026-11-13T18:47:22.940Z"
+                "at": "2026-11-14T04:19:24.617Z"
               }
             ]
           },
           "ratio": 0.96
         },
-        "at": "2026-11-13T18:47:24.052Z"
+        "at": "2026-11-14T04:19:25.726Z"
       },
       "budget-pause-call": {
         "status": "pass",
         "evidence": {
           "truncated": true,
           "bytes": 2098,
-          "preview": "{\"call\":{\"at\":\"2026-11-13T18:47:22.937Z\",\"action\":\"pause\",\"actor\":\"overwatch\",\"reason\":\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\",\"text\":\"\",\"target\":null,\"from\":\"running\",\"to\":\"paused\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":1636,\"preview\":\"{\\\"status\\\":\\\"paused\\\",\\\"budgetRatio\\\":0.96,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"from\\\":\\\"created\\\",\\\"to\\\":\\\"running\\\"}},{\\\"seq\\\":3,\\\"id\\\":\\\"evt_m1_3\\\",\\\"type\\\":\\\"swarm/dispatch/started\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"mem_worker_1\\\",\\\"payload\\\":{\\\"taskId\\\":\\\"task_m1_1\\\",\\\"memberId\\\":\\\"mem_worker_1\\\",\\\"childId\\\":\\\"child_m1_1\\\"}},{\\\"seq\\\":4,\\\""
+          "preview": "{\"call\":{\"at\":\"2026-11-14T04:19:24.614Z\",\"action\":\"pause\",\"actor\":\"overwatch\",\"reason\":\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\",\"text\":\"\",\"target\":null,\"from\":\"running\",\"to\":\"paused\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":1636,\"preview\":\"{\\\"status\\\":\\\"paused\\\",\\\"budgetRatio\\\":0.96,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"from\\\":\\\"created\\\",\\\"to\\\":\\\"running\\\"}},{\\\"seq\\\":3,\\\"id\\\":\\\"evt_m1_3\\\",\\\"type\\\":\\\"swarm/dispatch/started\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"mem_worker_1\\\",\\\"payload\\\":{\\\"taskId\\\":\\\"task_m1_1\\\",\\\"memberId\\\":\\\"mem_worker_1\\\",\\\"childId\\\":\\\"child_m1_1\\\"}},{\\\"seq\\\":4,\\\""
         },
-        "at": "2026-11-13T18:47:24.055Z"
+        "at": "2026-11-14T04:19:25.729Z"
       },
       "budget-pause-run": {
         "status": "pass",
@@ -777,28 +777,28 @@
           "status": "paused",
           "snapshotStatus": "paused"
         },
-        "at": "2026-11-13T18:47:24.057Z"
+        "at": "2026-11-14T04:19:25.731Z"
       },
       "budget-pause-watch": {
         "status": "pass",
         "evidence": {
           "truncated": true,
-          "bytes": 2049,
-          "preview": "{\"chain\":{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"c9fea650fd12a7c55d8a66e9719cf251\\\",\\\"actionId\\\":\\\"act_c9fea650fd12\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd"
+          "bytes": 2048,
+          "preview": "{\"chain\":{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"41413a3026e0960c974657c3bb382bb9\\\",\\\"actionId\\\":\\\"act_41413a3026e0\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e"
         },
-        "at": "2026-11-13T18:47:24.059Z"
+        "at": "2026-11-14T04:19:25.733Z"
       },
       "budget-exhausted-case": {
         "status": "pass",
         "evidence": {
           "case": {
-            "id": "case_948b29129c5e4c9b",
+            "id": "case_c451178ea13f404e",
             "code": "budget_exhausted",
             "severity": "L4",
             "title": "run budget exhausted at 101.0% — hard stop",
             "state": "open",
-            "openedAt": "2026-11-13T18:47:24.981Z",
-            "updatedAt": "2026-11-13T18:47:24.981Z",
+            "openedAt": "2026-11-14T04:19:26.651Z",
+            "updatedAt": "2026-11-14T04:19:26.651Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -806,31 +806,31 @@
                 "code": "budget_exhausted",
                 "severity": "L4",
                 "value": 1.01,
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:exhausted",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "actions": []
           },
           "ratio": 1.01
         },
-        "at": "2026-11-13T18:47:25.279Z"
+        "at": "2026-11-14T04:19:26.959Z"
       },
       "budget-exhausted-call": {
         "status": "pass",
         "evidence": {
           "truncated": true,
           "bytes": 2069,
-          "preview": "{\"call\":{\"at\":\"2026-11-13T18:47:24.473Z\",\"action\":\"abort\",\"actor\":\"overwatch\",\"reason\":\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\",\"text\":\"\",\"target\":null,\"from\":\"paused\",\"to\":\"aborted\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":2537,\"preview\":\"{\\\"status\\\":\\\"aborted\\\",\\\"budgetRatio\\\":1.01,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"},{\\\"at\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"action\\\":\\\"abort\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"paused\\\",\\\"to\\\":\\\"aborted\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"fro"
+          "preview": "{\"call\":{\"at\":\"2026-11-14T04:19:26.147Z\",\"action\":\"abort\",\"actor\":\"overwatch\",\"reason\":\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\",\"text\":\"\",\"target\":null,\"from\":\"paused\",\"to\":\"aborted\",\"httpStatus\":200,\"ok\":true,\"remoteAddress\":\"127.0.0.1\"},\"fakeState\":{\"truncated\":true,\"bytes\":2537,\"preview\":\"{\\\"status\\\":\\\"aborted\\\",\\\"budgetRatio\\\":1.01,\\\"calls\\\":[{\\\"at\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"action\\\":\\\"pause\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget at 96.0% crossed the hard pause threshold 95.0%; paused without automatic resume\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"running\\\",\\\"to\\\":\\\"paused\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"},{\\\"at\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"action\\\":\\\"abort\\\",\\\"actor\\\":\\\"overwatch\\\",\\\"reason\\\":\\\"run budget exhausted (101.0% of 1000000 tokens); deterministic abort\\\",\\\"text\\\":\\\"\\\",\\\"target\\\":null,\\\"from\\\":\\\"paused\\\",\\\"to\\\":\\\"aborted\\\",\\\"httpStatus\\\":200,\\\"ok\\\":true,\\\"remoteAddress\\\":\\\"127.0.0.1\\\"}],\\\"events\\\":[{\\\"seq\\\":1,\\\"id\\\":\\\"evt_m1_1\\\",\\\"type\\\":\\\"swarm/created\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"human\\\",\\\"payload\\\":{\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":3600000,\\\"taskTokens\\\":100000,\\\"memberTokens\\\":50000}}},{\\\"seq\\\":2,\\\"id\\\":\\\"evt_m1_2\\\",\\\"type\\\":\\\"swarm/status/changed\\\",\\\"at\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"actor\\\":\\\"system\\\",\\\"payload\\\":{\\\"fro"
         },
-        "at": "2026-11-13T18:47:25.282Z"
+        "at": "2026-11-14T04:19:26.964Z"
       },
       "budget-exhausted-run": {
         "status": "pass",
@@ -839,16 +839,16 @@
           "status": "aborted",
           "snapshotStatus": "aborted"
         },
-        "at": "2026-11-13T18:47:25.285Z"
+        "at": "2026-11-14T04:19:26.967Z"
       },
       "budget-exhausted-watch": {
         "status": "pass",
         "evidence": {
           "truncated": true,
-          "bytes": 2221,
-          "preview": "{\"chain\":{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc673\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"bfa5206dc67364f4148e1365a47fc283\\\",\\\"actionId\\\":\\\"act_bfa5206dc673\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"endedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_b"
+          "bytes": 2220,
+          "preview": "{\"chain\":{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9a\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"44e337b72d9a879082f5fd0a2acabbc1\\\",\\\"actionId\\\":\\\"act_44e337b72d9a\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"endedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44"
         },
-        "at": "2026-11-13T18:47:25.286Z"
+        "at": "2026-11-14T04:19:26.969Z"
       },
       "disarm": {
         "status": "pass",
@@ -858,14 +858,14 @@
             "runId": "swarm_m1",
             "state": "disarmed",
             "closedCases": [
-              "case_3c5f17578e6541d9",
-              "case_802a27af4b3942db",
-              "case_948b29129c5e4c9b"
+              "case_4137c97e55ef47ae",
+              "case_0a521d990c6941fb",
+              "case_c451178ea13f404e"
             ],
-            "disarmedAt": "2026-11-13T18:47:25.294Z"
+            "disarmedAt": "2026-11-14T04:19:26.982Z"
           }
         },
-        "at": "2026-11-13T18:47:25.300Z"
+        "at": "2026-11-14T04:19:26.996Z"
       },
       "disarm-run": {
         "status": "pass",
@@ -873,18 +873,18 @@
           "status": 200,
           "armed": false,
           "state": "disarmed",
-          "disarmedAt": "2026-11-13T18:47:25.294Z"
+          "disarmedAt": "2026-11-14T04:19:26.981Z"
         },
-        "at": "2026-11-13T18:47:25.309Z"
+        "at": "2026-11-14T04:19:27.010Z"
       },
       "disarm-cases": {
         "status": "pass",
         "evidence": {
           "truncated": true,
-          "bytes": 2559,
-          "preview": "{\"beforeStatus\":200,\"afterStatus\":200,\"pending\":[\"case_948b29129c5e4c9b\",\"case_802a27af4b3942db\",\"case_3c5f17578e6541d9\"],\"closedCases\":[\"case_3c5f17578e6541d9\",\"case_802a27af4b3942db\",\"case_948b29129c5e4c9b\"],\"missingOrNotAbandoned\":[],\"notListedByDisarm\":[],\"after\":[{\"id\":\"case_948b29129c5e4c9b\",\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"title\":\"run budget exhausted at 101.0% — hard stop\",\"state\":\"closed\",\"openedAt\":\"2026-11-13T18:47:24.981Z\",\"updatedAt\":\"2026-11-13T18:47:25.291Z\",\"closedAt\":\"2026-11-13T18:47:25.291Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"value\":1.01,\"at\":\"2026-11-13T18:47:24.981Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:[object Object]:exhausted\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-13T18:47:24.981Z\"}],\"actions\":[]},{\"id\":\"case_802a27af4b3942db\",\"code\":\"budget_pause\",\"severity\":\"L3\",\"title\":\"run budget at 96.0% — hard pause threshold\",\"state\":\"closed\",\"openedAt\":\"2026-11-13T18:47:22.932Z\",\"updatedAt\":\"2026-11-13T18:47:25.290Z\",\"closedAt\":\"2026-11-13T18:47:25.290Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_pause\",\"severity\":\"L3\",\"value\":0.96,\"at\":\"2026-11-13T18:47:22.932Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:[object Object]:pause\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-13T18:47:22.932Z\"}],\"actions\":[{\"id\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"state\":\"verified\",\"at\":\"2026-11-13T18:47:22.940Z\"}]},{\"id\":\"case_3c5f17578e6541d9\",\"code\":\"budget_pressure\",\"severity\":\"L2\",\"title\":\"run budget"
+          "bytes": 2555,
+          "preview": "{\"beforeStatus\":200,\"afterStatus\":200,\"pending\":[\"case_c451178ea13f404e\",\"case_0a521d990c6941fb\",\"case_4137c97e55ef47ae\"],\"closedCases\":[\"case_4137c97e55ef47ae\",\"case_0a521d990c6941fb\",\"case_c451178ea13f404e\"],\"missingOrNotAbandoned\":[],\"notListedByDisarm\":[],\"after\":[{\"id\":\"case_c451178ea13f404e\",\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"title\":\"run budget exhausted at 101.0% — hard stop\",\"state\":\"closed\",\"openedAt\":\"2026-11-14T04:19:26.651Z\",\"updatedAt\":\"2026-11-14T04:19:26.977Z\",\"closedAt\":\"2026-11-14T04:19:26.977Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_exhausted\",\"severity\":\"L4\",\"value\":1.01,\"at\":\"2026-11-14T04:19:26.651Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:runId=swarm_m1:exhausted\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-14T04:19:26.651Z\"}],\"actions\":[]},{\"id\":\"case_0a521d990c6941fb\",\"code\":\"budget_pause\",\"severity\":\"L3\",\"title\":\"run budget at 96.0% — hard pause threshold\",\"state\":\"closed\",\"openedAt\":\"2026-11-14T04:19:24.609Z\",\"updatedAt\":\"2026-11-14T04:19:26.975Z\",\"closedAt\":\"2026-11-14T04:19:26.975Z\",\"closeReason\":\"abandoned\",\"signals\":[{\"code\":\"budget_pause\",\"severity\":\"L3\",\"value\":0.96,\"at\":\"2026-11-14T04:19:24.609Z\"}],\"evidence\":[{\"id\":\"ev_swarm_budget_run:runId=swarm_m1:pause\",\"kind\":\"budget\",\"source\":\"swarm\",\"at\":\"2026-11-14T04:19:24.609Z\"}],\"actions\":[{\"id\":\"act_41413a3026e0\",\"kind\":\"pause\",\"state\":\"verified\",\"at\":\"2026-11-14T04:19:24.617Z\"}]},{\"id\":\"case_4137c97e55ef47ae\",\"code\":\"budget_pressure\",\"severity\":\"L2\",\"title\":\"run budget a"
         },
-        "at": "2026-11-13T18:47:25.312Z"
+        "at": "2026-11-14T04:19:27.015Z"
       },
       "disarm-again": {
         "status": "pass",
@@ -896,16 +896,16 @@
             "message": "run swarm_m1 is not supervised by this process"
           }
         },
-        "at": "2026-11-13T18:47:25.315Z"
+        "at": "2026-11-14T04:19:27.019Z"
       },
       "watch-chain": {
         "status": "pass",
         "evidence": {
-          "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
+          "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
           "count": 25,
-          "lastHash": "9c81190bc596acf64aa1f99539f0f148928a209b970e875a397c09c43edb1c7c"
+          "lastHash": "df295e9de7ec95c0df8a3fe2f71479d1498128bb429f93f6c1f559eda0eed371"
         },
-        "at": "2026-11-13T18:47:25.318Z"
+        "at": "2026-11-14T04:19:27.023Z"
       },
       "watch-types": {
         "status": "pass",
@@ -938,25 +938,25 @@
             "watch/disarmed"
           ]
         },
-        "at": "2026-11-13T18:47:25.319Z"
+        "at": "2026-11-14T04:19:27.024Z"
       },
       "watch-pause-chain": {
         "status": "pass",
         "evidence": {
           "truncated": true,
-          "bytes": 1552,
-          "preview": "{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:22.936Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:22.938Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"c9fea650fd12a7c55d8a66e9719cf251\\\",\\\"actionId\\\":\\\"act_c9fea650fd12\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:22.937Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:22.940Z\",\"payload\":{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind"
+          "bytes": 1551,
+          "preview": "{\"kind\":\"pause\",\"ok\":true,\"intended\":{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\"},\"executed\":{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\"},\"verified\":{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\"},\"events\":[{\"seq\":7,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:24.613Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\":\"pause\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:pause\"],\"severity\":\"L3\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":8,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:24.615Z\",\"payload\":{\"truncated\":true,\"bytes\":1391,\"preview\":\"{\\\"key\\\":\\\"41413a3026e0960c974657c3bb382bb9\\\",\\\"actionId\\\":\\\"act_41413a3026e0\\\",\\\"kind\\\":\\\"pause\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"pause\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"paused\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:24.614Z\\\",\\\"endedAt\\\":null,\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"runUsd\\\":10,\\\"runWallMs\\\":36\"}},{\"seq\":9,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:24.617Z\",\"payload\":{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\""
         },
-        "at": "2026-11-13T18:47:25.320Z"
+        "at": "2026-11-14T04:19:27.026Z"
       },
       "watch-abort-chain": {
         "status": "pass",
         "evidence": {
           "truncated": true,
-          "bytes": 1562,
-          "preview": "{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-13T18:47:24.473Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc673\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:[object Object]:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-13T18:47:24.474Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"bfa5206dc67364f4148e1365a47fc283\\\",\\\"actionId\\\":\\\"act_bfa5206dc673\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-13T18:47:19.605Z\\\",\\\"updatedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"endedAt\\\":\\\"2026-11-13T18:47:24.473Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-13T18:47:24.475Z\",\"payload\":{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc6"
+          "bytes": 1561,
+          "preview": "{\"kind\":\"abort\",\"ok\":true,\"intended\":{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\"},\"executed\":{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\"},\"verified\":{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\"},\"events\":[{\"seq\":14,\"type\":\"watch/action/intended\",\"at\":\"2026-11-14T04:19:26.146Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9a\",\"kind\":\"abort\",\"target\":{\"kind\":\"swarm_run\",\"id\":\"swarm_m1\"},\"evidenceRefs\":[\"ev_swarm_budget_run:runId=swarm_m1:exhausted\"],\"severity\":\"L4\",\"hardLimit\":true,\"params\":{\"runId\":\"swarm_m1\"}}},{\"seq\":15,\"type\":\"watch/action/executed\",\"at\":\"2026-11-14T04:19:26.148Z\",\"payload\":{\"truncated\":true,\"bytes\":1415,\"preview\":\"{\\\"key\\\":\\\"44e337b72d9a879082f5fd0a2acabbc1\\\",\\\"actionId\\\":\\\"act_44e337b72d9a\\\",\\\"kind\\\":\\\"abort\\\",\\\"ok\\\":true,\\\"result\\\":{\\\"ok\\\":true,\\\"kind\\\":\\\"abort\\\",\\\"httpStatus\\\":200,\\\"error\\\":null,\\\"data\\\":{\\\"swarmId\\\":\\\"swarm_m1\\\",\\\"runId\\\":\\\"swarm_m1\\\",\\\"goal\\\":\\\"M1 fake run\\\",\\\"repo\\\":\\\"C:\\\\\\\\fake\\\\\\\\swarm_m1\\\",\\\"topology\\\":\\\"mesh\\\",\\\"mode\\\":\\\"swarm\\\",\\\"status\\\":\\\"aborted\\\",\\\"round\\\":1,\\\"concurrencyLimit\\\":3,\\\"createdAt\\\":\\\"2026-11-14T04:19:21.298Z\\\",\\\"updatedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"endedAt\\\":\\\"2026-11-14T04:19:26.147Z\\\",\\\"budget\\\":{\\\"limits\\\":{\\\"runTokens\\\":1000000,\\\"ru\"}},{\"seq\":16,\"type\":\"watch/action/verified\",\"at\":\"2026-11-14T04:19:26.149Z\",\"payload\":{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9"
         },
-        "at": "2026-11-13T18:47:25.321Z"
+        "at": "2026-11-14T04:19:27.028Z"
       },
       "doctor": {
         "status": "pass",
@@ -1001,7 +1001,7 @@
             }
           ]
         },
-        "at": "2026-11-13T18:47:20.395Z"
+        "at": "2026-11-14T04:19:22.075Z"
       },
       "fish-index": {
         "status": "pass",
@@ -1018,14 +1018,14 @@
             "baseline": false
           }
         },
-        "at": "2026-11-13T18:47:20.398Z"
+        "at": "2026-11-14T04:19:22.078Z"
       },
       "fish-source": {
         "status": "pass",
         "evidence": {
           "status": 200
         },
-        "at": "2026-11-13T18:47:20.403Z"
+        "at": "2026-11-14T04:19:22.083Z"
       },
       "fish-missing": {
         "status": "pass",
@@ -1033,7 +1033,7 @@
           "status": 404,
           "code": "FISH_SOURCE_NOT_FOUND"
         },
-        "at": "2026-11-13T18:47:20.404Z"
+        "at": "2026-11-14T04:19:22.084Z"
       },
       "timeline-page": {
         "status": "pass",
@@ -1044,10 +1044,10 @@
             "swarm",
             "watch"
           ],
-          "nextSince": "2026-11-13T18:47:19.605Z|0|swarm:2",
+          "nextSince": "2026-11-14T04:19:21.298Z|0|swarm:2",
           "secondCount": 2
         },
-        "at": "2026-11-13T18:47:20.409Z"
+        "at": "2026-11-14T04:19:22.091Z"
       },
       "restore-intent": {
         "status": "pass",
@@ -1055,7 +1055,7 @@
           "status": 200,
           "recorded": true
         },
-        "at": "2026-11-13T18:47:20.414Z"
+        "at": "2026-11-14T04:19:22.096Z"
       },
       "restore-token-rejected": {
         "status": "pass",
@@ -1063,7 +1063,7 @@
           "status": 400,
           "code": "RESTORE_TOKEN_REJECTED"
         },
-        "at": "2026-11-13T18:47:20.415Z"
+        "at": "2026-11-14T04:19:22.097Z"
       },
       "restore-evidence": {
         "status": "pass",
@@ -1073,7 +1073,7 @@
           "checkpointId": "ck_m3",
           "confirmTokenLeaked": false
         },
-        "at": "2026-11-13T18:47:25.322Z"
+        "at": "2026-11-14T04:19:27.030Z"
       }
     },
     "http": {
@@ -1087,19 +1087,19 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.041Z",
+        "at": "2026-11-14T04:19:21.737Z",
         "body": {
           "ok": true,
           "version": "0.1.0",
           "mode": "guard",
-          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
-          "instanceId": "ow_6b47474199244c15",
-          "openedAt": "2026-11-13T18:47:19.839Z",
+          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
+          "instanceId": "ow_52cc55208760438f",
+          "openedAt": "2026-11-14T04:19:21.514Z",
           "service": {
             "watch": {
               "ok": true,
               "events": 1,
-              "lastHash": "c075a4061b6070b3eb1dedbab4a042eb86a88da76e3d0778f9c562adc0ac269c",
+              "lastHash": "86af9649dd898f458107adf86990d2f8b2464c230cf8d68c8f31ad0fb4e46c62",
               "error": null
             }
           },
@@ -1127,7 +1127,7 @@
             "errors": 0
           },
           "runs": [],
-          "asOf": "2026-11-13T18:47:20.012Z"
+          "asOf": "2026-11-14T04:19:21.678Z"
         }
       },
       "swarm-health": {
@@ -1140,7 +1140,7 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.049Z",
+        "at": "2026-11-14T04:19:21.745Z",
         "body": {
           "ok": true,
           "version": "fake-0.1.0",
@@ -1158,7 +1158,7 @@
         "tokenSent": false,
         "originHeader": null,
         "note": "no token",
-        "at": "2026-11-13T18:47:20.056Z",
+        "at": "2026-11-14T04:19:21.752Z",
         "body": {
           "ok": false,
           "code": "UNAUTHORIZED",
@@ -1176,7 +1176,7 @@
         "tokenSent": true,
         "originHeader": null,
         "note": "wrong token value",
-        "at": "2026-11-13T18:47:20.067Z",
+        "at": "2026-11-14T04:19:21.761Z",
         "body": {
           "ok": false,
           "code": "UNAUTHORIZED",
@@ -1194,7 +1194,7 @@
         "tokenSent": true,
         "originHeader": "https://evil.example",
         "note": "cross-origin write with the correct token",
-        "at": "2026-11-13T18:47:20.073Z",
+        "at": "2026-11-14T04:19:21.766Z",
         "body": {
           "ok": false,
           "code": "CROSS_ORIGIN",
@@ -1212,7 +1212,7 @@
         "tokenSent": true,
         "originHeader": null,
         "note": "same-origin, correct token",
-        "at": "2026-11-13T18:47:20.381Z",
+        "at": "2026-11-14T04:19:22.061Z",
         "body": {
           "ok": true,
           "data": {
@@ -1220,7 +1220,7 @@
             "mode": "guard",
             "state": "watching",
             "armed": true,
-            "armedAt": "2026-11-13T18:47:20.374Z",
+            "armedAt": "2026-11-14T04:19:22.046Z",
             "reserve": 50000
           }
         }
@@ -1236,7 +1236,7 @@
         "tokenSent": true,
         "originHeader": null,
         "note": "second arm on the same run",
-        "at": "2026-11-13T18:47:20.386Z",
+        "at": "2026-11-14T04:19:22.065Z",
         "body": {
           "ok": false,
           "code": "ALREADY_ARMED",
@@ -1253,17 +1253,17 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.394Z",
+        "at": "2026-11-14T04:19:22.075Z",
         "body": {
           "ok": true,
           "version": "0.1.0",
-          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
+          "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
           "checks": [
             {
               "id": "data-dir",
               "status": "pass",
               "detail": {
-                "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch",
+                "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch",
                 "writable": true
               }
             },
@@ -1273,7 +1273,7 @@
               "detail": {
                 "ok": true,
                 "count": 1,
-                "lastHash": "c075a4061b6070b3eb1dedbab4a042eb86a88da76e3d0778f9c562adc0ac269c",
+                "lastHash": "86af9649dd898f458107adf86990d2f8b2464c230cf8d68c8f31ad0fb4e46c62",
                 "error": null
               }
             },
@@ -1313,7 +1313,7 @@
               "id": "fish-index",
               "status": "pass",
               "detail": {
-                "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\fish-data",
+                "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\fish-data",
                 "available": true,
                 "sources": 1,
                 "checkpoints": 1,
@@ -1341,11 +1341,11 @@
               "id": "disk-free",
               "status": "pass",
               "detail": {
-                "freeBytes": 52707631104
+                "freeBytes": 52791754752
               }
             }
           ],
-          "asOf": "2026-11-13T18:47:20.393Z"
+          "asOf": "2026-11-14T04:19:22.073Z"
         }
       },
       "fish-index": {
@@ -1358,12 +1358,12 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.397Z",
+        "at": "2026-11-14T04:19:22.077Z",
         "body": {
           "ok": true,
           "data": {
             "available": true,
-            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\fish-data",
+            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\fish-data",
             "sources": [
               {
                 "sourceId": "fish-a",
@@ -1393,9 +1393,9 @@
             ],
             "errors": [],
             "checkpoints": 1,
-            "asOf": "2026-11-13T18:47:20.397Z"
+            "asOf": "2026-11-14T04:19:22.077Z"
           },
-          "asOf": "2026-11-13T18:47:20.397Z"
+          "asOf": "2026-11-14T04:19:22.077Z"
         }
       },
       "fish-source": {
@@ -1408,12 +1408,12 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.400Z",
+        "at": "2026-11-14T04:19:22.080Z",
         "body": {
           "ok": true,
           "data": {
             "available": true,
-            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\fish-data",
+            "dataDir": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\fish-data",
             "sources": [
               {
                 "sourceId": "fish-a",
@@ -1443,9 +1443,9 @@
             ],
             "errors": [],
             "checkpoints": 1,
-            "asOf": "2026-11-13T18:47:20.400Z"
+            "asOf": "2026-11-14T04:19:22.080Z"
           },
-          "asOf": "2026-11-13T18:47:20.400Z"
+          "asOf": "2026-11-14T04:19:22.080Z"
         }
       },
       "fish-missing": {
@@ -1458,7 +1458,7 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.402Z",
+        "at": "2026-11-14T04:19:22.082Z",
         "body": {
           "ok": false,
           "code": "FISH_SOURCE_NOT_FOUND",
@@ -1475,7 +1475,7 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.406Z",
+        "at": "2026-11-14T04:19:22.087Z",
         "body": {
           "ok": true,
           "data": {
@@ -1484,7 +1484,7 @@
                 "seq": 1,
                 "source": "swarm",
                 "type": "swarm/created",
-                "at": "2026-11-13T18:47:19.605Z",
+                "at": "2026-11-14T04:19:21.298Z",
                 "actor": "human",
                 "summary": "swarm/created"
               },
@@ -1492,20 +1492,20 @@
                 "seq": 2,
                 "source": "swarm",
                 "type": "swarm/status/changed",
-                "at": "2026-11-13T18:47:19.605Z",
+                "at": "2026-11-14T04:19:21.298Z",
                 "actor": "system",
                 "summary": "swarm/status/changed created->running"
               }
             ],
-            "nextSince": "2026-11-13T18:47:19.605Z|0|swarm:2",
+            "nextSince": "2026-11-14T04:19:21.298Z|0|swarm:2",
             "total": 5,
-            "asOf": "2026-11-13T18:47:20.405Z"
+            "asOf": "2026-11-14T04:19:22.085Z"
           }
         }
       },
       "timeline-page-2": {
         "method": "GET",
-        "path": "/overwatch/api/runs/swarm_m1/timeline?since=2026-11-13T18%3A47%3A19.605Z%7C0%7Cswarm%3A2&limit=2",
+        "path": "/overwatch/api/runs/swarm_m1/timeline?since=2026-11-14T04%3A19%3A21.298Z%7C0%7Cswarm%3A2&limit=2",
         "status": 200,
         "expected": [
           200
@@ -1513,7 +1513,7 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.408Z",
+        "at": "2026-11-14T04:19:22.090Z",
         "body": {
           "ok": true,
           "data": {
@@ -1522,7 +1522,7 @@
                 "seq": 3,
                 "source": "swarm",
                 "type": "swarm/dispatch/started",
-                "at": "2026-11-13T18:47:19.605Z",
+                "at": "2026-11-14T04:19:21.298Z",
                 "actor": "mem_worker_1",
                 "summary": "swarm/dispatch/started task=task_m1_1 member=mem_worker_1"
               },
@@ -1530,14 +1530,14 @@
                 "seq": 1,
                 "source": "watch",
                 "type": "watch/armed",
-                "at": "2026-11-13T18:47:20.374Z",
+                "at": "2026-11-14T04:19:22.046Z",
                 "actor": "human",
                 "summary": "watch/armed swarm_m1"
               }
             ],
-            "nextSince": "2026-11-13T18:47:20.374Z|3|watch:1",
+            "nextSince": "2026-11-14T04:19:22.046Z|3|watch:1",
             "total": 5,
-            "asOf": "2026-11-13T18:47:20.407Z"
+            "asOf": "2026-11-14T04:19:22.089Z"
           }
         }
       },
@@ -1551,7 +1551,7 @@
         "ok": true,
         "tokenSent": true,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.412Z",
+        "at": "2026-11-14T04:19:22.093Z",
         "body": {
           "ok": true,
           "data": {
@@ -1572,7 +1572,7 @@
         "ok": true,
         "tokenSent": true,
         "originHeader": null,
-        "at": "2026-11-13T18:47:20.413Z",
+        "at": "2026-11-14T04:19:22.095Z",
         "body": {
           "ok": false,
           "code": "RESTORE_TOKEN_REJECTED",
@@ -1590,13 +1590,13 @@
         "tokenSent": false,
         "originHeader": null,
         "note": "fake swarm budget ratio 0.81",
-        "at": "2026-11-13T18:47:20.417Z",
+        "at": "2026-11-14T04:19:22.099Z",
         "body": {
           "ok": true,
           "ratio": 0.81,
           "tokens": 810000,
           "status": "running",
-          "updatedAt": "2026-11-13T18:47:20.417Z"
+          "updatedAt": "2026-11-14T04:19:22.098Z"
         }
       },
       "fake-budget-l3": {
@@ -1610,13 +1610,13 @@
         "tokenSent": false,
         "originHeader": null,
         "note": "fake swarm budget ratio 0.96",
-        "at": "2026-11-13T18:47:22.843Z",
+        "at": "2026-11-14T04:19:24.519Z",
         "body": {
           "ok": true,
           "ratio": 0.96,
           "tokens": 960000,
           "status": "running",
-          "updatedAt": "2026-11-13T18:47:22.842Z"
+          "updatedAt": "2026-11-14T04:19:24.519Z"
         }
       },
       "fake-budget-l4": {
@@ -1630,13 +1630,13 @@
         "tokenSent": false,
         "originHeader": null,
         "note": "fake swarm budget ratio 1.01",
-        "at": "2026-11-13T18:47:24.061Z",
+        "at": "2026-11-14T04:19:25.735Z",
         "body": {
           "ok": true,
           "ratio": 1.01,
           "tokens": 1010000,
           "status": "paused",
-          "updatedAt": "2026-11-13T18:47:24.061Z"
+          "updatedAt": "2026-11-14T04:19:25.735Z"
         }
       },
       "cases-before-disarm": {
@@ -1647,16 +1647,16 @@
           200
         ],
         "ok": true,
-        "at": "2026-11-13T18:47:25.289Z",
+        "at": "2026-11-14T04:19:26.973Z",
         "body": [
           {
-            "id": "case_948b29129c5e4c9b",
+            "id": "case_c451178ea13f404e",
             "code": "budget_exhausted",
             "severity": "L4",
             "title": "run budget exhausted at 101.0% — hard stop",
             "state": "open",
-            "openedAt": "2026-11-13T18:47:24.981Z",
-            "updatedAt": "2026-11-13T18:47:24.981Z",
+            "openedAt": "2026-11-14T04:19:26.651Z",
+            "updatedAt": "2026-11-14T04:19:26.651Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -1664,62 +1664,62 @@
                 "code": "budget_exhausted",
                 "severity": "L4",
                 "value": 1.01,
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:exhausted",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "actions": []
           },
           {
-            "id": "case_57682858733143a1",
+            "id": "case_ea09049f336b4c6a",
             "code": "budget_exhausted",
             "severity": "L4",
             "title": "run budget exhausted at 101.0% — hard stop",
             "state": "closed",
-            "openedAt": "2026-11-13T18:47:24.469Z",
-            "updatedAt": "2026-11-13T18:47:24.477Z",
-            "closedAt": "2026-11-13T18:47:24.477Z",
+            "openedAt": "2026-11-14T04:19:26.141Z",
+            "updatedAt": "2026-11-14T04:19:26.151Z",
+            "closedAt": "2026-11-14T04:19:26.151Z",
             "closeReason": "escalated",
             "signals": [
               {
                 "code": "budget_exhausted",
                 "severity": "L4",
                 "value": 1.01,
-                "at": "2026-11-13T18:47:24.469Z"
+                "at": "2026-11-14T04:19:26.141Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:exhausted",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:24.469Z"
+                "at": "2026-11-14T04:19:26.141Z"
               }
             ],
             "actions": [
               {
-                "id": "act_bfa5206dc673",
+                "id": "act_44e337b72d9a",
                 "kind": "abort",
                 "state": "verified",
-                "at": "2026-11-13T18:47:24.476Z"
+                "at": "2026-11-14T04:19:26.150Z"
               }
             ]
           },
           {
-            "id": "case_802a27af4b3942db",
+            "id": "case_0a521d990c6941fb",
             "code": "budget_pause",
             "severity": "L3",
             "title": "run budget at 96.0% — hard pause threshold",
             "state": "verifying",
-            "openedAt": "2026-11-13T18:47:22.932Z",
-            "updatedAt": "2026-11-13T18:47:22.943Z",
+            "openedAt": "2026-11-14T04:19:24.609Z",
+            "updatedAt": "2026-11-14T04:19:24.619Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -1727,34 +1727,34 @@
                 "code": "budget_pause",
                 "severity": "L3",
                 "value": 0.96,
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pause",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "actions": [
               {
-                "id": "act_c9fea650fd12",
+                "id": "act_41413a3026e0",
                 "kind": "pause",
                 "state": "verified",
-                "at": "2026-11-13T18:47:22.940Z"
+                "at": "2026-11-14T04:19:24.617Z"
               }
             ]
           },
           {
-            "id": "case_3c5f17578e6541d9",
+            "id": "case_4137c97e55ef47ae",
             "code": "budget_pressure",
             "severity": "L2",
             "title": "run budget at 81.0% — pressure threshold",
             "state": "open",
-            "openedAt": "2026-11-13T18:47:21.398Z",
-            "updatedAt": "2026-11-13T18:47:21.398Z",
+            "openedAt": "2026-11-14T04:19:23.073Z",
+            "updatedAt": "2026-11-14T04:19:23.073Z",
             "closedAt": null,
             "closeReason": null,
             "signals": [
@@ -1762,15 +1762,15 @@
                 "code": "budget_pressure",
                 "severity": "L2",
                 "value": 0.81,
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pressure",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "actions": []
@@ -1787,18 +1787,18 @@
         "ok": true,
         "tokenSent": true,
         "originHeader": null,
-        "at": "2026-11-13T18:47:25.299Z",
+        "at": "2026-11-14T04:19:26.993Z",
         "body": {
           "ok": true,
           "data": {
             "runId": "swarm_m1",
             "state": "disarmed",
             "closedCases": [
-              "case_3c5f17578e6541d9",
-              "case_802a27af4b3942db",
-              "case_948b29129c5e4c9b"
+              "case_4137c97e55ef47ae",
+              "case_0a521d990c6941fb",
+              "case_c451178ea13f404e"
             ],
-            "disarmedAt": "2026-11-13T18:47:25.294Z"
+            "disarmedAt": "2026-11-14T04:19:26.982Z"
           }
         }
       },
@@ -1812,11 +1812,11 @@
         "ok": true,
         "tokenSent": false,
         "originHeader": null,
-        "at": "2026-11-13T18:47:25.308Z",
+        "at": "2026-11-14T04:19:27.008Z",
         "body": {
           "truncated": true,
           "bytes": 2567,
-          "preview": "{\"ok\":true,\"data\":{\"runId\":\"swarm_m1\",\"armed\":false,\"state\":\"disarmed\",\"mode\":\"guard\",\"goal\":\"M1 fake run\",\"status\":\"aborted\",\"snapshot\":{\"schemaVersion\":1,\"runId\":\"swarm_m1\",\"asOf\":\"2026-11-13T18:47:24.981Z\",\"status\":\"aborted\",\"round\":1,\"goal\":\"M1 fake run\",\"budget\":{\"limit\":1000000,\"spent\":1010000,\"reserved\":0,\"ratio\":1.01,\"remaining\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"model\":\"inherit\",\"status\":\"idle\",\"load\":0,\"childId\":null,\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"model\":\"fast\",\"status\":\"idle\",\"load\":0,\"childId\":\"child_m1_1\",\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"role\":\"worker\",\"model\":\"fast\",\"status\":\"idle\",\"load\":0,\"childId\":null,\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null}],\"tasks\":{\"queued\":0,\"working\":0,\"reviewing\":0,\"approved\":0,\"blocked\":0,\"merged\":0,\"failed\":0,\"total\":0},\"reviews\":{\"open\":0,\"noQuorum\":0,\"oldestMs\":null,\"known\":false},\"merge\":{\"queue\":0,\"conflicts\":0,\"lastMergeAt\":null},\"workspace\":{\"conflicts\":0,\"worktrees\":null,\"degraded\":0},\"dispatch\":{\"auto\":false,\"active\":0},\"fish\":null,\"lastEventSeq\":9,\"lastEventAt\":\"2026-11-13T18:47:24.473Z\",\"eventGap\":null,\"freshness\":{\"swarm\":{\"ok\":true,\"at\":\"2026-11-13T18:47:24.981Z\",\"ageMs\":2,\"error\":null},\"pressure\":{\"ok\":false,\"at\":\"2026-11-13T18:47:23.445Z\",\"ageMs\":1538,\"error\":\"response is not JSON\"},\"fish\":{\"ok\":false,\"at\":\"2026-11-13T18:47:24.469Z\",\"ageMs\":514,\"error\":\"response is not JSON\"}},\"conversation\":{\"converged\":false,\"openTasks\":1,\"budgetRatio\":1.01,\"budgetExhausted\":true}},\"freshness\":{\"swarm\":{\"ok\":true,\"at\":\"2026-11-13T18:47:24.981Z\",\"ageMs\":2,\"error\":null},\"pressure\":{\"ok\":false,\"at\":\"2026-11-13T18:47:23.445Z\",\"ageMs\":1538,\"error\":\"response is not JSON\"},\"fish\":{\"ok\":false,\"at\":\"2026-11-13T18:47:24.469Z\",\"ageMs\":514,\"error\":\"response is not JSON\"}},\"budget\":{\"li"
+          "preview": "{\"ok\":true,\"data\":{\"runId\":\"swarm_m1\",\"armed\":false,\"state\":\"disarmed\",\"mode\":\"guard\",\"goal\":\"M1 fake run\",\"status\":\"aborted\",\"snapshot\":{\"schemaVersion\":1,\"runId\":\"swarm_m1\",\"asOf\":\"2026-11-14T04:19:26.651Z\",\"status\":\"aborted\",\"round\":1,\"goal\":\"M1 fake run\",\"budget\":{\"limit\":1000000,\"spent\":1010000,\"reserved\":0,\"ratio\":1.01,\"remaining\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"model\":\"inherit\",\"status\":\"idle\",\"load\":0,\"childId\":null,\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"model\":\"fast\",\"status\":\"idle\",\"load\":0,\"childId\":\"child_m1_1\",\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"role\":\"worker\",\"model\":\"fast\",\"status\":\"idle\",\"load\":0,\"childId\":null,\"taskId\":null,\"context\":null,\"failures\":null,\"repeats\":null,\"pressureAt\":null}],\"tasks\":{\"queued\":0,\"working\":0,\"reviewing\":0,\"approved\":0,\"blocked\":0,\"merged\":0,\"failed\":0,\"total\":0},\"reviews\":{\"open\":0,\"noQuorum\":0,\"oldestMs\":null,\"known\":false},\"merge\":{\"queue\":0,\"conflicts\":0,\"lastMergeAt\":null},\"workspace\":{\"conflicts\":0,\"worktrees\":null,\"degraded\":0},\"dispatch\":{\"auto\":false,\"active\":0},\"fish\":null,\"lastEventSeq\":9,\"lastEventAt\":\"2026-11-14T04:19:26.147Z\",\"eventGap\":null,\"freshness\":{\"swarm\":{\"ok\":true,\"at\":\"2026-11-14T04:19:26.651Z\",\"ageMs\":3,\"error\":null},\"pressure\":{\"ok\":false,\"at\":\"2026-11-14T04:19:25.121Z\",\"ageMs\":1533,\"error\":\"response is not JSON\"},\"fish\":{\"ok\":false,\"at\":\"2026-11-14T04:19:26.141Z\",\"ageMs\":513,\"error\":\"response is not JSON\"}},\"conversation\":{\"converged\":false,\"openTasks\":1,\"budgetRatio\":1.01,\"budgetExhausted\":true}},\"freshness\":{\"swarm\":{\"ok\":true,\"at\":\"2026-11-14T04:19:26.651Z\",\"ageMs\":3,\"error\":null},\"pressure\":{\"ok\":false,\"at\":\"2026-11-14T04:19:25.121Z\",\"ageMs\":1533,\"error\":\"response is not JSON\"},\"fish\":{\"ok\":false,\"at\":\"2026-11-14T04:19:26.141Z\",\"ageMs\":513,\"error\":\"response is not JSON\"}},\"budget\":{\"li"
         }
       },
       "cases-after-disarm": {
@@ -1827,131 +1827,131 @@
           200
         ],
         "ok": true,
-        "at": "2026-11-13T18:47:25.312Z",
+        "at": "2026-11-14T04:19:27.015Z",
         "body": [
           {
-            "id": "case_948b29129c5e4c9b",
+            "id": "case_c451178ea13f404e",
             "code": "budget_exhausted",
             "severity": "L4",
             "title": "run budget exhausted at 101.0% — hard stop",
             "state": "closed",
-            "openedAt": "2026-11-13T18:47:24.981Z",
-            "updatedAt": "2026-11-13T18:47:25.291Z",
-            "closedAt": "2026-11-13T18:47:25.291Z",
+            "openedAt": "2026-11-14T04:19:26.651Z",
+            "updatedAt": "2026-11-14T04:19:26.977Z",
+            "closedAt": "2026-11-14T04:19:26.977Z",
             "closeReason": "abandoned",
             "signals": [
               {
                 "code": "budget_exhausted",
                 "severity": "L4",
                 "value": 1.01,
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:exhausted",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:24.981Z"
+                "at": "2026-11-14T04:19:26.651Z"
               }
             ],
             "actions": []
           },
           {
-            "id": "case_802a27af4b3942db",
+            "id": "case_0a521d990c6941fb",
             "code": "budget_pause",
             "severity": "L3",
             "title": "run budget at 96.0% — hard pause threshold",
             "state": "closed",
-            "openedAt": "2026-11-13T18:47:22.932Z",
-            "updatedAt": "2026-11-13T18:47:25.290Z",
-            "closedAt": "2026-11-13T18:47:25.290Z",
+            "openedAt": "2026-11-14T04:19:24.609Z",
+            "updatedAt": "2026-11-14T04:19:26.975Z",
+            "closedAt": "2026-11-14T04:19:26.975Z",
             "closeReason": "abandoned",
             "signals": [
               {
                 "code": "budget_pause",
                 "severity": "L3",
                 "value": 0.96,
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pause",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:22.932Z"
+                "at": "2026-11-14T04:19:24.609Z"
               }
             ],
             "actions": [
               {
-                "id": "act_c9fea650fd12",
+                "id": "act_41413a3026e0",
                 "kind": "pause",
                 "state": "verified",
-                "at": "2026-11-13T18:47:22.940Z"
+                "at": "2026-11-14T04:19:24.617Z"
               }
             ]
           },
           {
-            "id": "case_3c5f17578e6541d9",
+            "id": "case_4137c97e55ef47ae",
             "code": "budget_pressure",
             "severity": "L2",
             "title": "run budget at 81.0% — pressure threshold",
             "state": "closed",
-            "openedAt": "2026-11-13T18:47:21.398Z",
-            "updatedAt": "2026-11-13T18:47:25.289Z",
-            "closedAt": "2026-11-13T18:47:25.289Z",
+            "openedAt": "2026-11-14T04:19:23.073Z",
+            "updatedAt": "2026-11-14T04:19:26.974Z",
+            "closedAt": "2026-11-14T04:19:26.974Z",
             "closeReason": "abandoned",
             "signals": [
               {
                 "code": "budget_pressure",
                 "severity": "L2",
                 "value": 0.81,
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:pressure",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:21.398Z"
+                "at": "2026-11-14T04:19:23.073Z"
               }
             ],
             "actions": []
           },
           {
-            "id": "case_57682858733143a1",
+            "id": "case_ea09049f336b4c6a",
             "code": "budget_exhausted",
             "severity": "L4",
             "title": "run budget exhausted at 101.0% — hard stop",
             "state": "closed",
-            "openedAt": "2026-11-13T18:47:24.469Z",
-            "updatedAt": "2026-11-13T18:47:24.477Z",
-            "closedAt": "2026-11-13T18:47:24.477Z",
+            "openedAt": "2026-11-14T04:19:26.141Z",
+            "updatedAt": "2026-11-14T04:19:26.151Z",
+            "closedAt": "2026-11-14T04:19:26.151Z",
             "closeReason": "escalated",
             "signals": [
               {
                 "code": "budget_exhausted",
                 "severity": "L4",
                 "value": 1.01,
-                "at": "2026-11-13T18:47:24.469Z"
+                "at": "2026-11-14T04:19:26.141Z"
               }
             ],
             "evidence": [
               {
-                "id": "ev_swarm_budget_run:[object Object]:exhausted",
+                "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
                 "kind": "budget",
                 "source": "swarm",
-                "at": "2026-11-13T18:47:24.469Z"
+                "at": "2026-11-14T04:19:26.141Z"
               }
             ],
             "actions": [
               {
-                "id": "act_bfa5206dc673",
+                "id": "act_44e337b72d9a",
                 "kind": "abort",
                 "state": "verified",
-                "at": "2026-11-13T18:47:24.476Z"
+                "at": "2026-11-14T04:19:26.150Z"
               }
             ]
           }
@@ -1969,7 +1969,7 @@
         "tokenSent": true,
         "originHeader": null,
         "note": "second disarm may be 404 or 409",
-        "at": "2026-11-13T18:47:25.314Z",
+        "at": "2026-11-14T04:19:27.018Z",
         "body": {
           "ok": false,
           "code": "RUN_NOT_ARMED",
@@ -1980,13 +1980,13 @@
     "cases": [
       {
         "phase": "L2",
-        "id": "case_3c5f17578e6541d9",
+        "id": "case_4137c97e55ef47ae",
         "code": "budget_pressure",
         "severity": "L2",
         "title": "run budget at 81.0% — pressure threshold",
         "state": "open",
-        "openedAt": "2026-11-13T18:47:21.398Z",
-        "updatedAt": "2026-11-13T18:47:21.398Z",
+        "openedAt": "2026-11-14T04:19:23.073Z",
+        "updatedAt": "2026-11-14T04:19:23.073Z",
         "closedAt": null,
         "closeReason": null,
         "signals": [
@@ -1994,26 +1994,26 @@
             "code": "budget_pressure",
             "severity": "L2",
             "value": 0.81,
-            "at": "2026-11-13T18:47:21.398Z"
+            "at": "2026-11-14T04:19:23.073Z"
           }
         ],
         "evidence": [
           {
-            "id": "ev_swarm_budget_run:[object Object]:pressure",
+            "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
             "kind": "budget",
             "source": "swarm",
-            "at": "2026-11-13T18:47:21.398Z"
+            "at": "2026-11-14T04:19:23.073Z"
           }
         ],
         "actions": [],
         "view": {
-          "id": "case_3c5f17578e6541d9",
+          "id": "case_4137c97e55ef47ae",
           "code": "budget_pressure",
           "severity": "L2",
           "title": "run budget at 81.0% — pressure threshold",
           "state": "open",
-          "openedAt": "2026-11-13T18:47:21.398Z",
-          "updatedAt": "2026-11-13T18:47:21.398Z",
+          "openedAt": "2026-11-14T04:19:23.073Z",
+          "updatedAt": "2026-11-14T04:19:23.073Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -2021,22 +2021,22 @@
               "code": "budget_pressure",
               "severity": "L2",
               "value": 0.81,
-              "at": "2026-11-13T18:47:21.398Z"
+              "at": "2026-11-14T04:19:23.073Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pressure",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:21.398Z"
+              "at": "2026-11-14T04:19:23.073Z"
             }
           ],
           "actions": []
         },
         "raw": {
           "schemaVersion": 1,
-          "id": "case_3c5f17578e6541d9",
+          "id": "case_4137c97e55ef47ae",
           "runId": "swarm_m1",
           "key": "c6931c1b94ac4ef34ac956d6683d3b36605c5a2588b71d5929d6cf512f80a34e",
           "state": "open",
@@ -2057,19 +2057,19 @@
                 "ratio": 0.81,
                 "threshold": 0.8
               },
-              "evidenceId": "ev_swarm_budget_run:[object Object]:pressure",
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_m1:pressure",
               "ref": {
                 "runId": "swarm_m1"
               },
-              "at": "2026-11-13T18:47:21.398Z"
+              "at": "2026-11-14T04:19:23.073Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pressure",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pressure",
               "source": "swarm",
               "kind": "budget",
-              "at": "2026-11-13T18:47:21.398Z",
+              "at": "2026-11-14T04:19:23.073Z",
               "ref": {
                 "runId": "swarm_m1"
               },
@@ -2084,8 +2084,8 @@
           ],
           "decisions": [],
           "actions": [],
-          "openedAt": "2026-11-13T18:47:21.398Z",
-          "updatedAt": "2026-11-13T18:47:21.398Z",
+          "openedAt": "2026-11-14T04:19:23.073Z",
+          "updatedAt": "2026-11-14T04:19:23.073Z",
           "closedAt": null,
           "closeReason": null,
           "note": null,
@@ -2094,13 +2094,13 @@
       },
       {
         "phase": "L3",
-        "id": "case_802a27af4b3942db",
+        "id": "case_0a521d990c6941fb",
         "code": "budget_pause",
         "severity": "L3",
         "title": "run budget at 96.0% — hard pause threshold",
         "state": "verifying",
-        "openedAt": "2026-11-13T18:47:22.932Z",
-        "updatedAt": "2026-11-13T18:47:22.943Z",
+        "openedAt": "2026-11-14T04:19:24.609Z",
+        "updatedAt": "2026-11-14T04:19:24.619Z",
         "closedAt": null,
         "closeReason": null,
         "signals": [
@@ -2108,33 +2108,33 @@
             "code": "budget_pause",
             "severity": "L3",
             "value": 0.96,
-            "at": "2026-11-13T18:47:22.932Z"
+            "at": "2026-11-14T04:19:24.609Z"
           }
         ],
         "evidence": [
           {
-            "id": "ev_swarm_budget_run:[object Object]:pause",
+            "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
             "kind": "budget",
             "source": "swarm",
-            "at": "2026-11-13T18:47:22.932Z"
+            "at": "2026-11-14T04:19:24.609Z"
           }
         ],
         "actions": [
           {
-            "id": "act_c9fea650fd12",
+            "id": "act_41413a3026e0",
             "kind": "pause",
             "state": "verified",
-            "at": "2026-11-13T18:47:22.940Z"
+            "at": "2026-11-14T04:19:24.617Z"
           }
         ],
         "view": {
-          "id": "case_802a27af4b3942db",
+          "id": "case_0a521d990c6941fb",
           "code": "budget_pause",
           "severity": "L3",
           "title": "run budget at 96.0% — hard pause threshold",
           "state": "verifying",
-          "openedAt": "2026-11-13T18:47:22.932Z",
-          "updatedAt": "2026-11-13T18:47:22.943Z",
+          "openedAt": "2026-11-14T04:19:24.609Z",
+          "updatedAt": "2026-11-14T04:19:24.619Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -2142,29 +2142,29 @@
               "code": "budget_pause",
               "severity": "L3",
               "value": 0.96,
-              "at": "2026-11-13T18:47:22.932Z"
+              "at": "2026-11-14T04:19:24.609Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pause",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:22.932Z"
+              "at": "2026-11-14T04:19:24.609Z"
             }
           ],
           "actions": [
             {
-              "id": "act_c9fea650fd12",
+              "id": "act_41413a3026e0",
               "kind": "pause",
               "state": "verified",
-              "at": "2026-11-13T18:47:22.940Z"
+              "at": "2026-11-14T04:19:24.617Z"
             }
           ]
         },
         "raw": {
           "schemaVersion": 1,
-          "id": "case_802a27af4b3942db",
+          "id": "case_0a521d990c6941fb",
           "runId": "swarm_m1",
           "key": "ea007414dc645f23cda8c468945eaa914e195195619c0e12fe5ba60e6dbe152a",
           "state": "verifying",
@@ -2185,19 +2185,19 @@
                 "ratio": 0.96,
                 "threshold": 0.95
               },
-              "evidenceId": "ev_swarm_budget_run:[object Object]:pause",
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_m1:pause",
               "ref": {
                 "runId": "swarm_m1"
               },
-              "at": "2026-11-13T18:47:22.932Z"
+              "at": "2026-11-14T04:19:24.609Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:pause",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:pause",
               "source": "swarm",
               "kind": "budget",
-              "at": "2026-11-13T18:47:22.932Z",
+              "at": "2026-11-14T04:19:24.609Z",
               "ref": {
                 "runId": "swarm_m1"
               },
@@ -2221,16 +2221,16 @@
           ],
           "actions": [
             {
-              "id": "act_c9fea650fd12",
+              "id": "act_41413a3026e0",
               "kind": "pause",
               "state": "verified",
               "severity": "L3",
               "detail": null,
-              "at": "2026-11-13T18:47:22.940Z"
+              "at": "2026-11-14T04:19:24.617Z"
             }
           ],
-          "openedAt": "2026-11-13T18:47:22.932Z",
-          "updatedAt": "2026-11-13T18:47:22.943Z",
+          "openedAt": "2026-11-14T04:19:24.609Z",
+          "updatedAt": "2026-11-14T04:19:24.619Z",
           "closedAt": null,
           "closeReason": null,
           "note": null,
@@ -2239,13 +2239,13 @@
       },
       {
         "phase": "L4",
-        "id": "case_948b29129c5e4c9b",
+        "id": "case_c451178ea13f404e",
         "code": "budget_exhausted",
         "severity": "L4",
         "title": "run budget exhausted at 101.0% — hard stop",
         "state": "open",
-        "openedAt": "2026-11-13T18:47:24.981Z",
-        "updatedAt": "2026-11-13T18:47:24.981Z",
+        "openedAt": "2026-11-14T04:19:26.651Z",
+        "updatedAt": "2026-11-14T04:19:26.651Z",
         "closedAt": null,
         "closeReason": null,
         "signals": [
@@ -2253,26 +2253,26 @@
             "code": "budget_exhausted",
             "severity": "L4",
             "value": 1.01,
-            "at": "2026-11-13T18:47:24.981Z"
+            "at": "2026-11-14T04:19:26.651Z"
           }
         ],
         "evidence": [
           {
-            "id": "ev_swarm_budget_run:[object Object]:exhausted",
+            "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
             "kind": "budget",
             "source": "swarm",
-            "at": "2026-11-13T18:47:24.981Z"
+            "at": "2026-11-14T04:19:26.651Z"
           }
         ],
         "actions": [],
         "view": {
-          "id": "case_948b29129c5e4c9b",
+          "id": "case_c451178ea13f404e",
           "code": "budget_exhausted",
           "severity": "L4",
           "title": "run budget exhausted at 101.0% — hard stop",
           "state": "open",
-          "openedAt": "2026-11-13T18:47:24.981Z",
-          "updatedAt": "2026-11-13T18:47:24.981Z",
+          "openedAt": "2026-11-14T04:19:26.651Z",
+          "updatedAt": "2026-11-14T04:19:26.651Z",
           "closedAt": null,
           "closeReason": null,
           "signals": [
@@ -2280,22 +2280,22 @@
               "code": "budget_exhausted",
               "severity": "L4",
               "value": 1.01,
-              "at": "2026-11-13T18:47:24.981Z"
+              "at": "2026-11-14T04:19:26.651Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:exhausted",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
               "kind": "budget",
               "source": "swarm",
-              "at": "2026-11-13T18:47:24.981Z"
+              "at": "2026-11-14T04:19:26.651Z"
             }
           ],
           "actions": []
         },
         "raw": {
           "schemaVersion": 1,
-          "id": "case_948b29129c5e4c9b",
+          "id": "case_c451178ea13f404e",
           "runId": "swarm_m1",
           "key": "520c41c494717fa5e47b6e6310021b1353cc5359d1be194995dda5f5a09781c0",
           "state": "open",
@@ -2316,19 +2316,19 @@
                 "ratio": 1.01,
                 "threshold": 1
               },
-              "evidenceId": "ev_swarm_budget_run:[object Object]:exhausted",
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
               "ref": {
                 "runId": "swarm_m1"
               },
-              "at": "2026-11-13T18:47:24.981Z"
+              "at": "2026-11-14T04:19:26.651Z"
             }
           ],
           "evidence": [
             {
-              "id": "ev_swarm_budget_run:[object Object]:exhausted",
+              "id": "ev_swarm_budget_run:runId=swarm_m1:exhausted",
               "source": "swarm",
               "kind": "budget",
-              "at": "2026-11-13T18:47:24.981Z",
+              "at": "2026-11-14T04:19:26.651Z",
               "ref": {
                 "runId": "swarm_m1"
               },
@@ -2343,20 +2343,20 @@
           ],
           "decisions": [],
           "actions": [],
-          "openedAt": "2026-11-13T18:47:24.981Z",
-          "updatedAt": "2026-11-13T18:47:24.981Z",
+          "openedAt": "2026-11-14T04:19:26.651Z",
+          "updatedAt": "2026-11-14T04:19:26.651Z",
           "closedAt": null,
           "closeReason": null,
           "note": null,
-          "reopens": "case_57682858733143a1"
+          "reopens": "case_ea09049f336b4c6a"
         }
       }
     ],
     "watch": {
-      "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-pXrGN0\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
+      "path": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-m1-tHTH3I\\home\\overwatch\\runs\\swarm_m1\\watch.jsonl",
       "chainOk": true,
       "count": 25,
-      "lastHash": "9c81190bc596acf64aa1f99539f0f148928a209b970e875a397c09c43edb1c7c",
+      "lastHash": "df295e9de7ec95c0df8a3fe2f71479d1498128bb429f93f6c1f559eda0eed371",
       "error": null,
       "types": [
         "watch/armed",
@@ -2389,7 +2389,7 @@
         {
           "seq": 1,
           "type": "watch/armed",
-          "at": "2026-11-13T18:47:20.374Z",
+          "at": "2026-11-14T04:19:22.046Z",
           "actor": "human",
           "payload": {
             "mode": "guard",
@@ -2398,6 +2398,7 @@
             "reserve": 50000,
             "supervisor": "unavailable-m1",
             "watchName": null,
+            "agentOptions": {},
             "sampling": {
               "swarmEventMs": 500,
               "swarmSnapshotMs": 500,
@@ -2417,7 +2418,7 @@
         {
           "seq": 2,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:20.378Z",
+          "at": "2026-11-14T04:19:22.050Z",
           "actor": "guard",
           "payload": {
             "status": "running",
@@ -2433,20 +2434,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:20.096Z",
-                "ageMs": 281,
+                "at": "2026-11-14T04:19:21.785Z",
+                "ageMs": 264,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:20.096Z",
-                "ageMs": 281,
+                "at": "2026-11-14T04:19:21.785Z",
+                "ageMs": 264,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:20.096Z",
-                "ageMs": 281,
+                "at": "2026-11-14T04:19:21.785Z",
+                "ageMs": 264,
                 "error": "response is not JSON"
               }
             }
@@ -2455,7 +2456,7 @@
         {
           "seq": 3,
           "type": "watch/restore/intent",
-          "at": "2026-11-13T18:47:20.411Z",
+          "at": "2026-11-14T04:19:22.093Z",
           "actor": "human",
           "payload": {
             "sourceId": "fish-a",
@@ -2476,7 +2477,7 @@
         {
           "seq": 4,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:20.888Z",
+          "at": "2026-11-14T04:19:22.563Z",
           "actor": "guard",
           "payload": {
             "status": "running",
@@ -2492,20 +2493,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:20.886Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:22.560Z",
+                "ageMs": 3,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:20.096Z",
-                "ageMs": 792,
+                "at": "2026-11-14T04:19:21.785Z",
+                "ageMs": 778,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:20.096Z",
-                "ageMs": 792,
+                "at": "2026-11-14T04:19:21.785Z",
+                "ageMs": 778,
                 "error": "response is not JSON"
               }
             }
@@ -2514,10 +2515,10 @@
         {
           "seq": 5,
           "type": "watch/case/opened",
-          "at": "2026-11-13T18:47:21.402Z",
+          "at": "2026-11-14T04:19:23.079Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_3c5f17578e6541d9",
+            "caseId": "case_4137c97e55ef47ae",
             "severity": "L2",
             "code": "budget_pressure",
             "title": "run budget at 81.0% — pressure threshold",
@@ -2526,7 +2527,7 @@
               "id": "run"
             },
             "evidenceIds": [
-              "ev_swarm_budget_run:[object Object]:pressure"
+              "ev_swarm_budget_run:runId=swarm_m1:pressure"
             ],
             "reopens": null
           }
@@ -2534,10 +2535,10 @@
         {
           "seq": 6,
           "type": "watch/case/opened",
-          "at": "2026-11-13T18:47:22.935Z",
+          "at": "2026-11-14T04:19:24.612Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_802a27af4b3942db",
+            "caseId": "case_0a521d990c6941fb",
             "severity": "L3",
             "code": "budget_pause",
             "title": "run budget at 96.0% — hard pause threshold",
@@ -2546,7 +2547,7 @@
               "id": "run"
             },
             "evidenceIds": [
-              "ev_swarm_budget_run:[object Object]:pause"
+              "ev_swarm_budget_run:runId=swarm_m1:pause"
             ],
             "reopens": null
           }
@@ -2554,18 +2555,18 @@
         {
           "seq": 7,
           "type": "watch/action/intended",
-          "at": "2026-11-13T18:47:22.936Z",
+          "at": "2026-11-14T04:19:24.613Z",
           "actor": "guard",
           "payload": {
-            "key": "c9fea650fd12a7c55d8a66e9719cf251",
-            "actionId": "act_c9fea650fd12",
+            "key": "41413a3026e0960c974657c3bb382bb9",
+            "actionId": "act_41413a3026e0",
             "kind": "pause",
             "target": {
               "kind": "swarm_run",
               "id": "swarm_m1"
             },
             "evidenceRefs": [
-              "ev_swarm_budget_run:[object Object]:pause"
+              "ev_swarm_budget_run:runId=swarm_m1:pause"
             ],
             "severity": "L3",
             "hardLimit": true,
@@ -2577,22 +2578,22 @@
         {
           "seq": 8,
           "type": "watch/action/executed",
-          "at": "2026-11-13T18:47:22.938Z",
+          "at": "2026-11-14T04:19:24.615Z",
           "actor": "executor",
           "payload": {
             "truncated": true,
             "bytes": 1391,
-            "preview": "{\"key\":\"c9fea650fd12a7c55d8a66e9719cf251\",\"actionId\":\"act_c9fea650fd12\",\"kind\":\"pause\",\"ok\":true,\"result\":{\"ok\":true,\"kind\":\"pause\",\"httpStatus\":200,\"error\":null,\"data\":{\"swarmId\":\"swarm_m1\",\"runId\":\"swarm_m1\",\"goal\":\"M1 fake run\",\"repo\":\"C:\\\\fake\\\\swarm_m1\",\"topology\":\"mesh\",\"mode\":\"swarm\",\"status\":\"paused\",\"round\":1,\"concurrencyLimit\":3,\"createdAt\":\"2026-11-13T18:47:19.605Z\",\"updatedAt\":\"2026-11-13T18:47:22.937Z\",\"endedAt\":null,\"budget\":{\"limits\":{\"runTokens\":1000000,\"runUsd\":10,\"runWallMs\":3600000,\"taskTokens\":100000,\"memberTokens\":50000},\"run\":{\"tokens\":960000,\"reservedTokens\":0,\"calls\":3,\"usd\":9.6,\"reservedUsd\":0,\"wallMs\":60000},\"tasks\":{},\"members\":{},\"reservations\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"status\":\"idle\",\"model\":\"inherit\",\"load\":0,\"joinedAt\":1794595639605},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"status\":\"idle\",\"model\":\"fast\",\"load\":0,\"joinedAt\":1794595639606},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"role\":\"worker\",\"status\":\"id"
+            "preview": "{\"key\":\"41413a3026e0960c974657c3bb382bb9\",\"actionId\":\"act_41413a3026e0\",\"kind\":\"pause\",\"ok\":true,\"result\":{\"ok\":true,\"kind\":\"pause\",\"httpStatus\":200,\"error\":null,\"data\":{\"swarmId\":\"swarm_m1\",\"runId\":\"swarm_m1\",\"goal\":\"M1 fake run\",\"repo\":\"C:\\\\fake\\\\swarm_m1\",\"topology\":\"mesh\",\"mode\":\"swarm\",\"status\":\"paused\",\"round\":1,\"concurrencyLimit\":3,\"createdAt\":\"2026-11-14T04:19:21.298Z\",\"updatedAt\":\"2026-11-14T04:19:24.614Z\",\"endedAt\":null,\"budget\":{\"limits\":{\"runTokens\":1000000,\"runUsd\":10,\"runWallMs\":3600000,\"taskTokens\":100000,\"memberTokens\":50000},\"run\":{\"tokens\":960000,\"reservedTokens\":0,\"calls\":3,\"usd\":9.6,\"reservedUsd\":0,\"wallMs\":60000},\"tasks\":{},\"members\":{},\"reservations\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"status\":\"idle\",\"model\":\"inherit\",\"load\":0,\"joinedAt\":1794629961298},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"status\":\"idle\",\"model\":\"fast\",\"load\":0,\"joinedAt\":1794629961299},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"role\":\"worker\",\"status\":\"id"
           }
         },
         {
           "seq": 9,
           "type": "watch/action/verified",
-          "at": "2026-11-13T18:47:22.940Z",
+          "at": "2026-11-14T04:19:24.617Z",
           "actor": "executor",
           "payload": {
-            "key": "c9fea650fd12a7c55d8a66e9719cf251",
-            "actionId": "act_c9fea650fd12",
+            "key": "41413a3026e0960c974657c3bb382bb9",
+            "actionId": "act_41413a3026e0",
             "kind": "pause",
             "ok": true,
             "detail": {
@@ -2603,7 +2604,7 @@
         {
           "seq": 10,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:22.943Z",
+          "at": "2026-11-14T04:19:24.620Z",
           "actor": "guard",
           "payload": {
             "status": "running",
@@ -2619,20 +2620,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:22.932Z",
+                "at": "2026-11-14T04:19:24.609Z",
                 "ageMs": 2,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:21.398Z",
-                "ageMs": 1536,
+                "at": "2026-11-14T04:19:23.073Z",
+                "ageMs": 1538,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:22.422Z",
-                "ageMs": 512,
+                "at": "2026-11-14T04:19:24.096Z",
+                "ageMs": 515,
                 "error": "response is not JSON"
               }
             }
@@ -2641,18 +2642,18 @@
         {
           "seq": 11,
           "type": "watch/guard/notice",
-          "at": "2026-11-13T18:47:23.447Z",
+          "at": "2026-11-14T04:19:25.125Z",
           "actor": "guard",
           "payload": {
             "code": "hard_pause_skipped",
             "reason": "budget hard pause threshold crossed while the run is paused",
-            "caseId": "case_802a27af4b3942db"
+            "caseId": "case_0a521d990c6941fb"
           }
         },
         {
           "seq": 12,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:23.448Z",
+          "at": "2026-11-14T04:19:25.125Z",
           "actor": "guard",
           "payload": {
             "status": "paused",
@@ -2668,20 +2669,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:23.445Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:25.121Z",
+                "ageMs": 3,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:23.445Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:25.121Z",
+                "ageMs": 3,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:22.422Z",
-                "ageMs": 1025,
+                "at": "2026-11-14T04:19:24.096Z",
+                "ageMs": 1028,
                 "error": "response is not JSON"
               }
             }
@@ -2690,10 +2691,10 @@
         {
           "seq": 13,
           "type": "watch/case/opened",
-          "at": "2026-11-13T18:47:24.472Z",
+          "at": "2026-11-14T04:19:26.146Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_57682858733143a1",
+            "caseId": "case_ea09049f336b4c6a",
             "severity": "L4",
             "code": "budget_exhausted",
             "title": "run budget exhausted at 101.0% — hard stop",
@@ -2702,7 +2703,7 @@
               "id": "run"
             },
             "evidenceIds": [
-              "ev_swarm_budget_run:[object Object]:exhausted"
+              "ev_swarm_budget_run:runId=swarm_m1:exhausted"
             ],
             "reopens": null
           }
@@ -2710,18 +2711,18 @@
         {
           "seq": 14,
           "type": "watch/action/intended",
-          "at": "2026-11-13T18:47:24.473Z",
+          "at": "2026-11-14T04:19:26.146Z",
           "actor": "guard",
           "payload": {
-            "key": "bfa5206dc67364f4148e1365a47fc283",
-            "actionId": "act_bfa5206dc673",
+            "key": "44e337b72d9a879082f5fd0a2acabbc1",
+            "actionId": "act_44e337b72d9a",
             "kind": "abort",
             "target": {
               "kind": "swarm_run",
               "id": "swarm_m1"
             },
             "evidenceRefs": [
-              "ev_swarm_budget_run:[object Object]:exhausted"
+              "ev_swarm_budget_run:runId=swarm_m1:exhausted"
             ],
             "severity": "L4",
             "hardLimit": true,
@@ -2733,22 +2734,22 @@
         {
           "seq": 15,
           "type": "watch/action/executed",
-          "at": "2026-11-13T18:47:24.474Z",
+          "at": "2026-11-14T04:19:26.148Z",
           "actor": "executor",
           "payload": {
             "truncated": true,
             "bytes": 1415,
-            "preview": "{\"key\":\"bfa5206dc67364f4148e1365a47fc283\",\"actionId\":\"act_bfa5206dc673\",\"kind\":\"abort\",\"ok\":true,\"result\":{\"ok\":true,\"kind\":\"abort\",\"httpStatus\":200,\"error\":null,\"data\":{\"swarmId\":\"swarm_m1\",\"runId\":\"swarm_m1\",\"goal\":\"M1 fake run\",\"repo\":\"C:\\\\fake\\\\swarm_m1\",\"topology\":\"mesh\",\"mode\":\"swarm\",\"status\":\"aborted\",\"round\":1,\"concurrencyLimit\":3,\"createdAt\":\"2026-11-13T18:47:19.605Z\",\"updatedAt\":\"2026-11-13T18:47:24.473Z\",\"endedAt\":\"2026-11-13T18:47:24.473Z\",\"budget\":{\"limits\":{\"runTokens\":1000000,\"runUsd\":10,\"runWallMs\":3600000,\"taskTokens\":100000,\"memberTokens\":50000},\"run\":{\"tokens\":1010000,\"reservedTokens\":0,\"calls\":3,\"usd\":10.1,\"reservedUsd\":0,\"wallMs\":60000},\"tasks\":{},\"members\":{},\"reservations\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"status\":\"idle\",\"model\":\"inherit\",\"load\":0,\"joinedAt\":1794595639605},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"status\":\"idle\",\"model\":\"fast\",\"load\":0,\"joinedAt\":1794595639606},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"ro"
+            "preview": "{\"key\":\"44e337b72d9a879082f5fd0a2acabbc1\",\"actionId\":\"act_44e337b72d9a\",\"kind\":\"abort\",\"ok\":true,\"result\":{\"ok\":true,\"kind\":\"abort\",\"httpStatus\":200,\"error\":null,\"data\":{\"swarmId\":\"swarm_m1\",\"runId\":\"swarm_m1\",\"goal\":\"M1 fake run\",\"repo\":\"C:\\\\fake\\\\swarm_m1\",\"topology\":\"mesh\",\"mode\":\"swarm\",\"status\":\"aborted\",\"round\":1,\"concurrencyLimit\":3,\"createdAt\":\"2026-11-14T04:19:21.298Z\",\"updatedAt\":\"2026-11-14T04:19:26.147Z\",\"endedAt\":\"2026-11-14T04:19:26.147Z\",\"budget\":{\"limits\":{\"runTokens\":1000000,\"runUsd\":10,\"runWallMs\":3600000,\"taskTokens\":100000,\"memberTokens\":50000},\"run\":{\"tokens\":1010000,\"reservedTokens\":0,\"calls\":3,\"usd\":10.1,\"reservedUsd\":0,\"wallMs\":60000},\"tasks\":{},\"members\":{},\"reservations\":0},\"members\":[{\"id\":\"mem_queen\",\"name\":\"queen\",\"role\":\"queen\",\"status\":\"idle\",\"model\":\"inherit\",\"load\":0,\"joinedAt\":1794629961298},{\"id\":\"mem_worker_1\",\"name\":\"worker-1\",\"role\":\"worker\",\"status\":\"idle\",\"model\":\"fast\",\"load\":0,\"joinedAt\":1794629961299},{\"id\":\"mem_worker_2\",\"name\":\"worker-2\",\"ro"
           }
         },
         {
           "seq": 16,
           "type": "watch/action/verified",
-          "at": "2026-11-13T18:47:24.475Z",
+          "at": "2026-11-14T04:19:26.149Z",
           "actor": "executor",
           "payload": {
-            "key": "bfa5206dc67364f4148e1365a47fc283",
-            "actionId": "act_bfa5206dc673",
+            "key": "44e337b72d9a879082f5fd0a2acabbc1",
+            "actionId": "act_44e337b72d9a",
             "kind": "abort",
             "ok": true,
             "detail": {
@@ -2759,10 +2760,10 @@
         {
           "seq": 17,
           "type": "watch/case/closed",
-          "at": "2026-11-13T18:47:24.477Z",
+          "at": "2026-11-14T04:19:26.151Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_57682858733143a1",
+            "caseId": "case_ea09049f336b4c6a",
             "reason": "escalated",
             "note": "run aborted by the deterministic guard",
             "actions": 1
@@ -2771,7 +2772,7 @@
         {
           "seq": 18,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:24.478Z",
+          "at": "2026-11-14T04:19:26.152Z",
           "actor": "guard",
           "payload": {
             "status": "paused",
@@ -2787,20 +2788,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:24.469Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:26.141Z",
+                "ageMs": 4,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:23.445Z",
-                "ageMs": 1026,
+                "at": "2026-11-14T04:19:25.121Z",
+                "ageMs": 1024,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:24.469Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:26.141Z",
+                "ageMs": 4,
                 "error": "response is not JSON"
               }
             }
@@ -2809,10 +2810,10 @@
         {
           "seq": 19,
           "type": "watch/case/opened",
-          "at": "2026-11-13T18:47:24.984Z",
+          "at": "2026-11-14T04:19:26.656Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_948b29129c5e4c9b",
+            "caseId": "case_c451178ea13f404e",
             "severity": "L4",
             "code": "budget_exhausted",
             "title": "run budget exhausted at 101.0% — hard stop",
@@ -2821,15 +2822,15 @@
               "id": "run"
             },
             "evidenceIds": [
-              "ev_swarm_budget_run:[object Object]:exhausted"
+              "ev_swarm_budget_run:runId=swarm_m1:exhausted"
             ],
-            "reopens": "case_57682858733143a1"
+            "reopens": "case_ea09049f336b4c6a"
           }
         },
         {
           "seq": 20,
           "type": "watch/sample",
-          "at": "2026-11-13T18:47:24.984Z",
+          "at": "2026-11-14T04:19:26.656Z",
           "actor": "guard",
           "payload": {
             "status": "aborted",
@@ -2845,20 +2846,20 @@
             "freshness": {
               "swarm": {
                 "ok": true,
-                "at": "2026-11-13T18:47:24.981Z",
-                "ageMs": 2,
+                "at": "2026-11-14T04:19:26.651Z",
+                "ageMs": 3,
                 "error": null
               },
               "pressure": {
                 "ok": false,
-                "at": "2026-11-13T18:47:23.445Z",
-                "ageMs": 1538,
+                "at": "2026-11-14T04:19:25.121Z",
+                "ageMs": 1533,
                 "error": "response is not JSON"
               },
               "fish": {
                 "ok": false,
-                "at": "2026-11-13T18:47:24.469Z",
-                "ageMs": 514,
+                "at": "2026-11-14T04:19:26.141Z",
+                "ageMs": 513,
                 "error": "response is not JSON"
               }
             }
@@ -2867,10 +2868,10 @@
         {
           "seq": 21,
           "type": "watch/case/closed",
-          "at": "2026-11-13T18:47:25.290Z",
+          "at": "2026-11-14T04:19:26.975Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_3c5f17578e6541d9",
+            "caseId": "case_4137c97e55ef47ae",
             "reason": "abandoned",
             "note": "supervision disarmed: e2e",
             "actions": 0
@@ -2879,10 +2880,10 @@
         {
           "seq": 22,
           "type": "watch/case/closed",
-          "at": "2026-11-13T18:47:25.291Z",
+          "at": "2026-11-14T04:19:26.976Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_802a27af4b3942db",
+            "caseId": "case_0a521d990c6941fb",
             "reason": "abandoned",
             "note": "supervision disarmed: e2e",
             "actions": 1
@@ -2891,10 +2892,10 @@
         {
           "seq": 23,
           "type": "watch/case/closed",
-          "at": "2026-11-13T18:47:25.292Z",
+          "at": "2026-11-14T04:19:26.979Z",
           "actor": "guard",
           "payload": {
-            "caseId": "case_948b29129c5e4c9b",
+            "caseId": "case_c451178ea13f404e",
             "reason": "abandoned",
             "note": "supervision disarmed: e2e",
             "actions": 0
@@ -2903,14 +2904,14 @@
         {
           "seq": 24,
           "type": "watch/shift",
-          "at": "2026-11-13T18:47:25.293Z",
+          "at": "2026-11-14T04:19:26.980Z",
           "actor": "system",
           "payload": {
             "shiftId": "shift-0001",
             "reason": "e2e",
             "window": {
-              "from": "2026-11-13T18:47:20.374Z",
-              "to": "2026-11-13T18:47:25.292Z"
+              "from": "2026-11-14T04:19:22.046Z",
+              "to": "2026-11-14T04:19:26.979Z"
             },
             "summary": {
               "mode": "guard",
@@ -2934,14 +2935,14 @@
         {
           "seq": 25,
           "type": "watch/disarmed",
-          "at": "2026-11-13T18:47:25.294Z",
+          "at": "2026-11-14T04:19:26.981Z",
           "actor": "human",
           "payload": {
             "reason": "e2e",
             "closedCases": [
-              "case_3c5f17578e6541d9",
-              "case_802a27af4b3942db",
-              "case_948b29129c5e4c9b"
+              "case_4137c97e55ef47ae",
+              "case_0a521d990c6941fb",
+              "case_c451178ea13f404e"
             ],
             "shiftId": "shift-0001",
             "supervisorSpent": 0
@@ -2953,9 +2954,9 @@
     "gate": {
       "ok": true,
       "failed": [],
-      "checkedAt": "2026-11-13T18:47:25.323Z"
+      "checkedAt": "2026-11-14T04:19:27.031Z"
     },
-    "finishedAt": "2026-11-13T18:47:25.323Z"
+    "finishedAt": "2026-11-14T04:19:27.031Z"
   },
   "watchFiles": [
     "watch.jsonl",

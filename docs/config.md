@@ -55,6 +55,7 @@ The Host only reads `checkpoints/<sourceId>/index.jsonl`,
 | `provider` | string | `spawn` | subagent provider |
 | `model` | `inherit` \| `fast` \| `strong` | `inherit` | routed by the child preset |
 | `agentPreset` | string | `''` | optional explicit child preset |
+| `agentOptions` | object | `{}` | child route override: `provider`, `model`, `reasoningEffort`, `maxTokens` |
 | `reserveRatio` | number 0–0.5 | `0.05` | `R = clamp(B*ratio, 0, min(maxReserve, 0.2B))` |
 | `maxReserveTokens` | integer | `200000` | upper bound for R |
 | `maxWakes` | integer | `30` | total wakes per run |

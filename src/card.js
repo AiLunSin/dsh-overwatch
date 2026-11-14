@@ -85,6 +85,12 @@ export function buildCaseCard(input) {
       lastEventAt: snapshot?.lastEventAt ?? null,
     },
     allowedActions: allowedActions(record.severity),
+    targets: {
+      swarm_run: record.runId,
+      swarm_member: 'memberId from snapshot.members',
+      swarm_task: 'taskId from snapshot.tasks',
+      session: 'session id from pressure evidence only',
+    },
     recentEvents: (Array.isArray(input.events) ? input.events : []).slice(-8).map(event => ({
       seq: event.seq,
       type: event.type,

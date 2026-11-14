@@ -5,6 +5,17 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — M4 real-model watch validation
+
+- `e2e/m4`: scripted root + real DeepSeek account watch child, one wake within a
+  hard 80k-token/200s budget. Real model called the three scoped tools, produced
+  an accepted `coach` decision (confidence 0.82) and the executor verified it.
+- `supervisor.agentOptions` routes only the watch child to a real model.
+- Fixed budget evidence ids containing `[object Object]` (stable ref key), added
+  `target.kind` enum and case-card target hints to `watch_decide`, and recorded
+  validation `errors` on rejected decisions.
+- Configurable `runId` for the fake swarm harness.
+
 ### Added — M4 hardening and release tooling
 
 - Eight deterministic incident scenarios (I-1..I-8) including review deadlock,

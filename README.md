@@ -4,9 +4,10 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M0–M4 发布候选（值班员 experimental；真实模型 A/B、浏览器恢复演练与
-npm 发布受外部条件阻塞）。** 仓库包含 Host + Web 面板、真实 DSH 0.2.2-rc.3 上的
-M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例与 scoped 发布产物。
+**状态：M0–M4 发布候选（值班员 experimental；真实模型单次唤醒已验证，完整
+A/B/C、浏览器恢复演练与 npm 发布受外部条件阻塞）。** 仓库包含 Host + Web 面板、
+真实 DSH 0.2.2-rc.3 上的 M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例、
+一次真实 DeepSeek 模型的值班员唤醒，以及 scoped 发布产物。
 `supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
 子代理；它提交结构化决定，由代码校验、执行、验证并记账。硬限（预算 80/95/100%、
 事件流缺口）始终由确定性 Guard 执行，不经过模型。
@@ -35,7 +36,7 @@ M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例与 scoped 发
 | `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/restores；doctor |
 | `client.js` | ✅ M3 | 值班室、事件单、鱼缸（检查点/恢复）、回放时间轴、doctor |
 | 发布产物 | ✅ M4 | scoped 构建、目录/tarball 安装冒烟、CI；npm 发布待 OTP |
-| 真实模型 A/B | ⛔ | 需要模型凭据与费用授权；协议见 docs/m4.md |
+| 真实模型 | ✅ 单次 / ⛔ A/B | 值班员单次唤醒 9,958 tokens PASS；完整 A/B/C 见 docs/m4.md |
 
 ### 两层如何分工
 
@@ -145,6 +146,7 @@ npm run lint    # node --check 48 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1/M3 web 端到端（33/33）
 npm run m2      # M2 值班员 headless 端到端（12/12）
+npm run m4:real # 一次真实模型值班员唤醒（需账号凭据；token 上限 80k）
 npm run build:release   # scoped 发布副本
 npm run smoke:install   # 目录安装冒烟（tarball 见 docs/m4.md）
 ```
@@ -170,8 +172,9 @@ case `mitigated`、交接班 `shift-0001`、13 条 watch 哈希链全连续。
 
 ## 5. 设计边界（不要过度承诺）
 
-- **没有真实模型 A/B**：M2 的管线与限制用脚本化 provider 验证；判断质量、误动作率、
-  5% 预算是否够要 M4 用真实模型跑 3 个场景对比 guard-only。
+- **完整模型 A/B/C 未做**：已用 2 元预算验证**一次**真实值班员唤醒
+  （9,958 tokens，`coach` 0.82 被执行器接受）；三组 ×3 场景的对比需要更多预算与
+  真实 swarm，不能把单次唤醒当成质量结论。
 - **教练不保证送达**：`coach`/`throttle` 的文本只写 swarm `steer` 事件，上游不投递
   成员 inbox；v1 文案必须写"可能不送达"。
 - **M1/M2 不自动恢复**：`pause` 需人工 resume；`throttle` 只在"由我们暂停"时按

@@ -1,0 +1,263 @@
+{
+  "schemaVersion": 1,
+  "stage": "m4-real-watch",
+  "dshVersion": "0.2.2-rc.3",
+  "reasoningEffort": "off",
+  "budget": {
+    "tokens": 80000,
+    "wallMs": 200000
+  },
+  "startedAt": "2026-11-14T04:18:38.452Z",
+  "finishedAt": "2026-11-14T04:18:50.183Z",
+  "error": null,
+  "checks": {
+    "chain-ok": {
+      "status": "pass",
+      "evidence": {
+        "ok": true,
+        "count": 13,
+        "error": null
+      }
+    },
+    "armed-supervised": {
+      "status": "pass",
+      "evidence": {
+        "mode": "supervised",
+        "requestedMode": "supervised",
+        "runId": "swarm_m4",
+        "reserve": 50000,
+        "supervisor": "lazy",
+        "watchName": "ow-12c33ad31ce3",
+        "agentOptions": {
+          "provider": "deepseek-account",
+          "model": "deepseek-flash",
+          "reasoningEffort": "off",
+          "maxTokens": 2048
+        },
+        "sampling": {
+          "swarmEventMs": 500,
+          "swarmSnapshotMs": 500,
+          "pressureMs": 500,
+          "fishMs": 500,
+          "staleMs": 5000,
+          "requestTimeoutMs": 2000,
+          "maxInflight": 2
+        },
+        "capabilities": {
+          "guard": true,
+          "supervisor": true,
+          "write": true
+        }
+      }
+    },
+    "real-route": {
+      "status": "pass",
+      "evidence": {
+        "provider": "deepseek-account",
+        "model": "deepseek-flash",
+        "reasoningEffort": "off",
+        "maxTokens": 2048
+      }
+    },
+    "case-opened": {
+      "status": "pass",
+      "evidence": {
+        "opened": 1
+      }
+    },
+    "wake-recorded": {
+      "status": "pass",
+      "evidence": {
+        "wakes": 1
+      }
+    },
+    "decision-produced": {
+      "status": "pass",
+      "evidence": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "generation": 1,
+        "action": "coach",
+        "confidence": 0.82,
+        "reason": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient act",
+        "accepted": true,
+        "code": null,
+        "errors": null,
+        "requiresHuman": false,
+        "actionId": "act_40077aa4487e"
+      }
+    },
+    "action-chain": {
+      "status": "pass",
+      "evidence": {
+        "intended": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "target": {
+            "kind": "swarm_run",
+            "id": "swarm_m4"
+          },
+          "evidenceRefs": [
+            "ev_swarm_budget_run:runId=swarm_m4:pressure"
+          ]
+        },
+        "executed": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "ok": true,
+          "result": {
+            "ok": true,
+            "kind": "steer",
+            "httpStatus": 200,
+            "error": null,
+            "data": {
+              "swarmId": "swarm_m4",
+              "runId": "swarm_m4",
+              "goal": "M2 supervised probe",
+              "repo": "C:/tmp/repo",
+              "topology": "mesh",
+              "mode": "swarm",
+              "status": "running",
+              "round": 1,
+              "concurrencyLimit": 2,
+              "createdAt": 1794629920489,
+              "updatedAt": 1794629929090,
+              "endedAt": null,
+              "recovered": false,
+              "convergedReason": null,
+              "baseCommit": "",
+              "gateCommands": [],
+              "workspace": {
+                "enabled": false,
+                "integrationBranch": null,
+                "degraded": 0,
+                "conflicts": 0
+              },
+              "dispatch": {
+                "auto": false,
+                "active": 1,
+                "parentBound": true
+              },
+              "preflight": null,
+              "convergence": {
+                "converged": false,
+                "openTasks": 1,
+                "budgetRatio": 0.81,
+                "budgetExhausted": false
+              },
+              "stats": {
+                "members": 2,
+                "tasks": 1,
+                "merged": 0,
+                "failed": 0,
+                "active": 1,
+                "boardEntries": 0,
+                "events": 3
+              },
+              "budget": {
+                "limits": {
+                  "runTokens": 1000000,
+                  "runUsd": 0,
+                  "runWallMs": 0,
+                  "taskTokens": 400000,
+                  "memberTokens": 800000
+                },
+                "run": {
+                  "tokens": 810000,
+                  "reservedTokens": 0,
+                  "calls": 3,
+                  "usd": 0,
+                  "reservedUsd": 0,
+                  "wallMs": 0
+                },
+                "tasks": {},
+                "members": {},
+                "reservations": 0
+              },
+              "members": [
+                {
+                  "id": "member_queen",
+                  "name": "queen",
+                  "role": "queen",
+                  "model": "inherit",
+                  "status": "busy",
+                  "load": 0,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794629920489,
+                  "lastWinRound": 0,
+                  "skills": []
+                },
+                {
+                  "id": "member_worker",
+                  "name": "worker-1",
+                  "role": "worker",
+                  "model": "fast",
+                  "status": "busy",
+                  "load": 1,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794629920489,
+                  "lastWinRound": 0,
+                  "skills": [
+                    ".js"
+                  ]
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "task_1",
+                  "title": "probe task",
+                  "state": "working",
+                  "assignee": "member_worker"
+                }
+              ]
+            }
+          }
+        },
+        "verified": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "ok": true,
+          "detail": {
+            "status": "running"
+          }
+        }
+      }
+    },
+    "usage-capped": {
+      "status": "pass",
+      "evidence": {
+        "spent": 9958,
+        "budget": 80000
+      }
+    },
+    "disarmed": {
+      "status": "pass",
+      "evidence": {
+        "disarmed": 1
+      }
+    }
+  },
+  "gate": {
+    "ok": true,
+    "failed": [],
+    "total": 9
+  },
+  "usage": {
+    "caseId": "case_d6fd4fb5dca94ef8",
+    "spent": 9958,
+    "reserve": 50000,
+    "calls": 3
+  },
+  "durationMs": 11731,
+  "exitCode": 0
+}

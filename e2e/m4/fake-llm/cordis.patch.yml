@@ -1,0 +1,4 @@
+# M4 test-only bundle: scripted root provider.
+- insert:
+    - id: dsh-fake-llm-m4
+      name: dsh-fake-llm-m4

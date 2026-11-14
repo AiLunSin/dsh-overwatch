@@ -7,9 +7,10 @@
 **Status: M0–M4 release candidate (watch officer experimental).** The bundle ships a Host
 half and a Web panel, with real-DeepSeek-Harness 0.2.2-rc.3 probes for capability
 (M0), guard-only supervision (M1), the watch officer (M2), fish tank / replay / doctor
-/ restore evidence (M3), and eight-scenario hardening plus release tooling (M4).
-The real-model A/B benchmark, browser restore drill, and npm publication depend on
-external credentials/approval; `npm publish` currently stops at EOTP.
+/ restore evidence (M3), eight-scenario hardening plus release tooling (M4), and one
+real DeepSeek account watch wake (9,958 tokens, accepted `coach` decision).
+The full A/B/C benchmark, browser restore drill, and npm publication still depend on
+external budget/credentials/approval; `npm publish` currently stops at EOTP.
 
 ## What it does
 
@@ -69,6 +70,7 @@ npm run lint
 npm run m0      # capability probe
 npm run m1      # M1/M3 web end-to-end (33 checks)
 npm run m2      # M2 watch officer headless end-to-end (12 checks)
+npm run m4:real # one real-model watch wake (account credentials, 80k cap)
 npm run build:release
 npm run smoke:install
 ```

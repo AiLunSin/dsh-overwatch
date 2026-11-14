@@ -1,0 +1,52 @@
+{
+  "calls": [
+    {
+      "action": "steer",
+      "body": {
+        "action": "steer",
+        "reason": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient action is an advisory coach to finish cheaply and report budget, keeping throttle available if the ratio keeps climbing.",
+        "actor": "overwatch",
+        "text": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient action is an advisory coach to finish cheaply and report budget, keeping throttle available if the ratio keeps climbing."
+      },
+      "at": "2026-11-14T04:18:49.089Z",
+      "status": "running"
+    }
+  ],
+  "status": "running",
+  "events": [
+    {
+      "seq": 1,
+      "id": "evt_1",
+      "type": "swarm/created",
+      "at": "2026-11-14T04:18:40.643Z",
+      "actor": "system",
+      "payload": {
+        "runId": "swarm_m4"
+      }
+    },
+    {
+      "seq": 2,
+      "id": "evt_2",
+      "type": "swarm/dispatch/started",
+      "at": "2026-11-14T04:18:40.643Z",
+      "actor": "system",
+      "payload": {
+        "memberId": "member_worker",
+        "childId": "sess_worker",
+        "taskId": "task_1"
+      }
+    },
+    {
+      "seq": 3,
+      "id": "evt_3",
+      "type": "swarm/intervened",
+      "at": "2026-11-14T04:18:49.089Z",
+      "actor": "system",
+      "payload": {
+        "action": "steer",
+        "text": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient action is an advisory coach to finish cheaply and report budget, keeping throttle available if the ratio keeps climbing.",
+        "target": null
+      }
+    }
+  ]
+}

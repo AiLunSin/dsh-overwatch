@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "stage": "headless-m2",
-  "startedAt": "2026-11-13T18:47:33.496Z",
+  "startedAt": "2026-11-14T04:19:18.560Z",
   "dshVersion": "0.2.2-rc.3",
-  "port": 56317,
+  "port": 58789,
   "checks": {
     "run-exit": {
       "status": "pass",
@@ -29,7 +29,8 @@
           "runId": "swarm_m2",
           "reserve": 50000,
           "supervisor": "lazy",
-          "watchName": "ow-dbbf861f35fe",
+          "watchName": "ow-189b6b7acf30",
+          "agentOptions": {},
           "sampling": {
             "swarmEventMs": 500,
             "swarmSnapshotMs": 500,
@@ -63,15 +64,16 @@
       "status": "pass",
       "evidence": {
         "decision": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "generation": 1,
           "action": "coach",
           "confidence": 0.82,
           "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
           "accepted": true,
           "code": null,
+          "errors": null,
           "requiresHuman": false,
-          "actionId": "act_6b983c67d19d"
+          "actionId": "act_2a8fb2fcf268"
         }
       }
     },
@@ -79,20 +81,20 @@
       "status": "pass",
       "evidence": {
         "intended": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "target": {
             "kind": "swarm_run",
             "id": "swarm_m2"
           },
           "evidenceRefs": [
-            "ev_swarm_budget_run:[object Object]:pressure"
+            "ev_swarm_budget_run:runId=swarm_m2:pressure"
           ]
         },
         "executed": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "ok": true,
           "result": {
@@ -110,8 +112,8 @@
               "status": "running",
               "round": 1,
               "concurrencyLimit": 2,
-              "createdAt": 1794595649646,
-              "updatedAt": 1794595650467,
+              "createdAt": 1794629954689,
+              "updatedAt": 1794629955482,
               "endedAt": null,
               "recovered": false,
               "convergedReason": null,
@@ -177,7 +179,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794595649646,
+                  "joinedAt": 1794629954689,
                   "lastWinRound": 0,
                   "skills": []
                 },
@@ -193,7 +195,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794595649646,
+                  "joinedAt": 1794629954689,
                   "lastWinRound": 0,
                   "skills": [
                     ".js"
@@ -212,8 +214,8 @@
           }
         },
         "verified": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "ok": true,
           "detail": {
@@ -249,7 +251,7 @@
       "status": "pass",
       "evidence": {
         "usage": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "spent": 18720,
           "reserve": 50000,
           "calls": 3
@@ -260,7 +262,7 @@
       "status": "pass",
       "evidence": {
         "closed": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "reason": "mitigated",
           "note": "watch officer issued coach",
           "actions": 1
@@ -274,8 +276,8 @@
           "shiftId": "shift-0001",
           "reason": "M2 e2e complete",
           "window": {
-            "from": "2026-11-13T18:47:29.885Z",
-            "to": "2026-11-13T18:47:33.426Z"
+            "from": "2026-11-14T04:19:14.909Z",
+            "to": "2026-11-14T04:19:18.451Z"
           },
           "summary": {
             "mode": "supervised",
@@ -323,7 +325,8 @@
         "runId": "swarm_m2",
         "reserve": 50000,
         "supervisor": "lazy",
-        "watchName": "ow-dbbf861f35fe",
+        "watchName": "ow-189b6b7acf30",
+        "agentOptions": {},
         "sampling": {
           "swarmEventMs": 500,
           "swarmSnapshotMs": 500,
@@ -340,22 +343,23 @@
         }
       },
       "decision": {
-        "caseId": "case_be1c0d1401cb45b5",
+        "caseId": "case_9dd4915fc4c54bdd",
         "generation": 1,
         "action": "coach",
         "confidence": 0.82,
         "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
         "accepted": true,
         "code": null,
+        "errors": null,
         "requiresHuman": false,
-        "actionId": "act_6b983c67d19d"
+        "actionId": "act_2a8fb2fcf268"
       }
     },
     "events": [
       {
         "seq": 1,
         "type": "watch/armed",
-        "at": "2026-11-13T18:47:29.885Z",
+        "at": "2026-11-14T04:19:14.909Z",
         "actor": "human",
         "payload": {
           "mode": "supervised",
@@ -363,7 +367,8 @@
           "runId": "swarm_m2",
           "reserve": 50000,
           "supervisor": "lazy",
-          "watchName": "ow-dbbf861f35fe",
+          "watchName": "ow-189b6b7acf30",
+          "agentOptions": {},
           "sampling": {
             "swarmEventMs": 500,
             "swarmSnapshotMs": 500,
@@ -383,7 +388,7 @@
       {
         "seq": 2,
         "type": "watch/sample",
-        "at": "2026-11-13T18:47:29.888Z",
+        "at": "2026-11-14T04:19:14.911Z",
         "actor": "guard",
         "payload": {
           "status": "running",
@@ -399,20 +404,20 @@
           "freshness": {
             "swarm": {
               "ok": true,
-              "at": "2026-11-13T18:47:29.880Z",
-              "ageMs": 7,
+              "at": "2026-11-14T04:19:14.904Z",
+              "ageMs": 6,
               "error": null
             },
             "pressure": {
               "ok": false,
-              "at": "2026-11-13T18:47:29.880Z",
-              "ageMs": 7,
+              "at": "2026-11-14T04:19:14.904Z",
+              "ageMs": 6,
               "error": "HTTP 404"
             },
             "fish": {
               "ok": false,
-              "at": "2026-11-13T18:47:29.880Z",
-              "ageMs": 7,
+              "at": "2026-11-14T04:19:14.904Z",
+              "ageMs": 6,
               "error": "HTTP 404"
             }
           }
@@ -421,10 +426,10 @@
       {
         "seq": 3,
         "type": "watch/case/opened",
-        "at": "2026-11-13T18:47:30.398Z",
+        "at": "2026-11-14T04:19:15.419Z",
         "actor": "guard",
         "payload": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "severity": "L2",
           "code": "budget_pressure",
           "title": "run budget at 81.0% — pressure threshold",
@@ -433,7 +438,7 @@
             "id": "run"
           },
           "evidenceIds": [
-            "ev_swarm_budget_run:[object Object]:pressure"
+            "ev_swarm_budget_run:runId=swarm_m2:pressure"
           ],
           "reopens": null
         }
@@ -441,10 +446,10 @@
       {
         "seq": 4,
         "type": "watch/wake",
-        "at": "2026-11-13T18:47:30.399Z",
+        "at": "2026-11-14T04:19:15.420Z",
         "actor": "system",
         "payload": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "generation": 1,
           "wakeIndex": 1,
           "budgetLeft": 50000,
@@ -455,11 +460,11 @@
       {
         "seq": 5,
         "type": "watch/attach",
-        "at": "2026-11-13T18:47:30.406Z",
+        "at": "2026-11-14T04:19:15.427Z",
         "actor": "watch",
         "payload": {
-          "agentId": "c2570b6c-d99f-4fb1-ad6b-f873d7464960",
-          "name": "ow-dbbf861f35fe",
+          "agentId": "017579d5-2fcf-4586-9009-05a1d81bc04c",
+          "name": "ow-189b6b7acf30",
           "inherited": 33,
           "registered": [
             "watch_case",
@@ -471,29 +476,29 @@
       {
         "seq": 6,
         "type": "watch/action/intended",
-        "at": "2026-11-13T18:47:30.464Z",
+        "at": "2026-11-14T04:19:15.479Z",
         "actor": "watch",
         "payload": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "target": {
             "kind": "swarm_run",
             "id": "swarm_m2"
           },
           "evidenceRefs": [
-            "ev_swarm_budget_run:[object Object]:pressure"
+            "ev_swarm_budget_run:runId=swarm_m2:pressure"
           ]
         }
       },
       {
         "seq": 7,
         "type": "watch/action/executed",
-        "at": "2026-11-13T18:47:30.467Z",
+        "at": "2026-11-14T04:19:15.483Z",
         "actor": "executor",
         "payload": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "ok": true,
           "result": {
@@ -511,8 +516,8 @@
               "status": "running",
               "round": 1,
               "concurrencyLimit": 2,
-              "createdAt": 1794595649646,
-              "updatedAt": 1794595650467,
+              "createdAt": 1794629954689,
+              "updatedAt": 1794629955482,
               "endedAt": null,
               "recovered": false,
               "convergedReason": null,
@@ -578,7 +583,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794595649646,
+                  "joinedAt": 1794629954689,
                   "lastWinRound": 0,
                   "skills": []
                 },
@@ -594,7 +599,7 @@
                     "done": 0,
                     "failed": 0
                   },
-                  "joinedAt": 1794595649646,
+                  "joinedAt": 1794629954689,
                   "lastWinRound": 0,
                   "skills": [
                     ".js"
@@ -616,11 +621,11 @@
       {
         "seq": 8,
         "type": "watch/action/verified",
-        "at": "2026-11-13T18:47:30.469Z",
+        "at": "2026-11-14T04:19:15.484Z",
         "actor": "executor",
         "payload": {
-          "key": "6b983c67d19d03947989e321502822bb",
-          "actionId": "act_6b983c67d19d",
+          "key": "2a8fb2fcf2688a3016989d499fe56f0c",
+          "actionId": "act_2a8fb2fcf268",
           "kind": "coach",
           "ok": true,
           "detail": {
@@ -631,27 +636,28 @@
       {
         "seq": 9,
         "type": "watch/decision",
-        "at": "2026-11-13T18:47:30.471Z",
+        "at": "2026-11-14T04:19:15.486Z",
         "actor": "watch",
         "payload": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "generation": 1,
           "action": "coach",
           "confidence": 0.82,
           "reason": "Budget pressure crossed the soft threshold while one member stays busy; coaching is the smallest reversible action.",
           "accepted": true,
           "code": null,
+          "errors": null,
           "requiresHuman": false,
-          "actionId": "act_6b983c67d19d"
+          "actionId": "act_2a8fb2fcf268"
         }
       },
       {
         "seq": 10,
         "type": "watch/usage",
-        "at": "2026-11-13T18:47:30.472Z",
+        "at": "2026-11-14T04:19:15.487Z",
         "actor": "system",
         "payload": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "spent": 18720,
           "reserve": 50000,
           "calls": 3
@@ -660,10 +666,10 @@
       {
         "seq": 11,
         "type": "watch/case/closed",
-        "at": "2026-11-13T18:47:30.473Z",
+        "at": "2026-11-14T04:19:15.488Z",
         "actor": "guard",
         "payload": {
-          "caseId": "case_be1c0d1401cb45b5",
+          "caseId": "case_9dd4915fc4c54bdd",
           "reason": "mitigated",
           "note": "watch officer issued coach",
           "actions": 1
@@ -672,14 +678,14 @@
       {
         "seq": 12,
         "type": "watch/shift",
-        "at": "2026-11-13T18:47:33.427Z",
+        "at": "2026-11-14T04:19:18.452Z",
         "actor": "system",
         "payload": {
           "shiftId": "shift-0001",
           "reason": "M2 e2e complete",
           "window": {
-            "from": "2026-11-13T18:47:29.885Z",
-            "to": "2026-11-13T18:47:33.426Z"
+            "from": "2026-11-14T04:19:14.909Z",
+            "to": "2026-11-14T04:19:18.451Z"
           },
           "summary": {
             "mode": "supervised",
@@ -703,7 +709,7 @@
       {
         "seq": 13,
         "type": "watch/disarmed",
-        "at": "2026-11-13T18:47:33.427Z",
+        "at": "2026-11-14T04:19:18.453Z",
         "actor": "human",
         "payload": {
           "reason": "M2 e2e complete",
@@ -724,7 +730,7 @@
           "actor": "overwatch",
           "text": "The run is under budget pressure; keep the member on task and re-check in ten minutes."
         },
-        "at": "2026-11-13T18:47:30.466Z",
+        "at": "2026-11-14T04:19:15.481Z",
         "status": "running"
       }
     ]
@@ -738,7 +744,7 @@
     "leaked": [],
     "requests": [
       {
-        "sessionId": "c2570b6c-d99f-4fb1-ad6b-f873d7464960",
+        "sessionId": "017579d5-2fcf-4586-9009-05a1d81bc04c",
         "call": 1,
         "toolNames": [
           "watch_case",
@@ -747,7 +753,7 @@
         ]
       },
       {
-        "sessionId": "c2570b6c-d99f-4fb1-ad6b-f873d7464960",
+        "sessionId": "017579d5-2fcf-4586-9009-05a1d81bc04c",
         "call": 2,
         "toolNames": [
           "watch_case",
@@ -756,7 +762,7 @@
         ]
       },
       {
-        "sessionId": "c2570b6c-d99f-4fb1-ad6b-f873d7464960",
+        "sessionId": "017579d5-2fcf-4586-9009-05a1d81bc04c",
         "call": 3,
         "toolNames": [
           "watch_case",
@@ -765,7 +771,7 @@
         ]
       },
       {
-        "sessionId": "c2570b6c-d99f-4fb1-ad6b-f873d7464960",
+        "sessionId": "017579d5-2fcf-4586-9009-05a1d81bc04c",
         "call": 4,
         "toolNames": [
           "watch_case",

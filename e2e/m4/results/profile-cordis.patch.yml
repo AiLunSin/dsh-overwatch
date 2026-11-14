@@ -1,0 +1,59 @@
+# M4 real-watch probe. Test values only; the real account credential is
+# copied into the throwaway DSH_HOME and never printed.
+- insert:
+    - id: credentials-local
+      name: '@deepseek-ai/dsh-credentials-local'
+    - id: authorization
+      name: '@deepseek-ai/dsh-authorization'
+    - id: deepseek-account
+      name: '@deepseek-ai/dsh-deepseek-account'
+- id: agent-default-model
+  name: '@deepseek-ai/dsh-agent-default-model'
+  config:
+    provider: fake
+    model: fake-1
+- id: subagent
+  config:
+    maxActiveSubagents: 3
+- id: dsh-overwatch
+  config:
+    enabled: true
+    mode: guard
+    http:
+      token: m4-token
+    ports:
+      origin: http://127.0.0.1:56065
+      swarmToken: m4-swarm-token
+    fish:
+      dataDir: 'C:/Users/11403/AppData/Local/Temp/overwatch-m4-real-usKLyc/fish-data'
+    sampling:
+      swarmEventMs: 500
+      swarmSnapshotMs: 500
+      pressureMs: 500
+      fishMs: 500
+      staleMs: 5000
+      requestTimeoutMs: 2000
+      maxInflight: 2
+    supervisor:
+      maxWakes: 1
+      maxWakesPerHour: 1
+      wakeTimeoutMs: 120000
+      maxEvidenceCalls: 2
+      maxTokensPerWake: 20000
+      agentOptions:
+        provider: deepseek-account
+        model: deepseek-flash
+        reasoningEffort: off
+        maxTokens: 2048
+    policy:
+      twoSignalRule: true
+      autopilot:
+        throttle: false
+        pause: false
+        pauseOnHardLimit: true
+        abortOnHardLimit: true
+- id: dsh-overwatch-m2-harness
+  config:
+    port: 56065
+    token: m4-swarm-token
+    runId: swarm_m4

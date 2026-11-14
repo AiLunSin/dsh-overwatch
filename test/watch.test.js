@@ -5,7 +5,12 @@ import { WatchOfficer } from '../src/watch.js'
 
 const config = resolveConfig({
   http: { token: 'secret' },
-  supervisor: { maxEvidenceCalls: 3, wakeTimeoutMs: 5_000, maxEvidenceBytes: 8_192 },
+  supervisor: {
+    maxEvidenceCalls: 3,
+    wakeTimeoutMs: 5_000,
+    maxEvidenceBytes: 8_192,
+    agentOptions: { provider: 'deepseek-account', model: 'deepseek-flash', maxTokens: 4_096 },
+  },
 })
 
 function fakeChildTools() {
@@ -122,6 +127,7 @@ test('the first wake starts a caller-delivered depth-1 child with the case card'
   assert.equal(state.startCalls[0].delivery, 'caller')
   assert.equal(state.startCalls[0].maxDepth, 1)
   assert.equal(state.startCalls[0].name, 'ow-test')
+  assert.deepEqual(state.startCalls[0].agentOptions, { provider: 'deepseek-account', model: 'deepseek-flash', maxTokens: 4_096 })
   assert.match(state.startCalls[0].prompt[0].text, /case-1/)
 
   const result = await decideToolCall(officer, decision)

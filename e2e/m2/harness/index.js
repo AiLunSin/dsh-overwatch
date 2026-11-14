@@ -26,6 +26,8 @@ export function apply(ctx, rawConfig) {
   const config = rawConfig ?? {}
   const port = Number(config.port ?? 0)
   const token = String(config.token ?? '')
+  const runId = String(config.runId ?? 'swarm_m2')
+  if (!/^[A-Za-z0-9_-]{1,200}$/.test(runId)) throw new Error(`m2-harness: invalid runId ${runId}`)
   if (!Number.isSafeInteger(port) || port <= 0 || port > 65_535) throw new Error(`m2-harness: invalid port ${String(config.port)}`)
   if (token === '') throw new Error('m2-harness: token is required')
 
@@ -63,8 +65,8 @@ export function apply(ctx, rawConfig) {
     const limit = 1_000_000
     const used = Math.round(limit * 0.81)
     return {
-      swarmId: 'swarm_m2',
-      runId: 'swarm_m2',
+      swarmId: runId,
+      runId,
       goal: 'M2 supervised probe',
       repo: 'C:/tmp/repo',
       topology: 'mesh',
@@ -125,7 +127,7 @@ export function apply(ctx, rawConfig) {
       if (pathname === '/swarm/api/runs' && req.method === 'GET') {
         json(res, 200, {
           runs: [{
-            swarmId: 'swarm_m2',
+            swarmId: runId,
             goal: 'M2 supervised probe',
             status: state.status,
             tasks: 1,
@@ -136,17 +138,17 @@ export function apply(ctx, rawConfig) {
         })
         return
       }
-      if (pathname === '/swarm/api/runs/swarm_m2' && req.method === 'GET') {
+      if (pathname === `/swarm/api/runs/${runId}` && req.method === 'GET') {
         json(res, 200, snapshot())
         return
       }
-      if (pathname === '/swarm/api/runs/swarm_m2/events' && req.method === 'GET') {
+      if (pathname === `/swarm/api/runs/${runId}/events` && req.method === 'GET') {
         const since = Number(url.searchParams.get('since') ?? 0)
         const limit = Math.min(Number(url.searchParams.get('limit') ?? 200), 1_000)
-        json(res, 200, { runId: 'swarm_m2', events: state.events.filter(event => event.seq > since).slice(0, limit) })
+        json(res, 200, { runId, events: state.events.filter(event => event.seq > since).slice(0, limit) })
         return
       }
-      if (pathname === '/swarm/api/runs/swarm_m2/intervene' && req.method === 'POST') {
+      if (pathname === `/swarm/api/runs/${runId}/intervene` && req.method === 'POST') {
         if (req.headers['x-swarm-token'] !== token) {
           json(res, 401, { error: { code: 'UNAUTHORIZED', message: 'bad swarm token' } })
           return
@@ -190,7 +192,7 @@ export function apply(ctx, rawConfig) {
   ctx.effect(() => () => new Promise(resolve => server.close(() => resolve(undefined))))
   server.listen(port, '127.0.0.1', () => {
     ctx.logger?.info?.(`[m2-harness] fake swarm listening on 127.0.0.1:${port}`)
-    emit('swarm/created', { runId: 'swarm_m2' })
+    emit('swarm/created', { runId })
     emit('swarm/dispatch/started', { memberId: 'member_worker', childId: 'sess_worker', taskId: 'task_1' })
     save({ calls: state.calls, status: state.status, events: state.events })
   })

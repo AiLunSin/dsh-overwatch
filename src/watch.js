@@ -215,6 +215,11 @@ export class WatchOfficer {
       maxDepth: 1,
     }
     if (this.config.supervisor.agentPreset !== '') spec.agentPreset = this.config.supervisor.agentPreset
+    if (this.config.supervisor.agentOptions !== null
+      && typeof this.config.supervisor.agentOptions === 'object'
+      && Object.keys(this.config.supervisor.agentOptions).length > 0) {
+      spec.agentOptions = { ...this.config.supervisor.agentOptions }
+    }
     // Reserve the child identity up front: `agent/created` fires before
     // startActivation returns, and at that point the catalog has no name yet.
     this.reservedId = randomUUID()
@@ -297,7 +302,14 @@ export class WatchOfficer {
             target: {
               type: 'object',
               additionalProperties: false,
-              properties: { kind: { type: 'string' }, id: { type: 'string' } },
+              properties: {
+                kind: {
+                  type: 'string',
+                  enum: ['swarm_run', 'swarm_member', 'swarm_task', 'session'],
+                  description: 'Use swarm_run for run-level cases (budget/stall/log); swarm_member or swarm_task for that scope.',
+                },
+                id: { type: 'string', description: 'The runId, memberId or taskId shown in the case card; never a guessed id.' },
+              },
               required: ['kind', 'id'],
             },
             params: { type: 'object' },

@@ -1,0 +1,732 @@
+{
+  "schemaVersion": 1,
+  "stage": "m4-real-watch",
+  "dshVersion": "0.2.2-rc.3",
+  "reasoningEffort": "off",
+  "checks": {
+    "chain-ok": {
+      "status": "pass",
+      "evidence": {
+        "ok": true,
+        "count": 13,
+        "error": null
+      }
+    },
+    "armed-supervised": {
+      "status": "pass",
+      "evidence": {
+        "mode": "supervised",
+        "requestedMode": "supervised",
+        "runId": "swarm_m4",
+        "reserve": 50000,
+        "supervisor": "lazy",
+        "watchName": "ow-12c33ad31ce3",
+        "agentOptions": {
+          "provider": "deepseek-account",
+          "model": "deepseek-flash",
+          "reasoningEffort": "off",
+          "maxTokens": 2048
+        },
+        "sampling": {
+          "swarmEventMs": 500,
+          "swarmSnapshotMs": 500,
+          "pressureMs": 500,
+          "fishMs": 500,
+          "staleMs": 5000,
+          "requestTimeoutMs": 2000,
+          "maxInflight": 2
+        },
+        "capabilities": {
+          "guard": true,
+          "supervisor": true,
+          "write": true
+        }
+      }
+    },
+    "real-route": {
+      "status": "pass",
+      "evidence": {
+        "provider": "deepseek-account",
+        "model": "deepseek-flash",
+        "reasoningEffort": "off",
+        "maxTokens": 2048
+      }
+    },
+    "case-opened": {
+      "status": "pass",
+      "evidence": {
+        "opened": 1
+      }
+    },
+    "wake-recorded": {
+      "status": "pass",
+      "evidence": {
+        "wakes": 1
+      }
+    },
+    "decision-produced": {
+      "status": "pass",
+      "evidence": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "generation": 1,
+        "action": "coach",
+        "confidence": 0.82,
+        "reason": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient act",
+        "accepted": true,
+        "code": null,
+        "errors": null,
+        "requiresHuman": false,
+        "actionId": "act_40077aa4487e"
+      }
+    },
+    "action-chain": {
+      "status": "pass",
+      "evidence": {
+        "intended": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "target": {
+            "kind": "swarm_run",
+            "id": "swarm_m4"
+          },
+          "evidenceRefs": [
+            "ev_swarm_budget_run:runId=swarm_m4:pressure"
+          ]
+        },
+        "executed": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "ok": true,
+          "result": {
+            "ok": true,
+            "kind": "steer",
+            "httpStatus": 200,
+            "error": null,
+            "data": {
+              "swarmId": "swarm_m4",
+              "runId": "swarm_m4",
+              "goal": "M2 supervised probe",
+              "repo": "C:/tmp/repo",
+              "topology": "mesh",
+              "mode": "swarm",
+              "status": "running",
+              "round": 1,
+              "concurrencyLimit": 2,
+              "createdAt": 1794629920489,
+              "updatedAt": 1794629929090,
+              "endedAt": null,
+              "recovered": false,
+              "convergedReason": null,
+              "baseCommit": "",
+              "gateCommands": [],
+              "workspace": {
+                "enabled": false,
+                "integrationBranch": null,
+                "degraded": 0,
+                "conflicts": 0
+              },
+              "dispatch": {
+                "auto": false,
+                "active": 1,
+                "parentBound": true
+              },
+              "preflight": null,
+              "convergence": {
+                "converged": false,
+                "openTasks": 1,
+                "budgetRatio": 0.81,
+                "budgetExhausted": false
+              },
+              "stats": {
+                "members": 2,
+                "tasks": 1,
+                "merged": 0,
+                "failed": 0,
+                "active": 1,
+                "boardEntries": 0,
+                "events": 3
+              },
+              "budget": {
+                "limits": {
+                  "runTokens": 1000000,
+                  "runUsd": 0,
+                  "runWallMs": 0,
+                  "taskTokens": 400000,
+                  "memberTokens": 800000
+                },
+                "run": {
+                  "tokens": 810000,
+                  "reservedTokens": 0,
+                  "calls": 3,
+                  "usd": 0,
+                  "reservedUsd": 0,
+                  "wallMs": 0
+                },
+                "tasks": {},
+                "members": {},
+                "reservations": 0
+              },
+              "members": [
+                {
+                  "id": "member_queen",
+                  "name": "queen",
+                  "role": "queen",
+                  "model": "inherit",
+                  "status": "busy",
+                  "load": 0,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794629920489,
+                  "lastWinRound": 0,
+                  "skills": []
+                },
+                {
+                  "id": "member_worker",
+                  "name": "worker-1",
+                  "role": "worker",
+                  "model": "fast",
+                  "status": "busy",
+                  "load": 1,
+                  "stats": {
+                    "won": 0,
+                    "done": 0,
+                    "failed": 0
+                  },
+                  "joinedAt": 1794629920489,
+                  "lastWinRound": 0,
+                  "skills": [
+                    ".js"
+                  ]
+                }
+              ],
+              "tasks": [
+                {
+                  "id": "task_1",
+                  "title": "probe task",
+                  "state": "working",
+                  "assignee": "member_worker"
+                }
+              ]
+            }
+          }
+        },
+        "verified": {
+          "key": "40077aa4487edc6f3651a4f8c94525ec",
+          "actionId": "act_40077aa4487e",
+          "kind": "coach",
+          "ok": true,
+          "detail": {
+            "status": "running"
+          }
+        }
+      }
+    },
+    "usage-capped": {
+      "status": "pass",
+      "evidence": {
+        "spent": 9958,
+        "budget": 80000
+      }
+    },
+    "disarmed": {
+      "status": "pass",
+      "evidence": {
+        "disarmed": 1
+      }
+    }
+  },
+  "decision": {
+    "caseId": "case_d6fd4fb5dca94ef8",
+    "generation": 1,
+    "action": "coach",
+    "confidence": 0.82,
+    "reason": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient act",
+    "accepted": true,
+    "code": null,
+    "errors": null,
+    "requiresHuman": false,
+    "actionId": "act_40077aa4487e"
+  },
+  "timedOut": null,
+  "usage": {
+    "caseId": "case_d6fd4fb5dca94ef8",
+    "spent": 9958,
+    "reserve": 50000,
+    "calls": 3
+  },
+  "calls": [],
+  "llm": [
+    {
+      "sessionId": "session-478c7f8b-31c0-4256-82a3-eca280944984",
+      "call": 1,
+      "toolNames": [
+        "create_goal",
+        "edit",
+        "get_goal",
+        "glob",
+        "grep",
+        "job_kill",
+        "job_list",
+        "job_output",
+        "list_agents",
+        "pwsh",
+        "read",
+        "read_image",
+        "send_message",
+        "skill",
+        "subagent",
+        "subagent_fork",
+        "todo_write",
+        "update_goal",
+        "wait_agent",
+        "watch_arm",
+        "watch_disarm",
+        "watch_report",
+        "watch_status",
+        "web_fetch",
+        "web_search",
+        "workflow",
+        "working_directory",
+        "write"
+      ],
+      "hasToolResult": false,
+      "at": "2026-11-14T04:18:40.694Z"
+    },
+    {
+      "sessionId": "session-478c7f8b-31c0-4256-82a3-eca280944984",
+      "call": 2,
+      "toolNames": [
+        "create_goal",
+        "edit",
+        "get_goal",
+        "glob",
+        "grep",
+        "job_kill",
+        "job_list",
+        "job_output",
+        "list_agents",
+        "pwsh",
+        "read",
+        "read_image",
+        "send_message",
+        "skill",
+        "subagent",
+        "subagent_fork",
+        "todo_write",
+        "update_goal",
+        "wait_agent",
+        "watch_arm",
+        "watch_disarm",
+        "watch_report",
+        "watch_status",
+        "web_fetch",
+        "web_search",
+        "workflow",
+        "working_directory",
+        "write"
+      ],
+      "hasToolResult": true,
+      "at": "2026-11-14T04:18:40.739Z"
+    },
+    {
+      "sessionId": "session-478c7f8b-31c0-4256-82a3-eca280944984",
+      "call": 3,
+      "toolNames": [
+        "create_goal",
+        "edit",
+        "get_goal",
+        "glob",
+        "grep",
+        "job_kill",
+        "job_list",
+        "job_output",
+        "list_agents",
+        "pwsh",
+        "read",
+        "read_image",
+        "send_message",
+        "skill",
+        "subagent",
+        "subagent_fork",
+        "todo_write",
+        "update_goal",
+        "wait_agent",
+        "watch_arm",
+        "watch_disarm",
+        "watch_report",
+        "watch_status",
+        "web_fetch",
+        "web_search",
+        "workflow",
+        "working_directory",
+        "write"
+      ],
+      "hasToolResult": true,
+      "at": "2026-11-14T04:18:49.421Z"
+    }
+  ],
+  "events": [
+    {
+      "seq": 1,
+      "type": "watch/armed",
+      "at": "2026-11-14T04:18:40.717Z",
+      "payload": {
+        "mode": "supervised",
+        "requestedMode": "supervised",
+        "runId": "swarm_m4",
+        "reserve": 50000,
+        "supervisor": "lazy",
+        "watchName": "ow-12c33ad31ce3",
+        "agentOptions": {
+          "provider": "deepseek-account",
+          "model": "deepseek-flash",
+          "reasoningEffort": "off",
+          "maxTokens": 2048
+        },
+        "sampling": {
+          "swarmEventMs": 500,
+          "swarmSnapshotMs": 500,
+          "pressureMs": 500,
+          "fishMs": 500,
+          "staleMs": 5000,
+          "requestTimeoutMs": 2000,
+          "maxInflight": 2
+        },
+        "capabilities": {
+          "guard": true,
+          "supervisor": true,
+          "write": true
+        }
+      }
+    },
+    {
+      "seq": 2,
+      "type": "watch/sample",
+      "at": "2026-11-14T04:18:40.719Z",
+      "payload": {
+        "status": "running",
+        "round": 1,
+        "budget": {
+          "limit": 1000000,
+          "spent": 810000,
+          "ratio": 0.81
+        },
+        "cases": {
+          "open": 0
+        },
+        "freshness": {
+          "swarm": {
+            "ok": true,
+            "at": "2026-11-14T04:18:40.712Z",
+            "ageMs": 7,
+            "error": null
+          },
+          "pressure": {
+            "ok": false,
+            "at": "2026-11-14T04:18:40.712Z",
+            "ageMs": 7,
+            "error": "HTTP 404"
+          },
+          "fish": {
+            "ok": false,
+            "at": "2026-11-14T04:18:40.712Z",
+            "ageMs": 7,
+            "error": "HTTP 404"
+          }
+        }
+      }
+    },
+    {
+      "seq": 3,
+      "type": "watch/case/opened",
+      "at": "2026-11-14T04:18:41.234Z",
+      "payload": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "severity": "L2",
+        "code": "budget_pressure",
+        "title": "run budget at 81.0% — pressure threshold",
+        "scope": {
+          "kind": "run",
+          "id": "run"
+        },
+        "evidenceIds": [
+          "ev_swarm_budget_run:runId=swarm_m4:pressure"
+        ],
+        "reopens": null
+      }
+    },
+    {
+      "seq": 4,
+      "type": "watch/wake",
+      "at": "2026-11-14T04:18:41.235Z",
+      "payload": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "generation": 1,
+        "wakeIndex": 1,
+        "budgetLeft": 50000,
+        "severity": "L2",
+        "code": "budget_pressure"
+      }
+    },
+    {
+      "seq": 5,
+      "type": "watch/attach",
+      "at": "2026-11-14T04:18:41.262Z",
+      "payload": {
+        "agentId": "5a33781d-7289-46ce-814b-8db037140e9d",
+        "name": "ow-12c33ad31ce3",
+        "inherited": 33,
+        "registered": [
+          "watch_case",
+          "watch_evidence",
+          "watch_decide"
+        ]
+      }
+    },
+    {
+      "seq": 6,
+      "type": "watch/action/intended",
+      "at": "2026-11-14T04:18:49.088Z",
+      "payload": {
+        "key": "40077aa4487edc6f3651a4f8c94525ec",
+        "actionId": "act_40077aa4487e",
+        "kind": "coach",
+        "target": {
+          "kind": "swarm_run",
+          "id": "swarm_m4"
+        },
+        "evidenceRefs": [
+          "ev_swarm_budget_run:runId=swarm_m4:pressure"
+        ]
+      }
+    },
+    {
+      "seq": 7,
+      "type": "watch/action/executed",
+      "at": "2026-11-14T04:18:49.091Z",
+      "payload": {
+        "key": "40077aa4487edc6f3651a4f8c94525ec",
+        "actionId": "act_40077aa4487e",
+        "kind": "coach",
+        "ok": true,
+        "result": {
+          "ok": true,
+          "kind": "steer",
+          "httpStatus": 200,
+          "error": null,
+          "data": {
+            "swarmId": "swarm_m4",
+            "runId": "swarm_m4",
+            "goal": "M2 supervised probe",
+            "repo": "C:/tmp/repo",
+            "topology": "mesh",
+            "mode": "swarm",
+            "status": "running",
+            "round": 1,
+            "concurrencyLimit": 2,
+            "createdAt": 1794629920489,
+            "updatedAt": 1794629929090,
+            "endedAt": null,
+            "recovered": false,
+            "convergedReason": null,
+            "baseCommit": "",
+            "gateCommands": [],
+            "workspace": {
+              "enabled": false,
+              "integrationBranch": null,
+              "degraded": 0,
+              "conflicts": 0
+            },
+            "dispatch": {
+              "auto": false,
+              "active": 1,
+              "parentBound": true
+            },
+            "preflight": null,
+            "convergence": {
+              "converged": false,
+              "openTasks": 1,
+              "budgetRatio": 0.81,
+              "budgetExhausted": false
+            },
+            "stats": {
+              "members": 2,
+              "tasks": 1,
+              "merged": 0,
+              "failed": 0,
+              "active": 1,
+              "boardEntries": 0,
+              "events": 3
+            },
+            "budget": {
+              "limits": {
+                "runTokens": 1000000,
+                "runUsd": 0,
+                "runWallMs": 0,
+                "taskTokens": 400000,
+                "memberTokens": 800000
+              },
+              "run": {
+                "tokens": 810000,
+                "reservedTokens": 0,
+                "calls": 3,
+                "usd": 0,
+                "reservedUsd": 0,
+                "wallMs": 0
+              },
+              "tasks": {},
+              "members": {},
+              "reservations": 0
+            },
+            "members": [
+              {
+                "id": "member_queen",
+                "name": "queen",
+                "role": "queen",
+                "model": "inherit",
+                "status": "busy",
+                "load": 0,
+                "stats": {
+                  "won": 0,
+                  "done": 0,
+                  "failed": 0
+                },
+                "joinedAt": 1794629920489,
+                "lastWinRound": 0,
+                "skills": []
+              },
+              {
+                "id": "member_worker",
+                "name": "worker-1",
+                "role": "worker",
+                "model": "fast",
+                "status": "busy",
+                "load": 1,
+                "stats": {
+                  "won": 0,
+                  "done": 0,
+                  "failed": 0
+                },
+                "joinedAt": 1794629920489,
+                "lastWinRound": 0,
+                "skills": [
+                  ".js"
+                ]
+              }
+            ],
+            "tasks": [
+              {
+                "id": "task_1",
+                "title": "probe task",
+                "state": "working",
+                "assignee": "member_worker"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "seq": 8,
+      "type": "watch/action/verified",
+      "at": "2026-11-14T04:18:49.092Z",
+      "payload": {
+        "key": "40077aa4487edc6f3651a4f8c94525ec",
+        "actionId": "act_40077aa4487e",
+        "kind": "coach",
+        "ok": true,
+        "detail": {
+          "status": "running"
+        }
+      }
+    },
+    {
+      "seq": 9,
+      "type": "watch/decision",
+      "at": "2026-11-14T04:18:49.093Z",
+      "payload": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "generation": 1,
+        "action": "coach",
+        "confidence": 0.82,
+        "reason": "81% of 1M, only 1pp over the L2 threshold, with the 50k reserve unspent and the run healthy (1 task in flight, nothing queued, blocked or failed). This is early warning, not an emergency: throttle or pause would add coordination cost and risk stalling the only in-flight task. Smallest sufficient act",
+        "accepted": true,
+        "code": null,
+        "errors": null,
+        "requiresHuman": false,
+        "actionId": "act_40077aa4487e"
+      }
+    },
+    {
+      "seq": 10,
+      "type": "watch/usage",
+      "at": "2026-11-14T04:18:49.094Z",
+      "payload": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "spent": 9958,
+        "reserve": 50000,
+        "calls": 3
+      }
+    },
+    {
+      "seq": 11,
+      "type": "watch/case/closed",
+      "at": "2026-11-14T04:18:49.095Z",
+      "payload": {
+        "caseId": "case_d6fd4fb5dca94ef8",
+        "reason": "mitigated",
+        "note": "watch officer issued coach",
+        "actions": 1
+      }
+    },
+    {
+      "seq": 12,
+      "type": "watch/shift",
+      "at": "2026-11-14T04:18:49.390Z",
+      "payload": {
+        "shiftId": "shift-0001",
+        "reason": "M4 real-watch probe complete",
+        "window": {
+          "from": "2026-11-14T04:18:40.717Z",
+          "to": "2026-11-14T04:18:49.389Z"
+        },
+        "summary": {
+          "mode": "supervised",
+          "budget": {
+            "limit": 1000000,
+            "spent": 810000,
+            "ratio": 0.81,
+            "reserve": 50000,
+            "supervisorUsed": 9958
+          },
+          "supervisorSpent": 9958,
+          "cases": {
+            "total": 1,
+            "open": 0
+          },
+          "wakes": 1,
+          "timeouts": 0
+        }
+      }
+    },
+    {
+      "seq": 13,
+      "type": "watch/disarmed",
+      "at": "2026-11-14T04:18:49.390Z",
+      "payload": {
+        "reason": "M4 real-watch probe complete",
+        "closedCases": [],
+        "shiftId": "shift-0001",
+        "supervisorSpent": 9958
+      }
+    }
+  ],
+  "errors": [
+    "host exit 1"
+  ]
+}
