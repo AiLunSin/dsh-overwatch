@@ -42,6 +42,8 @@ export const DEFAULT_CONFIG = Object.freeze({
   policy: {
     cooldownMs: 900_000,
     maxAutoInterventions: 5,
+    approvalTtlMs: 3_600_000,
+    resolveMs: 60_000,
     twoSignalRule: true,
     throttleMinutes: 10,
     autopilot: {
@@ -65,6 +67,7 @@ export const DEFAULT_CONFIG = Object.freeze({
     reviewDeadlockMs: 900_000,
     maxResultTokens: 12_000,
     maxOpenCases: 20,
+    maxRunMs: 28_800_000,
   },
   storage: {
     dataDir: '',
@@ -141,7 +144,8 @@ export function resolveConfig(raw, options = {}) {
   }
   assertInteger(config.sampling, 'maxInflight', 1)
 
-  for (const key of ['cooldownMs', 'maxAutoInterventions']) assertInteger(config.policy, key, 0)
+  for (const key of ['cooldownMs', 'maxAutoInterventions', 'resolveMs']) assertInteger(config.policy, key, 0)
+  assertInteger(config.policy, 'approvalTtlMs', 60_000)
   assertInteger(config.policy, 'throttleMinutes', 1)
   if (config.policy.throttleMinutes > 60) fail('policy.throttleMinutes must be at most 60')
   assertBoolean(config.policy, 'twoSignalRule')
@@ -153,6 +157,7 @@ export function resolveConfig(raw, options = {}) {
   for (const key of ['failureStreak', 'gateFailures', 'conflictStorm', 'stallMs', 'reviewDeadlockMs', 'maxResultTokens', 'maxOpenCases']) {
     assertInteger(config.thresholds, key, 1)
   }
+  assertInteger(config.thresholds, 'maxRunMs', 0)
   if (config.thresholds.budgetPressure > config.thresholds.budgetPause) {
     fail('thresholds.budgetPressure must not exceed thresholds.budgetPause')
   }

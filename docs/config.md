@@ -84,7 +84,8 @@ One timer per run drives all due sources; failures back off exponentially.
 | Key | Type | Default | Notes |
 | --- | --- | --- | --- |
 | `cooldownMs` | integer ≥0 | `900000` | same case+action suppression |
-| `maxAutoInterventions` | integer ≥0 | `5` | soft guard actions per run |
+| `maxAutoInterventions` | integer ≥0 | `5` | soft actions per run (guard + watch) |
+| `resolveMs` | integer ≥0 | `60000` | auto-resolve a soft case after its signal has been absent this long |
 | `twoSignalRule` | boolean | `true` | L2 single signal needs two ticks |
 | `throttleMinutes` | integer 1–60 | `10` | guard-resume window |
 | `autopilot.throttle` | boolean | `true` | guard throttle switch |
@@ -93,6 +94,7 @@ One timer per run drives all due sources; failures back off exponentially.
 | `autopilot.abortOnHardLimit` | boolean | `true` | abort at 100% |
 | `autopilot.budgetAdjust` | boolean | `false` | reserved; human-only |
 | `autopilot.restore` | boolean | `false` | reserved; human-only |
+| `approvalTtlMs` | integer ≥60000 | `3600000` | pending approval expires after this; a challenge token is valid for 5 minutes |
 
 `pause` (watch) and `pauseOnHardLimit` (guard) are separate on purpose: enabling
 the hard pause must not silently allow a model-driven pause.
@@ -112,6 +114,7 @@ the hard pause must not silently allow a model-driven pause.
 | `reviewDeadlockMs` | integer ≥1 | `900000` |
 | `maxResultTokens` | integer ≥1 | `12000` |
 | `maxOpenCases` | integer ≥1 | `20` |
+| `maxRunMs` | integer ≥0 | `28800000` (8h; 0 disables) |
 
 `budgetPressure` must not exceed `budgetPause`; `contextExit` must not exceed
 `contextPressure`.
@@ -123,3 +126,18 @@ the hard pause must not silently allow a model-driven pause.
 | `dataDir` | string | `''` (`$DSH_HOME/overwatch`) |
 | `retentionDays` | integer ≥1 | `90` |
 | `maxBytesPerRun` | integer ≥1024 | `52428800` (50 MB) |
+
+The service sweeps archived runs on open and then every 6 hours. A run is purged
+only when it is not live, not locked, its chain verifies, and its newest mtime is
+older than `retentionDays`; a `watch/service/retention` tombstone is written
+before deletion. The token-protected `POST /runs/:id/purge` with
+`{"confirm":"PURGE <runId>"}` remains available for an explicit removal.
+
+## Environment
+
+| Variable | Effect |
+| --- | --- |
+| `OVERWATCH_CHAIN_KEY` | non-empty => new chain events use HMAC-SHA256 (`alg: "hmac-sha256"`); readers without the key fail with `EHMACKEY` and an HMAC→plain downgrade fails with `EALG` |
+
+External anchors are written to `<dataDir>/anchors/<runId>.jsonl` every 64
+appends and on close; `doctor` compares them with the verified chain.

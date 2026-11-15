@@ -10,7 +10,7 @@
 
 import { readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
-import { atomicWriteJson, ensureDir, newId, sha256 } from './util.js'
+import { atomicWriteJson, ensureDir, newId, scrubText, sha256 } from './util.js'
 
 /** @typedef {'L0' | 'L1' | 'L2' | 'L3' | 'L4'} Severity */
 
@@ -71,6 +71,7 @@ export function caseKey(runId, signal) {
  * @property {Array<Record<string, unknown>>} actions
  * @property {string} openedAt
  * @property {string} updatedAt
+ * @property {string} lastSeenAt
  * @property {string | null} closedAt
  * @property {string | null} closeReason
  * @property {string | null} note
@@ -120,6 +121,7 @@ export class CaseManager {
       try {
         const record = JSON.parse(readFileSync(path.join(this.dir, name), 'utf8'))
         if (record?.runId !== this.runId || typeof record.id !== 'string') continue
+        record.lastSeenAt = record.lastSeenAt ?? record.updatedAt ?? record.openedAt ?? null
         this.cases.set(record.id, record)
         const previous = this.byKey.get(record.key)
         if (record.state !== 'closed' && previous === undefined) this.byKey.set(record.key, record.id)
@@ -178,6 +180,7 @@ export class CaseManager {
       if (existing !== undefined) {
         const record = this.cases.get(existing)
         if (record !== undefined && record.state !== 'closed') {
+          record.lastSeenAt = at
           if (this.#merge(record, signal, at)) updated.push(record)
           continue
         }
@@ -211,7 +214,27 @@ export class CaseManager {
 
     // A pending L2 that stops being reported must restart its two-tick count.
     for (const key of [...this.pending.keys()]) if (!seen.has(key)) this.pending.delete(key)
-    return { opened, updated, closed: [], suppressed }
+
+    // Resolve soft cases whose signal has been absent for the configured
+    // window. Never do this while the swarm source is unavailable/stale: an
+    // outage is not evidence that the condition recovered, and never while an
+    // action is still being verified.
+    const closed = []
+    const resolveMs = Number(this.config.policy.resolveMs ?? 60_000)
+    const swarmFresh = input.snapshot?.freshness?.swarm
+    const canResolve = swarmFresh === undefined || swarmFresh === null
+      || (swarmFresh.ok !== false && swarmFresh.stale !== true)
+    if (canResolve && resolveMs >= 0) {
+      for (const record of this.cases.values()) {
+        if (record.state === 'closed' || record.state === 'acting' || record.state === 'verifying') continue
+        if (record.severity === 'L4' || seen.has(record.key)) continue
+        const lastSeen = Date.parse(record.lastSeenAt ?? record.updatedAt ?? record.openedAt ?? '')
+        if (!Number.isFinite(lastSeen) || now - lastSeen < resolveMs) continue
+        const result = this.close(record.id, 'resolved', `signal absent for ${Math.round((now - lastSeen) / 1000)}s`)
+        if (result !== null) closed.push(result)
+      }
+    }
+    return { opened, updated, closed, suppressed }
   }
 
   /**
@@ -304,6 +327,7 @@ export class CaseManager {
       actions: [],
       openedAt: at,
       updatedAt: at,
+      lastSeenAt: at,
       closedAt: null,
       closeReason: null,
       note: null,
@@ -386,7 +410,7 @@ export class CaseManager {
   /** @param {string} id @param {{ id: string, kind: string, state?: string, minutes?: number }} action */
   recordAction(id, action) {
     const record = this.cases.get(id)
-    if (record === undefined) return null
+    if (record === undefined || record.state === 'closed') return null
     const at = new Date(this.clock()).toISOString()
     record.actions.push({ ...action, state: action.state ?? 'intended', at })
     record.state = 'acting'
@@ -398,6 +422,7 @@ export class CaseManager {
   /** @param {string} id @param {string} actionId @param {string} state @param {Record<string, unknown>} [detail] */
   recordActionState(id, actionId, state, detail = {}) {
     const record = this.cases.get(id)
+    if (record === undefined || record.state === 'closed') return null
     const action = record?.actions.find(entry => entry.id === actionId)
     if (record === undefined || action === undefined) return null
     action.state = state
@@ -411,10 +436,32 @@ export class CaseManager {
   /** @param {string} id @param {Record<string, unknown>} decision */
   recordDecision(id, decision) {
     const record = this.cases.get(id)
-    if (record === undefined) return null
+    if (record === undefined || record.state === 'closed') return null
     record.decisions.push(decision)
     record.updatedAt = new Date(this.clock()).toISOString()
     this.#write(record)
+    return record
+  }
+
+  /**
+   * Invalidate a wake that is still in flight. The executor compares the
+   * decision's generation with the case record, so a human takeover cannot be
+   * overwritten by a late model decision.
+   * @param {string} id
+   * @returns {CaseRecord | null}
+   */
+  bumpGeneration(id) {
+    const record = this.cases.get(id)
+    if (record === undefined || record.state === 'closed') return null
+    record.generation = (Number.isSafeInteger(record.generation) ? record.generation : 1) + 1
+    record.updatedAt = new Date(this.clock()).toISOString()
+    this.#write(record)
+    this.store.append({
+      type: 'watch/case/updated',
+      actor: 'human',
+      causationRef: { kind: 'case', caseId: id },
+      payload: { caseId: id, generation: record.generation, reason: 'human takeover invalidated an in-flight decision' },
+    })
     return record
   }
 
@@ -460,6 +507,17 @@ export class CaseManager {
   /** @param {CaseRecord} record */
   #write(record) {
     ensureDir(this.dir)
+    // The materialized view is read by the API and the panel; scrub it with the
+    // same rules as the hash-chained log instead of persisting raw prose.
+    record.title = scrubText(String(record.title ?? ''))
+    if (typeof record.note === 'string') record.note = scrubText(record.note)
+    for (const decision of record.decisions) {
+      if (typeof decision.reason === 'string') decision.reason = scrubText(decision.reason)
+      if (typeof decision.note === 'string') decision.note = scrubText(decision.note)
+    }
+    for (const action of record.actions) {
+      if (typeof action.detail === 'string') action.detail = scrubText(action.detail)
+    }
     atomicWriteJson(path.join(this.dir, `${record.id}.json`), record)
   }
 }

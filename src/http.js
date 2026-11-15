@@ -18,6 +18,19 @@ export function isLoopback(req) {
 }
 
 /**
+ * DNS-rebinding defense: the Host header must name the loopback interface, not
+ * an attacker-controlled domain that currently resolves to 127.0.0.1.
+ * @param {string | undefined} host
+ * @returns {boolean}
+ */
+export function isLoopbackHost(host) {
+  if (typeof host !== 'string' || host === '') return false
+  if (host.startsWith('[')) return /^\[::1\](?::\d+)?$/i.test(host)
+  const name = host.split(':')[0].toLowerCase()
+  return name === '127.0.0.1' || name === 'localhost'
+}
+
+/**
  * @param {import('node:http').IncomingMessage} req
  * @param {string} origin expected `http://host:port`
  * @param {string} token configured write token (empty disables writes)
@@ -56,6 +69,10 @@ export function createNodeHandler(options) {
     try {
       if (!isLoopback(req)) {
         sendJson(res, 403, errorBody('LOOPBACK_ONLY', 'overwatch API is local-only'), head)
+        return
+      }
+      if (!isLoopbackHost(req.headers.host)) {
+        sendJson(res, 403, errorBody('HOST_REJECTED', 'overwatch API requires a loopback Host header'), head)
         return
       }
       const method = (req.method ?? 'GET').toUpperCase()
@@ -189,6 +206,23 @@ async function handleRead(input) {
     sendJson(res, 200, { ok: true, data: { ...detail, asOf: asOfForRun } }, head)
     return
   }
+  if (rest.length === 3 && rest[2] === 'approvals') {
+    const state = url.searchParams.get('state') ?? 'all'
+    const limit = intParam(url, 'limit', 100, 1, 200)
+    const approvals = service.approvals(runId, { state, limit })
+    sendJson(res, 200, { ok: true, data: { approvals, asOf: asOfForRun } }, head)
+    return
+  }
+  if (rest.length === 4 && rest[2] === 'approvals') {
+    const approvalId = validateParam(rest[3], 'approvalId')
+    const approval = service.approvalDetail(runId, approvalId)
+    if (approval === null) {
+      sendJson(res, 404, errorBody('APPROVAL_NOT_FOUND', `approval ${approvalId} not found`), head)
+      return
+    }
+    sendJson(res, 200, { ok: true, data: { approval, asOf: asOfForRun } }, head)
+    return
+  }
   sendJson(res, 404, errorBody('NOT_FOUND', 'unknown overwatch route'), head)
 }
 
@@ -225,14 +259,49 @@ async function handleWrite(input) {
     sendJson(res, 200, { ok: true, data: { case: record } })
     return
   }
+  if (action === 'cases' && rest.length === 5 && rest[4] === 'close') {
+    const caseId = validateParam(rest[3], 'caseId')
+    const reason = typeof body.reason === 'string' && body.reason !== '' ? body.reason : 'resolved'
+    const record = service.closeCase(runId, caseId, reason, typeof body.note === 'string' ? body.note : '')
+    sendJson(res, 200, { ok: true, data: { case: record } })
+    return
+  }
+  if (action === 'resume' && rest.length === 3) {
+    const result = await service.resume(runId, typeof body.reason === 'string' ? body.reason : 'resumed via HTTP')
+    sendJson(res, 200, { ok: true, data: result })
+    return
+  }
   if (action === 'purge' && rest.length === 3) {
-    sendJson(res, 501, errorBody('NOT_IMPLEMENTED', 'purge is not implemented in M1; data is retained'))
+    const result = service.purge(runId, {
+      confirm: body.confirm,
+      reason: typeof body.reason === 'string' ? body.reason : 'purged via HTTP',
+    })
+    sendJson(res, 200, { ok: true, data: result })
     return
   }
   if (action === 'restores' && rest.length === 3) {
     const result = service.recordRestore(runId, body)
     sendJson(res, 200, { ok: true, data: result })
     return
+  }
+  if (action === 'approvals' && rest.length === 5) {
+    const approvalId = validateParam(rest[3], 'approvalId')
+    if (rest[4] === 'challenge') {
+      const result = service.challengeApproval(runId, approvalId)
+      sendJson(res, 200, { ok: true, data: result })
+      return
+    }
+    if (rest[4] === 'approve') {
+      if (typeof body.token !== 'string' || body.token === '') throw badRequest('token is required')
+      const result = await service.approveApproval(runId, approvalId, body.token, typeof body.note === 'string' ? body.note : '')
+      sendJson(res, 200, { ok: true, data: result })
+      return
+    }
+    if (rest[4] === 'reject') {
+      const result = service.rejectApproval(runId, approvalId, typeof body.reason === 'string' ? body.reason : '')
+      sendJson(res, 200, { ok: true, data: result })
+      return
+    }
   }
   sendJson(res, 404, errorBody('NOT_FOUND', 'unknown overwatch write route'))
 }
@@ -263,7 +332,12 @@ async function readJsonBody(req) {
 
 /** @param {string} raw @param {string} name */
 function validateParam(raw, name) {
-  const value = decodeURIComponent(raw)
+  let value
+  try {
+    value = decodeURIComponent(raw)
+  } catch {
+    throw badRequest(`${name} contains invalid percent-encoding`)
+  }
   if (!RUN_ID.test(value)) throw badRequest(`${name} must match [A-Za-z0-9_-]{1,200}`)
   return value
 }
@@ -286,9 +360,14 @@ function sinceParam(url) {
   return raw
 }
 
-/** fishkeeper source ids allow dots and colons as well. @param {string} raw */
+/** @param {string} raw */
 function validateFishSourceId(raw) {
-  const value = decodeURIComponent(raw)
+  let value
+  try {
+    value = decodeURIComponent(raw)
+  } catch {
+    throw badRequest('sourceId contains invalid percent-encoding')
+  }
   if (!/^[A-Za-z0-9._:-]{1,200}$/.test(value)) throw badRequest('sourceId must match [A-Za-z0-9._:-]{1,200}')
   return value
 }
@@ -305,9 +384,11 @@ function intParam(url, name, fallback, min, max = Number.MAX_SAFE_INTEGER) {
 /** @param {string} code */
 function statusFor(code) {
   if (code === 'INVALID_ARGUMENT' || code === 'INVALID_BODY' || code.startsWith('INVALID_')) return 400
-  if (code === 'RESTORE_TOKEN_REJECTED' || code === 'INVALID_RESTORE') return 400
-  if (code === 'NOT_FOUND' || code === 'RUN_NOT_FOUND' || code === 'CASE_NOT_FOUND' || code === 'FISH_SOURCE_NOT_FOUND') return 404
-  if (code === 'ALREADY_ARMED' || code === 'RUN_NOT_ARMED' || code === 'RUN_NOT_RUNNING' || code === 'CASE_CLOSED' || code === 'ELOCKED' || code === 'SUPERVISOR_UNAVAILABLE') return 409
+  if (code === 'RESTORE_TOKEN_REJECTED' || code === 'INVALID_RESTORE' || code === 'CONFIRM_REQUIRED') return 400
+  if (code === 'NOT_FOUND' || code === 'RUN_NOT_FOUND' || code === 'CASE_NOT_FOUND' || code === 'FISH_SOURCE_NOT_FOUND' || code === 'APPROVAL_NOT_FOUND') return 404
+  if (code === 'ALREADY_ARMED' || code === 'RUN_NOT_ARMED' || code === 'RUN_ARMED' || code === 'RUN_NOT_RUNNING' || code === 'CASE_CLOSED' || code === 'ELOCKED' || code === 'SUPERVISOR_UNAVAILABLE' || code === 'CAPACITY_CONFLICT' || code === 'APPROVAL_CONFLICT' || code === 'APPROVAL_TOKEN_EXPIRED') return 409
+  if (code === 'APPROVAL_TOKEN_REQUIRED' || code === 'APPROVAL_TOKEN_INVALID' || code === 'APPROVAL_EXPIRED') return 400
+  if (code === 'WRITE_DISABLED' || code === 'AGENT_REQUIRED' || code === 'SUPERVISOR_DISABLED' || code === 'SUBAGENTS_UNAVAILABLE' || code === 'AUTO_INTERVENTION_LIMIT') return 403
   if (code === 'SWARM_UNAVAILABLE' || code === 'WEB_UNAVAILABLE' || code === 'SERVICE_LOG_CLOSED') return 503
   if (code === 'BODY_TOO_LARGE') return 413
   return 500

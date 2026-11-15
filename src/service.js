@@ -7,13 +7,14 @@
  * @module dsh-overwatch/service
  */
 
-import { existsSync, readdirSync, readFileSync, statfsSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, rmSync, statfsSync, statSync, unlinkSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { readApprovalFiles } from './approvals.js'
 import { readFishIndex, resolveFishDataDir } from './fish-index.js'
 import { createPorts } from './ports/index.js'
 import { RunSupervisor } from './run.js'
-import { readWatchLog } from './store.js'
-import { atomicWriteJson, ensureDir, newId, readJson, resolveDataDir } from './util.js'
+import { readWatchLog, verifyAnchor } from './store.js'
+import { atomicWriteJson, chainKeyFromEnv, ensureDir, newId, readJson, resolveDataDir } from './util.js'
 
 const RUN_ID_PATTERN = /^[A-Za-z0-9_-]{1,200}$/
 
@@ -33,6 +34,7 @@ export class OverwatchService {
    * @param {() => number} [options.clock]
    * @param {{ info?: (msg: string) => void, warn?: (msg: string) => void }} [options.logger]
    * @param {(origin: string) => any} [options.portsFactory] test seam
+   * @param {string} [options.hmacKey] chain HMAC key; defaults to OVERWATCH_CHAIN_KEY
    */
   constructor(options) {
     this.ctx = options.ctx
@@ -47,14 +49,30 @@ export class OverwatchService {
     }))
     this.dataDir = resolveDataDir(options.config.storage)
     this.runsDir = path.join(this.dataDir, 'runs')
+    this.anchorDir = path.join(this.dataDir, 'anchors')
     this.fishDir = resolveFishDataDir(this.config.fish)
     this.instanceId = newId('ow')
+    this.hmacKey = options.hmacKey ?? chainKeyFromEnv()
     /** @type {Map<string, RunSupervisor>} */
     this.runs = new Map()
     /** @type {any} */
     this.ports = null
-    this.serviceLog = new ServiceLog({ dir: this.dataDir, runId: 'overwatch', clock: this.clock, maxBytes: this.config.storage.maxBytesPerRun })
+    /** @type {NodeJS.Timeout | null} */
+    this.retentionTimer = null
+    this.serviceLog = new ServiceLog({
+      dir: this.dataDir,
+      runId: 'overwatch',
+      clock: this.clock,
+      maxBytes: this.config.storage.maxBytesPerRun,
+      hmacKey: this.hmacKey,
+      anchorFile: path.join(this.anchorDir, 'overwatch.jsonl'),
+    })
     this.openedAt = null
+  }
+
+  /** @param {string} runId */
+  #anchorFile(runId) {
+    return path.join(this.anchorDir, `${runId}.jsonl`)
   }
 
   /** @returns {string | null} */
@@ -82,6 +100,7 @@ export class OverwatchService {
     ensureDir(this.dataDir)
     ensureDir(this.runsDir)
     ensureDir(path.join(this.dataDir, 'tmp'))
+    ensureDir(this.anchorDir)
     await this.serviceLog.open()
     if (this.serviceLog.repaired !== null) {
       this.serviceLog.append({
@@ -99,6 +118,100 @@ export class OverwatchService {
     const origin = this.upstreamOrigin()
     if (origin !== null) this.attachPorts(origin)
     this.#writeIndex()
+    this.#startRetention()
+  }
+
+  /**
+   * Automatic retention: purge only archived runs whose last evidence is older
+   * than `storage.retentionDays`, never a run this process supervises, never one
+   * held by another Host, and never one whose chain cannot be verified.
+   * @returns {{ retentionDays: number, cutoff: string, purged: string[], skipped: Array<{ runId: string, reason: string }> }}
+   */
+  retention() {
+    const days = this.config.storage.retentionDays
+    const now = this.clock()
+    const cutoff = now - days * 86_400_000
+    /** @type {string[]} */
+    const purged = []
+    /** @type {Array<{ runId: string, reason: string }>} */
+    const skipped = []
+    let names = []
+    try {
+      names = readdirSync(this.runsDir, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name)
+    } catch {
+      return { retentionDays: days, cutoff: new Date(cutoff).toISOString(), purged, skipped }
+    }
+    for (const runId of names) {
+      if (!RUN_ID_PATTERN.test(runId) || this.runs.has(runId)) continue
+      const dir = path.join(this.runsDir, runId)
+      const logFile = path.join(dir, 'watch.jsonl')
+      if (!existsSync(logFile)) {
+        skipped.push({ runId, reason: 'no watch log' })
+        continue
+      }
+      // Another Host may still be supervising this run.
+      if (existsSync(path.join(dir, `watch-${runId}.lock`))) {
+        skipped.push({ runId, reason: 'lock is held' })
+        continue
+      }
+      const { events, chain } = readWatchLog(dir, runId, { hmacKey: this.hmacKey })
+      if (!chain.ok) {
+        skipped.push({ runId, reason: 'chain is damaged' })
+        continue
+      }
+      let updated = events.at(-1)?.at ?? null
+      if (updated === null) {
+        try {
+          updated = new Date(statSync(logFile).mtimeMs).toISOString()
+        } catch {
+          skipped.push({ runId, reason: 'mtime unavailable' })
+          continue
+        }
+      }
+      const updatedMs = Date.parse(updated)
+      if (!Number.isFinite(updatedMs) || updatedMs > cutoff) continue
+      try {
+        this.serviceLog.append({
+          type: 'watch/service/retention',
+          actor: 'system',
+          payload: {
+            runId,
+            reason: `older than storage.retentionDays (${days})`,
+            retentionDays: days,
+            cutoff: new Date(cutoff).toISOString(),
+            lastEventAt: updated,
+            chain,
+            purgedAt: new Date(now).toISOString(),
+          },
+        })
+        rmSync(dir, { recursive: true, force: true })
+        purged.push(runId)
+      } catch (error) {
+        skipped.push({ runId, reason: messageOf(error) })
+      }
+    }
+    return { retentionDays: days, cutoff: new Date(cutoff).toISOString(), purged, skipped }
+  }
+
+  #startRetention() {
+    if (this.retentionTimer !== null) return
+    try {
+      const result = this.retention()
+      if (result.purged.length > 0) this.logger?.info?.(`[overwatch] retention purged ${result.purged.join(', ')}`)
+    } catch (error) {
+      this.logger?.warn?.(`[overwatch] retention scan failed: ${messageOf(error)}`)
+    }
+    const everyMs = 6 * 3_600_000
+    const timer = setInterval(() => {
+      try {
+        const result = this.retention()
+        if (result.purged.length > 0) this.logger?.info?.(`[overwatch] retention purged ${result.purged.join(', ')}`)
+      } catch (error) {
+        this.logger?.warn?.(`[overwatch] retention scan failed: ${messageOf(error)}`)
+      }
+    }, everyMs)
+    timer.unref?.()
+    this.retentionTimer = timer
   }
 
   /** @param {string} origin */
@@ -144,6 +257,8 @@ export class OverwatchService {
       dir: path.join(this.runsDir, runId),
       clock: this.clock,
       logger: this.logger,
+      hmacKey: this.hmacKey,
+      anchorFile: this.#anchorFile(runId),
     })
     try {
       await supervisor.open()
@@ -245,7 +360,7 @@ export class OverwatchService {
     }
     for (const runId of names) {
       if (summaries.has(runId)) continue
-      const archive = readArchive(this.runsDir, runId, this.clock)
+      const archive = readArchive(this.runsDir, runId, this.clock, this.hmacKey)
       summaries.set(runId, {
         runId,
         armed: false,
@@ -267,7 +382,7 @@ export class OverwatchService {
     const supervisor = this.runs.get(runId)
     if (supervisor !== undefined) return supervisor.snapshot()
     if (!existsSync(dir)) return null
-    return readArchiveView(dir, runId, this.clock)
+    return readArchiveView(dir, runId, this.clock, this.hmacKey)
   }
 
   /** @param {string} runId @param {{ state?: string, limit?: number }} [query] */
@@ -288,7 +403,7 @@ export class OverwatchService {
     if (!existsSync(dir)) throw fail('RUN_NOT_FOUND', `run ${runId} not found`)
     const record = readCaseFiles(dir).find(entry => entry.id === caseId) ?? null
     if (record === null) return null
-    return { case: record, timeline: archiveTimeline(dir, runId, { limit: 50 }).events }
+    return { case: record, timeline: archiveTimeline(dir, runId, { limit: 50 }, this.hmacKey).events }
   }
 
   /** @param {string} runId @param {{ since?: number, limit?: number }} [query] */
@@ -297,7 +412,7 @@ export class OverwatchService {
     if (supervisor !== undefined) return supervisor.timeline(query)
     const dir = this.#dir(runId)
     if (!existsSync(dir)) throw fail('RUN_NOT_FOUND', `run ${runId} not found`)
-    return archiveTimeline(dir, runId, query)
+    return archiveTimeline(dir, runId, query, this.hmacKey)
   }
 
   /** @param {string} runId @param {string} caseId @param {string} [note] */
@@ -305,6 +420,106 @@ export class OverwatchService {
     const supervisor = this.runs.get(runId)
     if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm to acknowledge its cases')
     return supervisor.acknowledge(caseId, note)
+  }
+
+  /**
+   * @param {string} runId
+   * @param {string} caseId
+   * @param {string} [reason]
+   * @param {string} [note]
+   */
+  closeCase(runId, caseId, reason = 'resolved', note = '') {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm to close its cases')
+    return supervisor.closeCase(caseId, reason, note)
+  }
+
+  /** @param {string} runId @param {string} [reason] */
+  async resume(runId, reason = 'resumed by operator') {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm before resuming')
+    return supervisor.resume(reason)
+  }
+
+  /**
+   * Approval queue for a run. Live runs are authoritative; archived runs are a
+   * read-only view of the persisted approval files.
+   * @param {string} runId
+   * @param {{ state?: string, limit?: number }} [query]
+   */
+  approvals(runId, query = {}) {
+    const supervisor = this.runs.get(runId)
+    if (supervisor !== undefined) return supervisor.approvals(query)
+    const dir = this.#dir(runId)
+    if (!existsSync(dir)) throw fail('RUN_NOT_FOUND', `run ${runId} not found`)
+    return readApprovalFiles(path.join(dir, 'approvals'), runId, query)
+  }
+
+  /** @param {string} runId @param {string} approvalId */
+  approvalDetail(runId, approvalId) {
+    const supervisor = this.runs.get(runId)
+    if (supervisor !== undefined) return supervisor.approvalDetail(approvalId)
+    const dir = this.#dir(runId)
+    if (!existsSync(dir)) throw fail('RUN_NOT_FOUND', `run ${runId} not found`)
+    return readApprovalFiles(path.join(dir, 'approvals'), runId, { limit: 200 }).find(record => record.id === approvalId) ?? null
+  }
+
+  /**
+   * Mint a short-lived one-time token for one pending approval.
+   * @param {string} runId
+   * @param {string} approvalId
+   */
+  challengeApproval(runId, approvalId) {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm to approve its queue')
+    return supervisor.challengeApproval(approvalId)
+  }
+
+  /**
+   * @param {string} runId
+   * @param {string} approvalId
+   * @param {string} token
+   * @param {string} [note]
+   */
+  async approveApproval(runId, approvalId, token, note = '') {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm to approve its queue')
+    return supervisor.approveApproval(approvalId, token, note)
+  }
+
+  /**
+   * @param {string} runId
+   * @param {string} approvalId
+   * @param {string} [reason]
+   */
+  rejectApproval(runId, approvalId, reason = '') {
+    const supervisor = this.runs.get(runId)
+    if (supervisor === undefined) throw fail('RUN_NOT_ARMED', 'the run is not supervised; re-arm to decide its queue')
+    return supervisor.rejectApproval(approvalId, reason)
+  }
+
+  /**
+   * Explicit human purge of an archived run. The service log gets a tombstone
+   * before any file is removed; an armed run can never be purged.
+   * @param {string} runId
+   * @param {{ confirm?: unknown, reason?: unknown }} input
+   */
+  purge(runId, input = {}) {
+    if (!RUN_ID_PATTERN.test(runId)) throw fail('INVALID_RUN_ID', 'runId must match [A-Za-z0-9_-]{1,200}')
+    if (this.runs.has(runId)) throw fail('RUN_ARMED', 'disarm the run before purging its evidence')
+    const dir = path.join(this.runsDir, runId)
+    if (!existsSync(dir)) throw fail('RUN_NOT_FOUND', `run ${runId} not found`)
+    const expected = `PURGE ${runId}`
+    if (input.confirm !== expected) throw fail('CONFIRM_REQUIRED', `send {"confirm":"${expected}"} to purge`)
+    const { chain } = readWatchLog(dir, runId, { hmacKey: this.hmacKey })
+    const reason = typeof input.reason === 'string' ? input.reason.slice(0, 300) : 'human purge'
+    this.serviceLog.append({
+      type: 'watch/service/purge',
+      actor: 'human',
+      payload: { runId, reason, chain, purgedAt: new Date(this.clock()).toISOString() },
+    })
+    rmSync(dir, { recursive: true, force: true })
+    return { runId, purged: true, chain }
   }
 
   /**
@@ -381,6 +596,21 @@ export class OverwatchService {
         watch: health.watch?.state ?? 'disabled',
       })
     }
+    let anchorRuns = []
+    try {
+      anchorRuns = readdirSync(this.runsDir, { withFileTypes: true }).filter(entry => entry.isDirectory()).map(entry => entry.name)
+    } catch {
+      anchorRuns = []
+    }
+    for (const runId of anchorRuns) {
+      if (!RUN_ID_PATTERN.test(runId)) continue
+      const supervisor = this.runs.get(runId)
+      const events = supervisor !== undefined
+        ? supervisor.store.read()
+        : readWatchLog(path.join(this.runsDir, runId), runId, { hmacKey: this.hmacKey }).events
+      const anchor = verifyAnchor(this.#anchorFile(runId), events, runId)
+      add(`anchor:${runId}`, anchor.ok ? 'pass' : 'fail', { anchors: anchor.count, last: anchor.last, error: anchor.error })
+    }
     try {
       const stats = statfsSync(this.dataDir)
       const freeBytes = stats.bavail * stats.bsize
@@ -424,7 +654,7 @@ export class OverwatchService {
     }
     for (const runId of names) {
       if (this.runs.has(runId)) continue
-      const archive = readArchive(this.runsDir, runId, this.clock)
+      const archive = readArchive(this.runsDir, runId, this.clock, this.hmacKey)
       runs.push({ runId, state: archive.state, armed: false, log: archive.chain })
     }
     return {
@@ -468,9 +698,15 @@ export class OverwatchService {
   }
 
   close() {
+    if (this.retentionTimer !== null) {
+      clearInterval(this.retentionTimer)
+      this.retentionTimer = null
+    }
     for (const [runId, supervisor] of this.runs) {
       try {
-        void supervisor.disarm('plugin unloaded')
+        void supervisor.disarm('plugin unloaded').catch(error => {
+          this.logger?.warn?.(`[overwatch] could not disarm ${runId} on unload: ${String(error)}`)
+        })
       } catch (error) {
         this.logger?.warn?.(`[overwatch] could not disarm ${runId} on unload: ${String(error)}`)
       }
@@ -492,7 +728,7 @@ export class OverwatchService {
  * can verify that the plugin itself did not lose events.
  */
 class ServiceLog {
-  /** @param {{ dir: string, runId: string, clock: () => number, maxBytes: number }} options */
+  /** @param {{ dir: string, runId: string, clock: () => number, maxBytes: number, hmacKey?: string, anchorFile?: string }} options */
   constructor(options) {
     this.options = options
     // Lazy import avoids a circular-looking dependency at module load.
@@ -501,7 +737,14 @@ class ServiceLog {
 
   async open() {
     const { WatchStore } = await import('./store.js')
-    this.store = new WatchStore({ dir: this.options.dir, runId: this.options.runId, clock: this.options.clock, maxBytes: this.options.maxBytes })
+    this.store = new WatchStore({
+      dir: this.options.dir,
+      runId: this.options.runId,
+      clock: this.options.clock,
+      maxBytes: this.options.maxBytes,
+      hmacKey: this.options.hmacKey,
+      anchorFile: this.options.anchorFile,
+    })
     await this.store.open()
     return this
   }
@@ -549,9 +792,9 @@ class ServiceLog {
  * @param {string} runId
  * @param {() => number} clock
  */
-function readArchive(runsDir, runId, clock) {
+function readArchive(runsDir, runId, clock, hmacKey = '') {
   const dir = path.join(runsDir, runId)
-  const { events, chain } = readWatchLog(dir, runId)
+  const { events, chain } = readWatchLog(dir, runId, { hmacKey })
   const snapshot = readJsonSafe(path.join(dir, 'snapshots', 'last.json'))
   const cases = readCaseFiles(dir)
   const armed = events.find(event => event.type === 'watch/armed') ?? null
@@ -582,8 +825,8 @@ function readArchive(runsDir, runId, clock) {
  * @param {string} runId
  * @param {() => number} clock
  */
-function readArchiveView(dir, runId, clock) {
-  const archive = readArchive(path.dirname(dir), runId, clock)
+function readArchiveView(dir, runId, clock, hmacKey = '') {
+  const archive = readArchive(path.dirname(dir), runId, clock, hmacKey)
   const snapshot = archive.snapshot?.snapshot ?? {
     schemaVersion: 1,
     runId,
@@ -667,8 +910,8 @@ function filterCases(records, query) {
 }
 
 /** @param {string} dir @param {string} runId @param {{ since?: number | string, limit?: number }} query */
-function archiveTimeline(dir, runId, query) {
-  const { events } = readWatchLog(dir, runId)
+function archiveTimeline(dir, runId, query, hmacKey = '') {
+  const { events } = readWatchLog(dir, runId, { hmacKey })
   const since = query.since ?? 0
   const limit = Math.min(Math.max(query.limit ?? 100, 1), 500)
   const normalized = events.map(event => ({

@@ -138,6 +138,53 @@ test('low confidence cannot buy a mutating action', () => {
   assert.equal(validateDecision(decision({ confidence: 0.6 })).ok, true)
 })
 
+test('a decision cannot target another supervised run or its params.runId', () => {
+  const target = validateDecision(decision({ target: { kind: 'swarm_run', id: 'run-2' } }), {
+    caseId: 'case-1',
+    runId: 'run-1',
+    evidenceIds: evidence,
+  })
+  assert.equal(target.ok, false)
+  if (!target.ok) assert.match(target.errors.join(' '), /target\.id must be the supervised runId/)
+
+  const param = validateDecision(decision({ params: { runId: 'run-2' } }), {
+    caseId: 'case-1',
+    runId: 'run-1',
+    evidenceIds: evidence,
+  })
+  assert.equal(param.ok, false)
+  if (!param.ok) assert.match(param.errors.join(' '), /params\.runId must be the supervised runId/)
+
+  assert.equal(validateDecision(decision(), { caseId: 'case-1', runId: 'run-1', evidenceIds: evidence }).ok, true)
+})
+
+test('throttle minutes and coach text are bounded', () => {
+  assert.equal(validateDecision(decision({ params: { runId: 'run-1', minutes: 0 } })).ok, false)
+  assert.equal(validateDecision(decision({ params: { runId: 'run-1', minutes: 31 } })).ok, false)
+  assert.equal(validateDecision(decision({ params: { runId: 'run-1', minutes: 10 } })).ok, true)
+  assert.equal(validateDecision(decision({
+    action: 'coach',
+    params: { runId: 'run-1', text: 'x'.repeat(281) },
+  })).ok, false)
+  assert.equal(validateDecision(decision({
+    action: 'coach',
+    params: { runId: 'run-1', text: 'short' },
+  })).ok, true)
+})
+
+test('idempotency ignores params key order', () => {
+  const first = validateDecision(decision({ params: { runId: 'run-1', minutes: 5 } })).decision
+  const reordered = validateDecision(decision({ params: { minutes: 5, runId: 'run-1' } })).decision
+  assert.equal(idempotencyKey(first), idempotencyKey(reordered))
+})
+
+test('guard plan runId cannot diverge from the executor run context', () => {
+  const plan = guardPlan({ params: { runId: 'run-2', minutes: 10 } })
+  const result = validatePlan(plan, { evidenceIds: evidence, runId: 'run-1' })
+  assert.equal(result.ok, false)
+  if (!result.ok) assert.match(result.errors.join(' '), /params\.runId must be the supervised runId/)
+})
+
 test('idempotency ignores reason text but not evidence or params', () => {
   const first = validateDecision(decision()).decision
   const same = validateDecision(decision({ reason: 'a different sentence' })).decision

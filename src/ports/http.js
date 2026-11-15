@@ -33,10 +33,24 @@ export async function httpJson(url, options = {}) {
       headers['content-type'] = headers['content-type'] ?? 'application/json'
       body = JSON.stringify(options.body)
     }
-    const response = await fetchImpl(url, { method: options.method ?? 'GET', headers, body, signal: controller.signal })
+    const response = await fetchImpl(url, {
+      method: options.method ?? 'GET',
+      headers,
+      body,
+      signal: controller.signal,
+      // A local upstream must not be able to bounce the swarm write token and
+      // request body to a different origin.
+      redirect: 'error',
+    })
+    const declaredLength = typeof response.headers?.get === 'function'
+      ? Number(response.headers.get('content-length'))
+      : Number.NaN
+    if (Number.isFinite(declaredLength) && declaredLength > maxBytes) {
+      return { ok: false, status: response.status, data: null, error: `response exceeds ${maxBytes} bytes`, ms: Date.now() - startedAt }
+    }
     const text = await response.text()
     const ms = Date.now() - startedAt
-    if (text.length > maxBytes) {
+    if (Buffer.byteLength(text, 'utf8') > maxBytes) {
       return { ok: false, status: response.status, data: null, error: `response exceeds ${maxBytes} bytes`, ms }
     }
     let data = null

@@ -320,8 +320,12 @@ test('exposes both the guard-only and the supervised M2 surface', () => {
   assert.ok(SOURCE.includes("armSupervised"), 'supervised mode label must be translated')
   assert.ok(SOURCE.includes("watchStateLabel"), 'watch officer state must be rendered')
   assert.ok(!SOURCE.includes('/decide'), 'the panel must not expose the agent decision tool as an HTTP route')
-  assert.ok(!SOURCE.includes('/purge'), 'the panel must not expose purge')
   assert.ok(!SOURCE.includes('/shift/latest'), 'the panel must not depend on the shift route')
+  assert.ok(SOURCE.includes('/purge'), 'the panel must expose the explicit archived-run purge action')
+  assert.ok(SOURCE.includes("/cases/${encodeURIComponent(caseId)}/close"), 'the panel must close cases')
+  assert.ok(SOURCE.includes("'/resume'") || SOURCE.includes('/resume`'), 'the panel must resume paused runs')
+  assert.ok(SOURCE.includes('/approvals/'), 'the panel must surface the human approval queue')
+  assert.ok(SOURCE.includes("keepalive: true"), 'restore result recording must survive unload')
 })
 
 test('wires M3 fish, replay, doctor, restore, opaque cursors, and tablist keyboard', () => {
@@ -361,6 +365,10 @@ test('wires M3 fish, replay, doctor, restore, opaque cursors, and tablist keyboa
   assert.ok(SOURCE.includes("apiGetRaw('/doctor'"))
   assert.ok(SOURCE.includes('doctorStatusLabel'))
   assert.ok(SOURCE.includes('summarizeDetail'))
+  // Table and dialog accessibility.
+  assert.ok(SOURCE.includes("'aria-haspopup': 'dialog'"), 'case rows must be opened through a real button')
+  assert.ok(SOURCE.includes('openCaseA11y'), 'the case button must carry an action-specific label')
+  assert.ok(SOURCE.includes("'aria-labelledby': 'ow-drawer-title'"), 'the case drawer must be labelled by its heading')
   // Restore dialog accessibility.
   assert.ok(SOURCE.includes("'aria-modal': 'true'"))
   assert.ok(SOURCE.includes('ow-steps'))
@@ -524,6 +532,16 @@ function makeFixture(options = {}) {
     { id: 'data-dir', status: 'pass', detail: { path: 'C:/tmp/overwatch', writable: true } },
     { id: 'fish-index', status: 'warn', detail: { available: true, sources: 1 } },
   ]
+  const approvals = [{
+    id: 'apv_1',
+    kind: 'guard_plan',
+    status: 'pending',
+    action: 'pause',
+    caseId: 'case_1',
+    reason: 'pause disabled',
+    requestedAt: at(5),
+    expiresAt: new Date(now + 3_600_000).toISOString(),
+  }]
   return {
     now,
     at,
@@ -539,6 +557,7 @@ function makeFixture(options = {}) {
     restorePlan,
     restoreResult,
     doctor,
+    approvals,
   }
 }
 
@@ -640,6 +659,33 @@ function installSandbox(target, fixture, calls, options = {}) {
         fixture.caseDetail.case.state = 'acknowledged'
         return ok({ ok: true, data: { case: { ...fixture.caseSummary, state: 'acknowledged' } } })
       }
+      if (path.endsWith('/close')) {
+        fixture.caseSummary.state = 'closed'
+        fixture.caseSummary.closeReason = body?.reason ?? null
+        fixture.caseDetail.case.state = 'closed'
+        fixture.caseDetail.case.closeReason = body?.reason ?? null
+        return ok({ ok: true, data: { case: { ...fixture.caseSummary, state: 'closed', closeReason: body?.reason ?? null } } })
+      }
+      if (path.endsWith('/resume')) {
+        fixture.runSummary.status = 'running'
+        fixture.runDetail.status = 'running'
+        fixture.runDetail.throttle = null
+        return ok({ ok: true, data: { runId: 'run_1', status: 'running', resumed: true } })
+      }
+      if (path.endsWith('/purge')) {
+        return ok({ ok: true, data: { runId: 'run_1', purged: true, chain: { ok: true, count: 3 } } })
+      }
+      if (path.endsWith('/challenge')) {
+        return ok({ ok: true, data: { approval: { id: 'apv_1', status: 'pending' }, token: 'one-time-token', expiresAt: new Date(Date.now() + 300_000).toISOString() } })
+      }
+      if (path.endsWith('/approve')) {
+        for (const entry of fixture.approvals) entry.status = 'executed'
+        return ok({ ok: true, data: { approval: { id: 'apv_1', status: 'executed', action: 'pause' }, outcome: { ok: true, actionId: 'act_1' } } })
+      }
+      if (path.endsWith('/reject')) {
+        for (const entry of fixture.approvals) entry.status = 'rejected'
+        return ok({ ok: true, data: { id: 'apv_1', status: 'rejected' } })
+      }
       if (path === '/overwatch/api/runs/run_1/restores') {
         return ok({
           ok: true,
@@ -695,6 +741,13 @@ function installSandbox(target, fixture, calls, options = {}) {
     }
     if (path === '/overwatch/api/runs') {
       return ok({ ok: true, data: { runs: empty ? [] : [fixture.runSummary], asOf: new Date().toISOString() } })
+    }
+    if (path === '/overwatch/api/runs/run_1/approvals') {
+      const state = parsed.searchParams.get('state') ?? 'all'
+      const list = state === 'pending' || state === 'all'
+        ? fixture.approvals.filter((entry) => entry.status === 'pending')
+        : fixture.approvals
+      return ok({ ok: true, data: { approvals: list, asOf: new Date().toISOString() } })
     }
     if (path === '/overwatch/api/runs/run_1/timeline') {
       const rawSince = parsed.searchParams.get('since') ?? '0'
@@ -979,9 +1032,11 @@ test('render smoke: watch room, freshness, cases, detail drawer, and gated write
   assert.match(text, /Budget cliff/)
   assert.match(text, /budget_cliff/)
 
-  const caseRow = findOne(tree, (element) => element.type === 'tr' && element.props.tabIndex === 0 && typeof element.props.onClick === 'function')
+  const caseRow = findOne(tree, (element) => element.type === 'button' && element.props.className === 'ow-row-open')
   assert.notEqual(caseRow, null)
-  caseRow.props.onClick({})
+  assert.equal(caseRow.props['aria-haspopup'], 'dialog')
+  assert.match(caseRow.props['aria-label'], /Budget cliff/)
+  caseRow.props.onClick({ stopPropagation() {} })
   tree = await harness.flush()
   text = textOf(tree)
   assert.match(text, /budget_pressure/)
@@ -1028,6 +1083,114 @@ test('render smoke: watch room, freshness, cases, detail drawer, and gated write
     && call.url.includes('/overwatch/api/runs/run_1/disarm')
     && call.headers['x-overwatch-token'] === 'secret-token'))
 
+  harness.unmount()
+})
+
+test('render smoke: a paused run resumes from the panel', async () => {
+  const fixture = makeFixture()
+  fixture.runSummary.status = 'paused'
+  fixture.runDetail.status = 'paused'
+  const calls = []
+  const env = installSandbox(sandbox, fixture, calls)
+  env.storage.set(TOKEN_KEY, 'secret-token')
+  const harness = createRenderHarness(definition, sandbox)
+  let tree = await harness.flush()
+
+  const writeToggle = findOne(tree, (element) => element.type === 'button' && textOf(element).includes('展开写操作'))
+  assert.notEqual(writeToggle, null)
+  writeToggle.props.onClick({})
+  tree = await harness.flush()
+
+  const resume = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '恢复运行')
+  assert.notEqual(resume, null)
+  resume.props.onClick({})
+  tree = await harness.flush()
+
+  const confirm = findOne(tree, (element) => element.type === 'button'
+    && textOf(element).trim() === '确认'
+    && String(element.props.className).includes('ow-btn-primary'))
+  assert.notEqual(confirm, null)
+  confirm.props.onClick({})
+  tree = await harness.flush()
+
+  const call = calls.find((entry) => entry.method === 'POST' && entry.path === '/overwatch/api/runs/run_1/resume')
+  assert.notEqual(call, undefined)
+  assert.equal(call.headers['x-overwatch-token'], 'secret-token')
+  assert.match(textOf(tree), /运行已恢复/)
+  harness.unmount()
+})
+
+test('render smoke: a pending approval is challenged, approved once, and drops its token', async () => {
+  const fixture = makeFixture()
+  const calls = []
+  const env = installSandbox(sandbox, fixture, calls)
+  env.storage.set(TOKEN_KEY, 'secret-token')
+  const harness = createRenderHarness(definition, sandbox)
+  let tree = await harness.flush()
+
+  const writeToggle = findOne(tree, (element) => element.type === 'button' && textOf(element).includes('展开写操作'))
+  writeToggle.props.onClick({})
+  tree = await harness.flush()
+  const text = textOf(tree)
+  assert.match(text, /待批准请求/)
+  assert.match(text, /pause disabled/)
+
+  const approve = findOne(tree, (element) => element.type === 'button'
+    && element.props['aria-label'] === '批准并执行 pause case_1')
+  assert.notEqual(approve, null)
+  approve.props.onClick({})
+  tree = await harness.flush()
+
+  const challenge = calls.find((entry) => entry.method === 'POST'
+    && entry.path === '/overwatch/api/runs/run_1/approvals/apv_1/challenge')
+  const approved = calls.find((entry) => entry.method === 'POST'
+    && entry.path === '/overwatch/api/runs/run_1/approvals/apv_1/approve')
+  assert.notEqual(challenge, undefined)
+  assert.notEqual(approved, undefined)
+  assert.equal(approved.body.token, 'one-time-token')
+  assert.equal(env.storage.get('one-time-token'), undefined, 'the one-time token must stay in memory')
+  assert.equal(findOne(tree, (element) => element.type === 'button'
+    && element.props['aria-label'] === '批准并执行 pause case_1'), null)
+  assert.match(textOf(tree), /已批准并执行一次/)
+  harness.unmount()
+})
+
+test('render smoke: an archived run exposes the explicit purge confirmation', async () => {
+  const fixture = makeFixture()
+  fixture.runSummary.armed = false
+  fixture.runSummary.state = 'disarmed'
+  fixture.runDetail.armed = false
+  fixture.runDetail.state = 'disarmed'
+  const calls = []
+  installSandbox(sandbox, fixture, calls)
+  const harness = createRenderHarness(definition, sandbox)
+  let tree = await harness.flush()
+
+  const writeToggle = findOne(tree, (element) => element.type === 'button' && textOf(element).includes('展开写操作'))
+  writeToggle.props.onClick({})
+  tree = await harness.flush()
+  assert.match(textOf(tree), /展开写面板并设置令牌后才能处理批准/)
+
+  const passwordInput = findOne(tree, (element) => element.type === 'input' && element.props.type === 'password')
+  passwordInput.props.onChange({ target: { value: 'secret-token' } })
+  tree = await harness.flush()
+  const tokenForm = findOne(tree, (element) => element.type === 'form' && element.props.className === 'ow-token-form')
+  tokenForm.props.onSubmit({ preventDefault() {} })
+  tree = await harness.flush()
+
+  const purge = findOne(tree, (element) => element.type === 'button' && textOf(element).trim() === '清除归档运行')
+  assert.notEqual(purge, null)
+  purge.props.onClick({})
+  tree = await harness.flush()
+  assert.match(textOf(tree), /永久清除 run_1 的归档/)
+  const confirm = findOne(tree, (element) => element.type === 'button'
+    && textOf(element).trim() === '确认'
+    && String(element.props.className).includes('ow-btn-primary'))
+  confirm.props.onClick({})
+  tree = await harness.flush()
+  const call = calls.find((entry) => entry.method === 'POST' && entry.path === '/overwatch/api/runs/run_1/purge')
+  assert.notEqual(call, undefined)
+  assert.equal(call.body.confirm, 'PURGE run_1')
   harness.unmount()
 })
 

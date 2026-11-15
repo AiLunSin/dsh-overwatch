@@ -113,5 +113,59 @@ test('recovery finds an intended-but-unexecuted action', async () => {
   })
   const recovery = executor.recover()
   assert.deepEqual(recovery.incomplete, ['orphan'])
+  assert.ok(store.read().some(event => event.type === 'watch/action/unknown' && event.payload.key === 'orphan'))
+  store.close()
+})
+
+test('a restarted executor does not replay a verified action', async () => {
+  const { store, port, executor } = await harness()
+  const first = await executor.execute(decision(), { caseId: 'case-1', evidenceIds: new Set(['ev-1']) })
+  assert.equal(first.ok, true)
+  const restarted = new Executor({
+    store,
+    ports: [port],
+    policy: { mode: 'supervised', autopilot: { throttle: true, pause: false, abortOnHardLimit: true } },
+  })
+  assert.equal(restarted.recover().completed, 1)
+  const again = await restarted.execute(decision(), { caseId: 'case-1', evidenceIds: new Set(['ev-1']) })
+  assert.equal(again.duplicate, true)
+  assert.deepEqual(port.calls, ['throttle'])
+  store.close()
+})
+
+test('the executor passes trusted runId to the port and enforces the action cap', async () => {
+  const store = new WatchStore({ dir: tempDir(), runId: 'run-1', lockWaitMs: 10 })
+  await store.open()
+  const contexts = []
+  const port = {
+    supports: () => true,
+    async apply(decision, context) {
+      contexts.push(context)
+      return { ok: true }
+    },
+    async verify() {
+      return { ok: true }
+    },
+  }
+  const executor = new Executor({
+    store,
+    ports: [port],
+    policy: { mode: 'supervised', autopilot: { throttle: true, pause: true, abortOnHardLimit: true }, maxAutoInterventions: 1 },
+  })
+  const first = await executor.execute(decision({ action: 'throttle', params: { text: 'one' } }), {
+    caseId: 'case-1',
+    evidenceIds: new Set(['ev-1']),
+    runId: 'run-1',
+  })
+  assert.equal(first.ok, true)
+  assert.equal(contexts[0].runId, 'run-1')
+  const second = await executor.execute(decision({ action: 'coach', params: { text: 'two' } }), {
+    caseId: 'case-1',
+    evidenceIds: new Set(['ev-1']),
+    runId: 'run-1',
+  })
+  assert.equal(second.code, 'AUTO_INTERVENTION_LIMIT')
+  assert.equal(second.requiresHuman, true)
+  assert.equal(contexts.length, 1)
   store.close()
 })

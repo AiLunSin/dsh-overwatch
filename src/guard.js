@@ -39,6 +39,7 @@ const PLAN_PRIORITY = Object.freeze({ abort: 5, pause: 4, resume: 3, throttle: 2
  * @param {typeof import('./config.js').DEFAULT_CONFIG} input.config
  * @param {string} input.runId
  * @param {number} input.now
+ * @param {number} [input.elapsedMs] wall-clock time since arm
  * @returns {{ plans: GuardPlan[], notices: Array<{ code: string, reason: string, caseId?: string }> }}
  */
 export function evaluateGuard(input) {
@@ -78,6 +79,42 @@ export function evaluateGuard(input) {
       }, notices),
       notices,
     }
+  }
+
+  const maxRunMs = Number(config.thresholds.maxRunMs ?? 0)
+  const elapsedMs = Number(input.elapsedMs ?? 0)
+  if (maxRunMs > 0 && Number.isFinite(elapsedMs) && elapsedMs >= maxRunMs) {
+    const signal = {
+      code: 'wall_clock',
+      severity: /** @type {'L4'} */ ('L4'),
+      summary: `run wall clock at ${Math.round(elapsedMs / 1000)}s`,
+      suggestedAction: 'abort',
+      evidence: {
+        id: evidenceId('swarm', 'wall_clock', `${input.runId}:${maxRunMs}`),
+        source: 'swarm',
+        kind: 'wall_clock',
+        at: new Date(now).toISOString(),
+        ref: { runId: input.runId },
+        observed: { elapsedMs, maxRunMs },
+      },
+    }
+    return {
+      plans: plansFor({
+        runId: input.runId, cases, config, state, signal, kind: 'abort', severity: 'L4', hardLimit: true, now,
+        reason: `run wall clock ${Math.round(elapsedMs / 1000)}s reached the ${Math.round(maxRunMs / 1000)}s hard limit; deterministic abort`,
+      }, notices),
+      notices,
+    }
+  }
+
+  const swarmFreshness = snapshot?.freshness?.swarm
+  if (swarmFreshness !== undefined && swarmFreshness !== null
+    && (swarmFreshness.ok === false || swarmFreshness.stale === true || Number(swarmFreshness.failures ?? 0) >= 3)) {
+    notices.push({
+      code: 'source_stale',
+      reason: `swarm source is ${swarmFreshness.ok === false ? 'unavailable' : 'stale'}; deterministic actions wait for fresh data`,
+    })
+    return { plans, notices }
   }
 
   if (state.throttle !== null && state.throttle.active && state.throttle.dueAt <= now) {

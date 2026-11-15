@@ -62,6 +62,11 @@ async function main() {
 
   const dirName = name.replace(/^@/, '').replace(/\//g, '--')
   const out = typeof args.out === 'string' ? path.resolve(args.out) : path.join(root, 'dist', dirName)
+  const distRoot = path.resolve(root, 'dist')
+  if (out !== distRoot && !out.startsWith(`${distRoot}${path.sep}`)) {
+    throw new Error(`--out must be inside ${distRoot}; refusing to delete ${out}`)
+  }
+  if (out === distRoot) throw new Error('--out must name a directory below dist, not dist itself')
   await fsp.rm(out, { recursive: true, force: true })
   await fsp.mkdir(out, { recursive: true })
 

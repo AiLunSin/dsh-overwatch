@@ -1,0 +1,4 @@
+# A/B/C test-only bundle: scripted root provider.
+- insert:
+    - id: dsh-fake-llm-abc
+      name: dsh-fake-llm-abc

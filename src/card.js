@@ -42,11 +42,11 @@ export function buildCaseCard(input) {
   const maxBytes = input.maxBytes ?? config.supervisor.maxEvidenceBytes
   const budget = snapshot?.budget ?? {}
   const members = (Array.isArray(snapshot?.members) ? snapshot.members : []).slice(0, 12).map(member => ({
-    id: member.id,
-    name: member.name,
-    role: member.role,
-    status: member.status,
-    taskId: member.taskId ?? null,
+    id: String(member.id ?? '').slice(0, 200),
+    name: String(member.name ?? '').slice(0, 120),
+    role: String(member.role ?? '').slice(0, 80),
+    status: String(member.status ?? '').slice(0, 80),
+    taskId: member.taskId === null || member.taskId === undefined ? null : String(member.taskId).slice(0, 200),
     context: round(member.context),
     failures: member.failures ?? null,
   }))
@@ -56,8 +56,8 @@ export function buildCaseCard(input) {
     runId: record.runId,
     generation: record.generation,
     severity: record.severity,
-    code: record.code,
-    title: record.title,
+    code: String(record.code ?? '').slice(0, 80),
+    title: String(record.title ?? '').slice(0, 300),
     state: record.state,
     signals: record.signals.map(signal => ({
       code: signal.code,
@@ -83,6 +83,7 @@ export function buildCaseCard(input) {
       merge: snapshot?.merge ?? {},
       members,
       lastEventAt: snapshot?.lastEventAt ?? null,
+      freshness: snapshot?.freshness ?? null,
     },
     allowedActions: allowedActions(record.severity),
     targets: {
@@ -93,9 +94,9 @@ export function buildCaseCard(input) {
     },
     recentEvents: (Array.isArray(input.events) ? input.events : []).slice(-8).map(event => ({
       seq: event.seq,
-      type: event.type,
+      type: String(event.type ?? '').slice(0, 80),
       at: event.at,
-      summary: event.summary,
+      summary: String(event.summary ?? '').slice(0, 240),
     })),
     constraints: {
       maxEvidenceBytes: config.supervisor.maxEvidenceBytes,
@@ -122,14 +123,14 @@ export function buildEvidence(input) {
   /** @type {any[]} */
   const items = []
   for (const ref of input.refs.slice(0, 8)) {
-    const reference = String(ref)
+    const reference = String(ref).slice(0, 200)
     const eventMatch = /^swarm_event:(\d+)$/.exec(reference)
     if (eventMatch !== null) {
       const seq = Number(eventMatch[1])
       const event = events.find(entry => entry.seq === seq)
       items.push(event === undefined
         ? { ref: reference, kind: 'swarm_event', error: 'not_found' }
-        : { ref: reference, kind: 'swarm_event', seq, type: event.type, at: event.at, summary: event.summary })
+        : { ref: reference, kind: 'swarm_event', seq, type: String(event.type ?? '').slice(0, 80), at: event.at, summary: String(event.summary ?? '').slice(0, 240) })
       continue
     }
     const evidence = (input.record.evidence ?? []).find(entry => String(entry.id) === reference)
@@ -139,8 +140,8 @@ export function buildEvidence(input) {
     }
     items.push({
       ref: reference,
-      kind: evidence.kind,
-      source: evidence.source,
+      kind: String(evidence.kind ?? '').slice(0, 80),
+      source: String(evidence.source ?? '').slice(0, 80),
       at: evidence.at,
       observed: boundValue(evidence.observed, 1_500),
     })
@@ -151,6 +152,10 @@ export function buildEvidence(input) {
   if (result.bytes > maxBytes) {
     result.truncated = true
     result.items = result.items.slice(0, 2).map(item => ({ ...item, observed: undefined }))
+    result.bytes = Buffer.byteLength(JSON.stringify(result.items), 'utf8')
+  }
+  if (result.bytes > maxBytes) {
+    result.items = []
     result.bytes = Buffer.byteLength(JSON.stringify(result.items), 'utf8')
   }
   return result
@@ -176,7 +181,38 @@ function bound(card, maxBytes) {
     if (Buffer.byteLength(JSON.stringify(value), 'utf8') <= maxBytes) return value
     value = shrink()
   }
-  return value
+  // Last line of defence: never hand the watch officer a card larger than the
+  // configured byte budget, even if an upstream title/summary is pathological.
+  const minimal = {
+    schemaVersion: card.schemaVersion,
+    caseId: card.caseId,
+    runId: card.runId,
+    generation: card.generation,
+    severity: card.severity,
+    code: String(card.code ?? '').slice(0, 80),
+    title: String(card.title ?? '').slice(0, 160),
+    state: card.state,
+    signals: [],
+    evidenceIds: [],
+    snapshot: {
+      status: card.snapshot?.status ?? 'unknown',
+      round: card.snapshot?.round ?? 0,
+      budget: card.snapshot?.budget ?? {},
+      goal: null,
+      members: [],
+      tasks: {},
+      reviews: {},
+      merge: {},
+    },
+    allowedActions: card.allowedActions,
+    targets: {},
+    recentEvents: [],
+    constraints: card.constraints,
+    instructions: card.instructions,
+  }
+  if (Buffer.byteLength(JSON.stringify(minimal), 'utf8') > maxBytes) minimal.instructions = ''
+  if (Buffer.byteLength(JSON.stringify(minimal), 'utf8') > maxBytes) minimal.title = ''
+  return minimal
 }
 
 /** @param {unknown} value @param {number} maxLength */
@@ -184,7 +220,7 @@ function boundValue(value, maxLength) {
   if (value === null || value === undefined) return value
   const text = JSON.stringify(value)
   if (text === undefined) return null
-  return text.length <= maxLength ? value : { truncated: true, bytes: text.length }
+  return Buffer.byteLength(text, 'utf8') <= maxLength ? value : { truncated: true, bytes: Buffer.byteLength(text, 'utf8') }
 }
 
 /** @param {unknown} value @returns {number | null} */

@@ -328,6 +328,48 @@ test('a supervised run wakes the officer on an L2 case and applies its decision'
   await supervisor.disarm('test over')
 })
 
+test('an L3 supervised pause is queued, then approved and executed exactly once', async () => {
+  const { supervisor, state } = await harness(0.81, testConfig(), {
+    ctx: { get: name => (name === 'subagents' ? fakeSubagents(8) : undefined) },
+  })
+  await supervisor.arm({ mode: 'supervised', parentAgent: { id: 'root' } })
+  const record = supervisor.caseManager.list({ state: 'open' })[0]
+  assert.ok(record, 'the pressure case must be open')
+  const evidenceIds = new Set(record.evidence.map(entry => String(entry.id)))
+  const queued = await supervisor.executor.execute({
+    schemaVersion: 1,
+    caseId: record.id,
+    action: 'pause',
+    target: { kind: 'swarm_run', id: 'run-1' },
+    params: { mode: 'pause', runId: 'run-1' },
+    evidenceRefs: [String(record.evidence[0].id)],
+    reason: 'a human should decide this pause',
+    confidence: 0.9,
+  }, { caseId: record.id, evidenceIds, hardLimit: false, runId: 'run-1' })
+  assert.equal(queued.code, 'APPROVAL_REQUIRED')
+  const pending = supervisor.approvals({ state: 'pending' })
+  assert.equal(pending.length, 1)
+  assert.equal(pending[0].action, 'pause')
+  // The queued pause is not applied: the call count stays where the guard's own
+  // throttle left it until a human approves.
+  const callsBeforeApproval = state.calls.length
+  assert.equal(supervisor.snapshot().approvals.pending, 1)
+  assert.ok(supervisor.store.read().some(event => event.type === 'watch/approval/requested'))
+
+  const challenge = supervisor.challengeApproval(pending[0].id)
+  await assert.rejects(() => supervisor.approveApproval(pending[0].id, 'wrong-token'), error => error.code === 'APPROVAL_TOKEN_INVALID')
+  await supervisor.approveApproval(pending[0].id, challenge.token, 'approved in a test')
+  assert.equal(state.status, 'paused')
+  assert.equal(state.calls.length, callsBeforeApproval + 1)
+  assert.equal(state.calls.at(-1).action, 'pause')
+  assert.equal(supervisor.approvalDetail(pending[0].id).status, 'executed')
+  assert.throws(() => supervisor.challengeApproval(pending[0].id), error => error.code === 'APPROVAL_CONFLICT')
+  assert.ok(supervisor.store.read().some(event => event.type === 'watch/approval/executed'))
+  assert.equal(supervisor.snapshot().approvals.pending, 0)
+  assert.equal(supervisor.store.verify().ok, true)
+  await supervisor.disarm('test over')
+})
+
 test('a watch timeout is recorded, the case stays open, and the guard remains in charge', async () => {
   const config = testConfig({ policy: { twoSignalRule: false, cooldownMs: 0, autopilot: { throttle: false, pause: false, pauseOnHardLimit: true, abortOnHardLimit: true } } })
   const watch = fakeWatch('timeout')

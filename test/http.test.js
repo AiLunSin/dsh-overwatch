@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict'
 import { createServer } from 'node:http'
 import { after, test } from 'node:test'
-import { checkWriteRequest, createNodeHandler, isLoopback } from '../src/http.js'
+import { checkWriteRequest, createNodeHandler, isLoopback, isLoopbackHost } from '../src/http.js'
 
 /** @param {Record<string, string>} headers @param {string} remoteAddress */
 function request(headers = {}, remoteAddress = '127.0.0.1') {
@@ -16,6 +16,15 @@ test('only loopback requests reach the API', () => {
   const denied = checkWriteRequest(request({}, '10.0.0.7'), 'http://127.0.0.1:1', 'secret')
   assert.equal(denied.ok, false)
   assert.equal(denied.code, 'LOOPBACK_ONLY')
+})
+
+test('only a loopback Host header is accepted', () => {
+  assert.equal(isLoopbackHost('127.0.0.1:60917'), true)
+  assert.equal(isLoopbackHost('localhost:60917'), true)
+  assert.equal(isLoopbackHost('[::1]:60917'), true)
+  assert.equal(isLoopbackHost('evil.example:60917'), false)
+  assert.equal(isLoopbackHost('127.0.0.1.evil.example'), false)
+  assert.equal(isLoopbackHost(''), false)
 })
 
 test('an empty configured token disables writes entirely', () => {
@@ -68,6 +77,18 @@ function fakeService() {
       calls.push(['ack', runId, caseId])
       return { id: caseId, state: 'acknowledged' }
     },
+    closeCase(runId, caseId, reason, note) {
+      calls.push(['close', runId, caseId, reason, note])
+      return { id: caseId, state: 'closed', closeReason: reason }
+    },
+    async resume(runId, reason) {
+      calls.push(['resume', runId, reason])
+      return { runId, status: 'running', resumed: true }
+    },
+    purge(runId, input) {
+      calls.push(['purge', runId, input])
+      return { runId, purged: true, chain: { ok: true, count: 3 } }
+    },
     fishIndex(sourceId) {
       return {
         available: true,
@@ -86,6 +107,27 @@ function fakeService() {
     recordRestore(runId, input) {
       calls.push(['restore', runId, input.phase])
       return { recorded: true, phase: input.phase, sourceId: input.sourceId, checkpointId: input.checkpointId }
+    },
+    approvals(runId, query) {
+      calls.push(['approvals', runId, query])
+      return query.state === 'pending' || query.state === 'all'
+        ? [{ id: 'apv_1', kind: 'guard_plan', status: 'pending', action: 'pause', caseId: 'case-1', reason: 'pause disabled', expiresAt: '2026-11-15T01:00:00.000Z' }]
+        : []
+    },
+    approvalDetail(runId, approvalId) {
+      return approvalId === 'apv_1' ? { id: 'apv_1', status: 'pending', action: 'pause' } : null
+    },
+    challengeApproval(runId, approvalId) {
+      calls.push(['challenge', runId, approvalId])
+      return { approval: { id: approvalId, status: 'pending' }, token: 'one-time-token', expiresAt: '2026-11-15T00:05:00.000Z' }
+    },
+    async approveApproval(runId, approvalId, token, note) {
+      calls.push(['approve', runId, approvalId, token, note])
+      return { approval: { id: approvalId, status: 'executed' }, outcome: { ok: true, actionId: 'act_1' } }
+    },
+    rejectApproval(runId, approvalId, reason) {
+      calls.push(['reject', runId, approvalId, reason])
+      return { id: approvalId, status: 'rejected' }
     },
   }
 }
@@ -173,6 +215,87 @@ test('read routes answer with the data envelope and 404 for unknown runs', async
     const fishMissing = await fetch(`${base}/overwatch/api/fish/fish-z`)
     assert.equal(fishMissing.status, 404)
     assert.equal((await fishMissing.json()).code, 'FISH_SOURCE_NOT_FOUND')
+  })
+})
+
+test('human close, resume and purge routes use the write token', async () => {
+  await withServer(async ({ base, service }) => {
+    const close = await fetch(`${base}/overwatch/api/runs/run-1/cases/case-1/close`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ reason: 'false_positive', note: 'operator checked' }),
+    })
+    assert.equal(close.status, 200)
+    assert.equal((await close.json()).data.case.closeReason, 'false_positive')
+
+    const resume = await fetch(`${base}/overwatch/api/runs/run-1/resume`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ reason: 'operator resumed' }),
+    })
+    assert.equal(resume.status, 200)
+    assert.equal((await resume.json()).data.resumed, true)
+
+    const purge = await fetch(`${base}/overwatch/api/runs/run-1/purge`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ confirm: 'PURGE run-1', reason: 'retention' }),
+    })
+    assert.equal(purge.status, 200)
+    assert.equal((await purge.json()).data.purged, true)
+    assert.deepEqual(service.calls.at(-3)[0], 'close')
+    assert.deepEqual(service.calls.at(-2)[0], 'resume')
+    assert.deepEqual(service.calls.at(-1)[0], 'purge')
+  })
+})
+
+test('the approval queue is readable and its decisions require the write token plus a one-time token', async () => {
+  await withServer(async ({ base, service }) => {
+    const list = await fetch(`${base}/overwatch/api/runs/run-1/approvals?state=pending`)
+    assert.equal(list.status, 200)
+    assert.equal((await list.json()).data.approvals[0].id, 'apv_1')
+
+    const missing = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_missing`)
+    assert.equal(missing.status, 404)
+    assert.equal((await missing.json()).code, 'APPROVAL_NOT_FOUND')
+
+    const noToken = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_1/challenge`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{}',
+    })
+    assert.equal(noToken.status, 401)
+
+    const challenge = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_1/challenge`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: '{}',
+    })
+    assert.equal(challenge.status, 200)
+    assert.equal((await challenge.json()).data.token, 'one-time-token')
+
+    const missingApprovalToken = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_1/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: '{}',
+    })
+    assert.equal(missingApprovalToken.status, 400)
+
+    const approve = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_1/approve`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ token: 'one-time-token', note: 'looks right' }),
+    })
+    assert.equal(approve.status, 200)
+    assert.equal((await approve.json()).data.approval.status, 'executed')
+
+    const reject = await fetch(`${base}/overwatch/api/runs/run-1/approvals/apv_1/reject`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'x-overwatch-token': 'secret' },
+      body: JSON.stringify({ reason: 'not now' }),
+    })
+    assert.equal(reject.status, 200)
+    assert.deepEqual(service.calls.slice(-3).map(call => call[0]), ['challenge', 'approve', 'reject'])
   })
 })
 

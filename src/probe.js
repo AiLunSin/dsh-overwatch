@@ -86,12 +86,13 @@ export class Probe {
   /** @param {string} runId */
   freshness(runId) {
     const state = this.runs.get(runId)
+    const staleMs = this.config.sampling.staleMs
     if (state === undefined) return { swarm: source(false, null, 'not sampled'), pressure: source(false, null, 'not sampled'), fish: source(false, null, 'not sampled') }
     const now = this.clock()
     return {
-      swarm: source(state.last.swarm.ok, state.last.swarm.at, state.last.swarm.error, now),
-      pressure: source(state.last.pressure.ok, state.last.pressure.at, state.last.pressure.error, now),
-      fish: source(state.last.fish.ok, state.last.fish.at, state.last.fish.error, now),
+      swarm: source(state.last.swarm.ok, state.last.swarm.at, state.last.swarm.error, now, staleMs, state.failures.events),
+      pressure: source(state.last.pressure.ok, state.last.pressure.at, state.last.pressure.error, now, staleMs, state.failures.pressure),
+      fish: source(state.last.fish.ok, state.last.fish.at, state.last.fish.error, now, staleMs, state.failures.fish),
     }
   }
 
@@ -553,10 +554,11 @@ function summarizeFish(data) {
   }
 }
 
-/** @param {boolean} ok @param {string | null} at @param {string | null} error @param {number} [now] */
-function source(ok, at, error, now = Date.now()) {
+/** @param {boolean} ok @param {string | null} at @param {string | null} error @param {number} [now] @param {number} [staleMs] @param {number} [failures] */
+function source(ok, at, error, now = Date.now(), staleMs = 30_000, failures = 0) {
   const ageMs = at === null ? null : Math.max(0, now - Date.parse(at))
-  return { ok, at, ageMs, error }
+  const stale = ok === true && typeof ageMs === 'number' && ageMs > staleMs
+  return { ok, at, ageMs, stale, failures, error }
 }
 
 /** @returns {SourceState} */

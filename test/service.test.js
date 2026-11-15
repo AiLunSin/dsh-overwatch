@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { after, test } from 'node:test'
@@ -59,6 +59,7 @@ function fakePorts() {
       async intervene(_runId, body) {
         state.calls.push(body.action)
         if (body.action === 'pause') state.status = 'paused'
+        if (body.action === 'resume') state.status = 'running'
         return { ok: true, status: 200, data: { status: state.status }, error: null }
       },
       supports(decision) {
@@ -136,9 +137,9 @@ function fakeCtx(webServer) {
   }
 }
 
-function config(dataDir, fishDir) {
+function config(dataDir, fishDir, storage = {}) {
   return resolveConfig({
-    storage: { dataDir },
+    storage: { dataDir, ...storage },
     fish: { dataDir: fishDir ?? '' },
     http: { token: 'secret' },
     sampling: { swarmEventMs: 1_000, swarmSnapshotMs: 1_000, pressureMs: 1_000, fishMs: 1_000 },
@@ -189,6 +190,74 @@ test('the service arms one supervisor, lists it, and leaves a readable archive a
   assert.equal(archived.state, 'disarmed')
   assert.equal(service.listRuns()[0].armed, false)
   assert.match(service.report('run-1'), /archive/)
+  service.close()
+})
+
+test('the service can resume a paused run as a human action', async () => {
+  const dataDir = tempDir()
+  const ctx = fakeCtx(fakeWebServer('http://127.0.0.1:1')).ctx
+  const ports = fakePorts()
+  const service = new OverwatchService({
+    ctx,
+    config: config(dataDir),
+    version: '0.1.0',
+    portsFactory: () => ports,
+  })
+  await service.open()
+  await service.arm({ runId: 'run-1', mode: 'guard' })
+  ports.state.status = 'paused'
+  const resumed = await service.resume('run-1', 'operator resumed')
+  assert.equal(resumed.resumed, true)
+  assert.equal(resumed.status, 'running')
+  assert.ok(ports.state.calls.includes('resume'))
+  service.close()
+})
+
+test('purge requires an explicit confirmation and leaves a service-log tombstone', async () => {
+  const dataDir = tempDir()
+  const ctx = fakeCtx(fakeWebServer('http://127.0.0.1:1')).ctx
+  const service = new OverwatchService({
+    ctx,
+    config: config(dataDir),
+    version: '0.1.0',
+    portsFactory: () => fakePorts(),
+  })
+  await service.open()
+  await service.arm({ runId: 'run-1', mode: 'guard' })
+  const runDir = path.join(service.dataDir, 'runs', 'run-1')
+  assert.equal(existsSync(runDir), true)
+  assert.throws(() => service.purge('run-1', { confirm: 'PURGE run-1' }), error => error.code === 'RUN_ARMED')
+  await service.disarm('run-1', 'test done')
+  assert.throws(() => service.purge('run-1', { confirm: 'no' }), error => error.code === 'CONFIRM_REQUIRED')
+  const result = service.purge('run-1', { confirm: 'PURGE run-1', reason: 'retention test' })
+  assert.equal(result.purged, true)
+  assert.equal(existsSync(runDir), false)
+  assert.ok(service.watchEvents({ limit: 100 }).some(event => event.type === 'watch/service/purge' && event.payload.runId === 'run-1'))
+  service.close()
+})
+
+test('automatic retention purges only runs older than retentionDays and tombstones each purge', async () => {
+  const dataDir = tempDir()
+  const ctx = fakeCtx(fakeWebServer('http://127.0.0.1:1')).ctx
+  const service = new OverwatchService({
+    ctx,
+    config: config(dataDir, undefined, { retentionDays: 1 }),
+    version: '0.1.0',
+    portsFactory: () => fakePorts(),
+  })
+  await service.open()
+  await service.arm({ runId: 'run-old', mode: 'guard' })
+  await service.disarm('run-old', 'old run')
+  const future = Date.now() + 2 * 86_400_000
+  service.clock = () => future
+  await service.arm({ runId: 'run-new', mode: 'guard' })
+  await service.disarm('run-new', 'new run')
+
+  const result = service.retention()
+  assert.deepEqual(result.purged, ['run-old'])
+  assert.equal(existsSync(path.join(service.dataDir, 'runs', 'run-old')), false)
+  assert.equal(existsSync(path.join(service.dataDir, 'runs', 'run-new')), true)
+  assert.ok(service.watchEvents({ limit: 100 }).some(event => event.type === 'watch/service/retention' && event.payload.runId === 'run-old'))
   service.close()
 })
 

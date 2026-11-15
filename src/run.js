@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Per-run supervisor: one writer, one sampler, one action queue.
  *
  * The supervisor is the unit that `watch_arm` creates. It owns the run's watch
@@ -10,14 +10,15 @@
 
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
+import { ApprovalError, ApprovalQueue } from './approvals.js'
 import { buildCaseCard, buildEvidence } from './card.js'
-import { CaseManager } from './cases.js'
+import { CaseManager, CLOSE_REASONS } from './cases.js'
 import { Executor } from './executor.js'
 import { evaluateGuard } from './guard.js'
 import { Probe } from './probe.js'
-import { evaluateSnapshot, conflictStormSignal, contextPressureSignal, failureStreakSignal, gatePingpongSignal, reviewDeadlockSignal, stallSignal } from './signals.js'
+import { evaluateSnapshot, conflictStormSignal, contextPressureSignal, failureStreakSignal, gatePingpongSignal, reviewDeadlockSignal, sourceUnavailableSignal, stallSignal } from './signals.js'
 import { WatchStore } from './store.js'
-import { atomicWriteJson, clamp, ensureDir, sha256 } from './util.js'
+import { atomicWriteJson, clamp, ensureDir, scrubText, sha256 } from './util.js'
 import { WatchOfficer } from './watch.js'
 
 const RUN_ID_PATTERN = /^[A-Za-z0-9_-]{1,200}$/
@@ -38,6 +39,8 @@ export class RunSupervisor {
    * @param {string} options.dir run data directory
    * @param {() => number} [options.clock]
    * @param {{ info?: (message: string) => void, warn?: (message: string) => void }} [options.logger]
+   * @param {string} [options.hmacKey] chain HMAC key; defaults to OVERWATCH_CHAIN_KEY
+   * @param {string} [options.anchorFile] external chain-head anchor file
    */
   constructor(options) {
     if (!RUN_ID_PATTERN.test(options.runId)) throw fail('INVALID_RUN_ID', 'runId must match [A-Za-z0-9_-]{1,200}')
@@ -72,6 +75,8 @@ export class RunSupervisor {
       clock: this.clock,
       maxBytes: options.config.storage.maxBytesPerRun,
       lockWaitMs: options.lockWaitMs ?? 2_000,
+      hmacKey: options.hmacKey,
+      anchorFile: options.anchorFile ?? '',
     })
     this.caseManager = new CaseManager({
       runId: this.runId,
@@ -81,13 +86,25 @@ export class RunSupervisor {
       clock: this.clock,
       logger: this.logger,
     })
+    this.approvalQueue = new ApprovalQueue({
+      dir: path.join(this.dir, 'approvals'),
+      runId: this.runId,
+      store: this.store,
+      clock: this.clock,
+      ttlMs: this.config.policy.approvalTtlMs,
+    })
     this.probe = new Probe({ ports: this.ports, config: this.config, clock: this.clock, logger: this.logger })
     this.executor = new Executor({
       store: this.store,
       ports: [this.ports.swarm],
-      policy: { mode: this.config.mode, autopilot: this.config.policy.autopilot },
+      policy: {
+        mode: this.config.mode,
+        autopilot: this.config.policy.autopilot,
+        maxAutoInterventions: this.config.policy.maxAutoInterventions,
+      },
       clock: this.clock,
       logger: this.logger,
+      approvals: this.approvalQueue,
     })
     /** Test seam: the real factory builds a WatchOfficer over ctx.subagents. */
     this.watchFactory = options.watchFactory ?? (watchOptions => new WatchOfficer(watchOptions))
@@ -121,8 +138,9 @@ export class RunSupervisor {
     ensureDir(path.join(this.dir, 'snapshots'))
     await this.store.open()
     await this.caseManager.load()
+    this.approvalQueue.load()
     const recovered = this.executor.recover()
-    if (this.store.repaired !== null) {
+    if (this.store.repaired !== null || recovered.incomplete.length > 0 || recovered.damaged.length > 0) {
       this.store.append({
         type: 'watch/recovered',
         actor: 'system',
@@ -276,6 +294,7 @@ export class RunSupervisor {
         config: this.config,
         runId: this.runId,
         now,
+        elapsedMs: this.armedAt === null ? 0 : Math.max(0, now - Date.parse(this.armedAt)),
       })
       for (const plan of evaluation.plans) {
         const record = this.caseManager.get(plan.caseId)
@@ -283,13 +302,17 @@ export class RunSupervisor {
         const outcome = await this.executor.executePlan(plan, { runId: this.runId, evidenceIds })
         this.guardState.lastActions.set(`${plan.caseId}:${plan.kind}`, now)
         if (outcome.duplicate === true) continue
-        this.caseManager.recordAction(plan.caseId, {
-          id: outcome.actionId ?? `act_${plan.caseId}_${plan.kind}`,
-          kind: plan.kind,
-          state: outcome.ok ? 'verified' : (outcome.code ?? 'failed'),
-          severity: plan.severity,
-          detail: outcome.requiresHuman === true ? 'requires_human' : (outcome.reason ?? null),
-        })
+        // A queued approval is not an attempted action; the approval queue is
+        // its durable record until a human decides.
+        if (outcome.code !== 'APPROVAL_REQUIRED') {
+          this.caseManager.recordAction(plan.caseId, {
+            id: outcome.actionId ?? `act_${plan.caseId}_${plan.kind}`,
+            kind: plan.kind,
+            state: outcome.ok ? 'verified' : (outcome.code ?? 'failed'),
+            severity: plan.severity,
+            detail: outcome.requiresHuman === true ? 'requires_human' : (outcome.reason ?? null),
+          })
+        }
         if (outcome.ok === true) this.#afterAction(plan, outcome, now)
         else if (outcome.requiresHuman === true) {
           this.caseManager.recordDecision(plan.caseId, {
@@ -336,8 +359,11 @@ export class RunSupervisor {
       eventGap: snapshot.eventGap ?? undefined,
     }, this.config)
 
+    const pressureFreshness = snapshot?.freshness?.pressure
+    const pressureUsable = pressureFreshness === undefined || pressureFreshness === null
+      || (pressureFreshness.ok === true && pressureFreshness.stale !== true)
     for (const member of snapshot.members ?? []) {
-      if (typeof member.context === 'number') {
+      if (pressureUsable && typeof member.context === 'number') {
         const signal = contextPressureSignal(
           { ratio: member.context, sessionId: member.childId ?? member.id, at: member.pressureAt ?? snapshot.asOf },
           this.config.thresholds,
@@ -347,7 +373,7 @@ export class RunSupervisor {
           signals.push(signal)
         }
       }
-      if (typeof member.failures === 'number' && member.failures >= this.config.thresholds.failureStreak) {
+      if (pressureUsable && typeof member.failures === 'number' && member.failures >= this.config.thresholds.failureStreak) {
         const signal = failureStreakSignal(
           { failures: member.failures, lastFailureAt: member.pressureAt ?? snapshot.asOf, ref: { memberId: member.id, sessionId: member.childId } },
           this.config.thresholds,
@@ -376,8 +402,12 @@ export class RunSupervisor {
     }
     // A run that is still open but silent for the stall window is worth a case
     // even though the guard does not act on it in M1. A wall-clock jump must not
-    // fabricate a stall in the same tick.
-    const stall = this.clockJumpAt !== null && now - this.clockJumpAt <= 60_000
+    // fabricate a stall in the same tick, and a stale source is not evidence of
+    // silence.
+    const swarmFreshness = snapshot?.freshness?.swarm
+    const swarmUsable = swarmFreshness === undefined || swarmFreshness === null
+      || (swarmFreshness.ok === true && swarmFreshness.stale !== true)
+    const stall = !swarmUsable || (this.clockJumpAt !== null && now - this.clockJumpAt <= 60_000)
       ? null
       : stallSignal({
           status: String(snapshot.status ?? 'unknown'),
@@ -386,6 +416,16 @@ export class RunSupervisor {
           ref: { runId: this.runId },
         }, this.config.thresholds)
     if (stall !== null) signals.push(stall)
+    if (swarmFreshness !== undefined && swarmFreshness !== null) {
+      const sourceSignal = sourceUnavailableSignal({
+        source: 'swarm',
+        failures: Number(swarmFreshness.failures ?? 0),
+        error: swarmFreshness.error ?? null,
+        at: new Date(now).toISOString(),
+        ref: { runId: this.runId },
+      })
+      if (sourceSignal !== null) signals.push(sourceSignal)
+    }
     return signals
   }
 
@@ -429,23 +469,23 @@ export class RunSupervisor {
           } catch (error) {
             names = { error: messageOf(error) }
           }
-          this.store.append({
-            type: 'watch/agent/ignored',
-            actor: 'system',
-            payload: {
-              agentId: id,
-              origin: agent.session?.header?.origin ?? null,
-              keys: Object.keys(agent),
-              options: agent.options ?? null,
-              runtimeContext: summar(agent.runtimeContext),
-              scopeKeys: agent.scope === null || agent.scope === undefined ? null : Object.keys(agent.scope),
-              systemPrompt: typeof agent.systemPrompt === 'string' ? agent.systemPrompt.slice(0, 500) : null,
-              phase: agent.phase ?? null,
-              names,
-              header: agent.session?.header ?? null,
-              watchName: this.watch.name,
-            },
-          })
+          try {
+            // Deliberately metadata-only: never persist a prompt, session
+            // header, options bag, or runtime context for an unrelated agent.
+            this.store.append({
+              type: 'watch/agent/ignored',
+              actor: 'system',
+              payload: {
+                agentId: id,
+                origin: agent.session?.header?.origin ?? null,
+                phase: agent.phase ?? null,
+                names,
+                watchName: this.watch.name,
+              },
+            })
+          } catch (error) {
+            this.#recordError(error)
+          }
         }
       }
       return claimed
@@ -601,6 +641,17 @@ export class RunSupervisor {
     if (record === null) return { ok: false, code: 'CASE_NOT_FOUND', message: 'case not found' }
     if (record.state === 'closed') return { ok: false, code: 'CASE_CLOSED', message: 'case is already closed' }
     if (record.generation !== meta.generation) return { ok: false, code: 'STALE_GENERATION', message: 'case generation changed; refusing a stale decision' }
+    const action = typeof decision?.action === 'string' ? decision.action : ''
+    const freshness = this.probe.freshness(this.runId).swarm
+    if ((freshness.ok !== true || freshness.stale === true || Number(freshness.failures ?? 0) >= 3) && !['notice', 'escalate'].includes(action)) {
+      const reason = 'swarm source is unavailable/stale; only notice or escalate is allowed'
+      this.store.append({
+        type: 'watch/decision/denied',
+        actor: 'policy',
+        payload: { caseId: meta.caseId, action, requiresHuman: true, reason },
+      })
+      return { ok: false, code: 'STALE_SOURCE', requiresHuman: true, reason }
+    }
     const evidenceIds = new Set(record.evidence.map(entry => String(entry.id)))
     const outcome = await this.executor.execute(decision, {
       caseId: meta.caseId,
@@ -695,6 +746,15 @@ export class RunSupervisor {
       causationRef: { kind: 'case', caseId },
       payload: { caseId, status: outcome.status, error: outcome.error ?? null, code: outcome.code ?? null },
     })
+    if (outcome.code === 'WATCH_UNRESTRICTED') {
+      this.watchFailed = true
+      this.store.append({
+        type: 'watch/degraded',
+        actor: 'system',
+        payload: { reason: 'watch officer could not be proven tool-restricted; falling back to the deterministic guard' },
+      })
+      return
+    }
     if (this.watchErrors >= 2) {
       this.watchFailed = true
       this.store.append({ type: 'watch/degraded', actor: 'system', payload: { reason: 'two consecutive watch failures; falling back to the deterministic guard' } })
@@ -710,7 +770,8 @@ export class RunSupervisor {
   #applyWatchOutcome(caseId, decision, result, now) {
     const action = String(decision.action ?? '')
     if (action === 'throttle') {
-      const minutes = Math.max(1, Math.trunc(Number(decision.params?.minutes ?? this.config.policy.throttleMinutes)))
+      const requested = Number(decision.params?.minutes ?? this.config.policy.throttleMinutes)
+      const minutes = Number.isSafeInteger(requested) ? Math.min(30, Math.max(1, requested)) : this.config.policy.throttleMinutes
       this.throttle = {
         active: true,
         actionId: String(result.actionId ?? ''),
@@ -734,8 +795,15 @@ export class RunSupervisor {
       this.caseManager.close(caseId, 'escalated', 'watch officer escalated to a human')
       return
     }
-    if (action === 'coach' || action === 'notice') {
-      this.caseManager.close(caseId, 'mitigated', `watch officer issued ${action}`)
+    if (action === 'coach') {
+      this.caseManager.close(caseId, 'mitigated', 'watch officer issued coach')
+      return
+    }
+    if (action === 'notice') {
+      // A notice is record-only. Closing it as mitigated would suppress the
+      // real signal for the cooldown window; leave it open for auto-resolve or
+      // an explicit human close.
+      return
     }
   }
 
@@ -774,13 +842,15 @@ export class RunSupervisor {
   #writeShift(reason, now, officer = null) {
     const view = this.snapshot()
     this.shiftSeq += 1
-    const id = `shift-${String(this.shiftSeq).padStart(4, '0')}`
+    // The store sequence survives re-arm, so a second shift for the same run
+    // cannot overwrite the previous handover file.
+    const id = `shift-${String(Math.max(this.shiftSeq, this.store.seq + 1)).padStart(4, '0')}`
     const cases = this.caseManager.list({ state: 'all', limit: 100 })
     const lines = [
       `# Watch shift ${id} · ${this.runId}`,
       '',
       `- window: ${view.armedAt ?? 'unknown'} -> ${new Date(now).toISOString()}`,
-      `- mode: ${view.mode}  state: ${view.state}  reason: ${reason}`,
+      `- mode: ${view.mode}  state: ${view.state}  reason: ${scrubText(String(reason))}`,
       `- swarm: ${view.status}`,
       `- budget B/W/S/E: ${view.budget.limit} / ${view.budget.spent} / ${this.usage.total} / ${view.budget.spent + this.usage.total}`,
       `- watch officer: ${officer?.name ?? 'none'}  child: ${officer?.childId ?? 'none'}  wakes: ${officer?.wakes ?? 0}  timeouts: ${officer?.timeouts ?? 0}`,
@@ -915,6 +985,7 @@ export class RunSupervisor {
   #writeSnapshot() {
     const snapshot = this.probe.snapshot(this.runId)
     if (snapshot === null) return
+    if (typeof snapshot.goal === 'string') snapshot.goal = scrubText(snapshot.goal)
     const record = {
       schemaVersion: 1,
       runId: this.runId,
@@ -980,6 +1051,7 @@ export class RunSupervisor {
       this.watch = null
     }
     const closed = this.caseManager.closeAll('abandoned', `supervision disarmed: ${reason}`)
+    this.approvalQueue.cancelPending(`run disarmed: ${String(reason).slice(0, 200)}`)
     this.throttle = null
     const shift = this.#writeShift(String(reason).slice(0, 300), this.clock(), watchStatus)
     this.store.append({
@@ -1114,8 +1186,11 @@ export class RunSupervisor {
     if (record === null) throw fail('CASE_NOT_FOUND', `case ${caseId} not found`)
     if (record.state === 'closed') throw fail('CASE_CLOSED', `case ${caseId} is already closed`)
     this.caseManager.setState(caseId, 'acknowledged')
+    // Invalidate any in-flight wake: a late model decision must not overwrite
+    // the human takeover.
+    const updated = this.caseManager.bumpGeneration(caseId)
     this.caseManager.recordDecision(caseId, {
-      generation: record.generation,
+      generation: updated?.generation ?? record.generation,
       actor: 'human',
       verdict: 'acknowledged',
       note: String(note).slice(0, 300),
@@ -1128,6 +1203,183 @@ export class RunSupervisor {
       payload: { action: 'ack', caseId, note: String(note).slice(0, 300) },
     })
     return this.caseManager.get(caseId)
+  }
+
+  /**
+   * Human close of an open case. `abandoned` is reserved for disarm; a human
+   * must pick a real disposition.
+   * @param {string} caseId
+   * @param {string} [reason]
+   * @param {string} [note]
+   */
+  closeCase(caseId, reason = 'resolved', note = '') {
+    if (!CLOSE_REASONS.includes(reason) || reason === 'abandoned') {
+      throw fail('INVALID_CLOSE_REASON', `close reason must be one of resolved, mitigated, escalated, false_positive`)
+    }
+    const record = this.caseManager.get(caseId)
+    if (record === null) throw fail('CASE_NOT_FOUND', `case ${caseId} not found`)
+    if (record.state === 'closed') return record
+    const closed = this.caseManager.close(caseId, reason, String(note).slice(0, 300))
+    this.store.append({
+      type: 'watch/human_action',
+      actor: 'human',
+      causationRef: { kind: 'case', caseId },
+      payload: { action: 'close', caseId, reason, note: String(note).slice(0, 300) },
+    })
+    return closed
+  }
+
+  /**
+   * Pending and decided approval requests. Live runs read the in-memory queue;
+   * archived runs are read from their approval files by the service.
+   * @param {{ state?: string, limit?: number }} [query]
+   */
+  approvals(query = {}) {
+    return this.approvalQueue.list(query)
+  }
+
+  /** @param {string} approvalId */
+  approvalDetail(approvalId) {
+    return this.approvalQueue.get(approvalId)
+  }
+
+  /**
+   * Mint a one-time token for an approval. The token is returned once and only
+   * its hash is stored; approving needs both the write token and this token.
+   * @param {string} approvalId
+   */
+  challengeApproval(approvalId) {
+    this.#assertApprovalCase(approvalId)
+    return this.approvalQueue.challenge(approvalId)
+  }
+
+  /**
+   * Execute one approved request exactly once.
+   * @param {string} approvalId
+   * @param {string} token
+   * @param {string} [note]
+   */
+  async approveApproval(approvalId, token, note = '') {
+    this.#assertApprovalCase(approvalId)
+    const approval = this.approvalQueue.approve(approvalId, token, note)
+    let outcome
+    try {
+      const record = this.caseManager.get(approval.caseId)
+      if (record === null) throw fail('CASE_NOT_FOUND', `case ${approval.caseId} not found`)
+      if (record.state === 'closed') throw fail('CASE_CLOSED', `case ${approval.caseId} is already closed`)
+      const evidenceIds = new Set(record.evidence.map(entry => String(entry.id)))
+      outcome = approval.kind === 'guard_plan'
+        ? await this.executor.executePlan(approval.request.plan, {
+            runId: this.runId,
+            evidenceIds,
+            humanApproved: true,
+            approvalId,
+          })
+        : await this.executor.execute(approval.request.decision, {
+            caseId: approval.caseId,
+            evidenceIds,
+            hardLimit: record.severity === 'L4',
+            runId: this.runId,
+            humanApproved: true,
+            approvalId,
+          })
+    } catch (error) {
+      this.approvalQueue.complete(approvalId, 'failed', {
+        ok: false,
+        code: error instanceof Error && typeof (/** @type {any} */ (error).code) === 'string' ? /** @type {any} */ (error).code : 'EXECUTION_ERROR',
+        error: error instanceof Error ? error.message : String(error),
+      })
+      throw error
+    }
+    const ok = outcome.ok === true
+    this.approvalQueue.complete(approvalId, ok ? 'executed' : 'failed', {
+      ok,
+      actionId: outcome.actionId ?? null,
+      code: outcome.code ?? null,
+      verified: outcome.verified === true,
+      reason: outcome.reason ?? null,
+    })
+    if (typeof outcome.actionId === 'string') {
+      this.caseManager.recordAction(approval.caseId, {
+        id: outcome.actionId,
+        kind: approval.action,
+        state: ok ? 'verified' : String(outcome.code ?? 'failed'),
+        detail: ok ? 'approved_by_human' : String(outcome.reason ?? outcome.code ?? 'failed'),
+      })
+    }
+    const updated = this.caseManager.get(approval.caseId)
+    if (updated !== null && updated.state !== 'closed') {
+      this.caseManager.recordDecision(approval.caseId, {
+        generation: updated.generation,
+        actor: 'human',
+        verdict: `approved:${approval.action}`,
+        action: approval.action,
+        reason: typeof note === 'string' && note.trim() !== '' ? note.trim().slice(0, 300) : 'human approved a queued request',
+        accepted: ok,
+        code: outcome.code ?? null,
+      })
+    }
+    if (ok) {
+      if (approval.kind === 'guard_plan') this.#afterAction(approval.request.plan, outcome, this.clock())
+      else this.#applyWatchOutcome(approval.caseId, approval.request.decision, outcome, this.clock())
+    }
+    return { approval: this.approvalQueue.get(approvalId), outcome }
+  }
+
+  /**
+   * @param {string} approvalId
+   * @param {string} [reason]
+   */
+  rejectApproval(approvalId, reason = '') {
+    this.#assertApprovalCase(approvalId)
+    const approval = this.approvalQueue.reject(approvalId, reason)
+    this.caseManager.recordDecision(approval.caseId, {
+      actor: 'human',
+      verdict: `rejected:${approval.action}`,
+      action: approval.action,
+      reason: typeof reason === 'string' && reason.trim() !== '' ? reason.trim().slice(0, 300) : 'human rejected the queued request',
+      accepted: false,
+      code: 'APPROVAL_REJECTED',
+    })
+    return approval
+  }
+
+  /** @param {string} approvalId */
+  #assertApprovalCase(approvalId) {
+    const view = this.approvalQueue.get(approvalId)
+    if (view === null) throw new ApprovalError(`approval ${approvalId} does not exist`, 'APPROVAL_NOT_FOUND')
+    const record = this.caseManager.get(view.caseId)
+    if (record === null) throw fail('CASE_NOT_FOUND', `case ${view.caseId} not found`)
+    if (record.state === 'closed') throw fail('CASE_CLOSED', `case ${view.caseId} is already closed`)
+    return record
+  }
+
+  /**
+   * Human-only resume of a run the guard paused. The HTTP route is token
+   * protected; this method never runs from a model decision.
+   * @param {string} [reason]
+   */
+  async resume(reason = 'resumed by operator') {
+    const response = await this.ports.swarm.intervene(this.runId, {
+      action: 'resume',
+      reason: String(reason).slice(0, 300),
+      actor: 'overwatch-human',
+    })
+    if (response.ok !== true) {
+      throw fail('SWARM_WRITE_FAILED', `resume was rejected by swarm: ${String(response.error ?? response.status)}`)
+    }
+    const run = await this.ports.swarm.run(this.runId)
+    const status = run.ok === true && run.data !== null && typeof run.data === 'object'
+      ? String(/** @type {any} */ (run.data).status ?? 'unknown')
+      : 'unknown'
+    if (status !== 'running') throw fail('RUN_NOT_RUNNING', `swarm run is ${status} after resume`)
+    this.throttle = null
+    this.store.append({
+      type: 'watch/human_action',
+      actor: 'human',
+      payload: { action: 'resume', runId: this.runId, reason: String(reason).slice(0, 300) },
+    })
+    return { runId: this.runId, status, resumed: true }
   }
 
   /** Live read model for the panel and tools. */
@@ -1158,6 +1410,7 @@ export class RunSupervisor {
       watch: this.watchStatus(),
       cases: { open: this.caseManager.openCount(), bySeverity: this.#caseCounts(), total: this.caseManager.list({ state: 'all', limit: 500 }).length },
       throttle: this.throttle,
+      approvals: { pending: this.approvalQueue.pendingCount() },
       interventions: this.executor.interventions,
       lock: { held: this.store.opened, name: `watch-${this.runId}` },
       lastEventAt: snapshot?.lastEventAt ?? null,
@@ -1220,16 +1473,27 @@ export class RunSupervisor {
 }
 
 /**
+ * Reject a reserved key anywhere in a bounded JSON tree. Iterative on purpose:
+ * a depth-limited recursive check can be bypassed by nesting one level deeper.
  * @param {unknown} value
  * @param {string} key
- * @param {number} [depth]
  */
-function containsKey(value, key, depth = 0) {
-  if (depth > 4 || value === null || typeof value !== 'object') return false
-  if (Array.isArray(value)) return value.some(item => containsKey(item, key, depth + 1))
-  for (const [name, child] of Object.entries(value)) {
-    if (name === key) return true
-    if (containsKey(child, key, depth + 1)) return true
+function containsKey(value, key) {
+  const stack = [value]
+  let visited = 0
+  while (stack.length > 0) {
+    const node = stack.pop()
+    if (node === null || typeof node !== 'object') continue
+    visited += 1
+    if (visited > 10_000) return true
+    if (Array.isArray(node)) {
+      for (const item of node) stack.push(item)
+      continue
+    }
+    for (const [name, child] of Object.entries(node)) {
+      if (name === key) return true
+      stack.push(child)
+    }
   }
   return false
 }

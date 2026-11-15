@@ -19,11 +19,11 @@ dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-conso
 - 四个根 agent 工具：`watch_arm` / `watch_disarm` / `watch_status` / `watch_report`
 - 每 run 单写者 + 哈希链 `watch.jsonl`；崩溃尾部修复、篡改检测、只读归档
 - 采样器：swarm 事件游标 / 快照 / pressure 活跃成员 / 鱼缸概览；缺口锁存、退避、新鲜度
-- 事件单：确定性 key、15 分钟冷却、L2 双 tick、升级/重开、物化视图
+- 事件单：确定性 key、15 分钟冷却、L2 双 tick、升级/重开、`resolveMs` 自动 resolve
 - Guard：80% throttle（到期自动 resume）、95% 硬 pause、100% abort、
-  事件流缺口 abort；无 case / 无 token / 冷却 / 自动干预上限时只记 notice
-- Executor：校验 → 授权 → 幂等 → 执行 → 验证 → 记账；重启恢复
-- 只读 API + token/同源保护的 arm/disarm/ack；Web 面板（值班室 + 事件单）
+  事件流缺口 abort、墙钟 `maxRunMs` abort；源 stale/unavailable 时暂停确定性动作
+- Executor：校验 → 授权（绑定 run）→ 幂等 → 执行 → 验证 → 记账；崩溃恢复标记 unknown
+- 只读 API + token/同源保护的 arm/disarm/ack/close/resume/purge；Web 面板（值班室 + 事件单）
 
 **M2 值班员（experimental）**：
 
@@ -37,7 +37,7 @@ dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-conso
 - 面板显示值班员 state/wakes/timeouts/S/R/child，并区分 guard-only / supervised
 - 真实 DSH 端到端：`npm run m2`（12/12），见 `docs/m2.md`
 
-**M3 鱼缸 / 回放 / 恢复（Host/API 完成，浏览器恢复待验收）**：
+**M3 鱼缸 / 回放 / 恢复（Host/API 完成，浏览器恢复已由 M4 Edge 验收）**：
 
 - 只读 fishkeeper 数据目录（检查点索引、manifest 摘要、audit 尾部）；不读 blob
 - `GET /overwatch/api/fish`、`/fish/:sourceId`；`config.fish.dataDir` 可覆盖默认
@@ -49,9 +49,8 @@ dsh-swarm（运行事实）、dsh-pressure（token 读数）、fish-keeper-conso
 - 面板：鱼缸索引与恢复流程（dryRun→确认→执行→记账）、回放页、doctor 卡
 - 真实 DSH 端到端：`npm run m1`（33/33，含 M3 检查），见 `docs/m3.md`
 
-**未实现（M4 外部条件）**：真实模型 A/B（需要凭据与费用）、真实浏览器 fishkeeper
-恢复演练、npm 发布（需要 OTP）、GitHub Release（仓库没有 remote）。
-fishkeeper 自动检查点仍为 P1。
+**未实现（M4 外部条件）**：完整真实模型 A/B/C（需要凭据与费用）、npm 发布（需要 OTP）。
+GitHub Release `v0.1.0` 已创建；fishkeeper 自动检查点仍为 P1。
 
 ## 用法（5 分钟）
 
@@ -106,7 +105,7 @@ $DSH_HOME/overwatch/
 ## 验证
 
 ```powershell
-npm test     # 124 个测试
+npm test     # 151 个测试
 npm run m0   # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1   # M1/M3 web 端到端（33/33）
 npm run m2   # M2 值班员 headless 端到端（12/12）
@@ -119,10 +118,11 @@ npm run m2   # M2 值班员 headless 端到端（12/12）
 - **M2 判断质量未验证**：端到端用脚本化 provider；真实模型的误动作率/成本 A/B 是 M4 门槛。
 - 教练/节流只保证写到 watch 日志与 swarm `steer` 事件；成员 inbox 投递要等
   上游 message 路由（P1）。
-- `pause` 需人工 resume；`throttle` 只对"由我们暂停"的运行自动恢复。
+- `pause` 需人工恢复：`POST /overwatch/api/runs/:id/resume`（写 token）；`throttle` 只对
+  "由我们暂停"的运行自动恢复。
 - 自动鱼数据检查点需要浏览器凭据，v1 不做（P1）；面板只读展示。
-- 面板的 fishkeeper 恢复流程需要浏览器认证；**真实恢复演练未验收**（本环境没有可
-  自动化的浏览器）。overwatch 永不接收/存储 confirmToken。
+- 面板的 fishkeeper 恢复流程需要浏览器认证；真实恢复演练已由 M4 的 Edge 验收通过。
+  overwatch 永不接收/存储 confirmToken。
 - swarm 写 token 与 overwatch 写 token 需一致（或显式 `ports.swarmToken`）。
 - 监管层崩溃时总支出上界是 `B + S`（S ≤ 5% × B），不宣称"监管崩溃也零超支"。
-- 面板没有真实浏览器自动化验收；M0 已记录 headless Edge 在本机会挂起。
+- 面板的 M4 Edge 验收覆盖恢复/键盘/AX；M0 已记录普通 headless Edge 在本机会挂起。

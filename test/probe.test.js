@@ -124,6 +124,19 @@ test('a sequence gap is latched and the stream is rebuilt once', async () => {
   assert.deepEqual(probe.events('run-1', { since: 0 }).map(entry => entry.seq), [1, 3])
 })
 
+test('freshness marks a source stale after the configured staleMs', async () => {
+  let now = T0
+  const ports = fakePorts()
+  const probe = new Probe({ ports, config, clock: () => now })
+  await probe.prime('run-1')
+  assert.equal(probe.freshness('run-1').swarm.stale, false)
+  now = T0 + 31_000
+  const fresh = probe.freshness('run-1').swarm
+  assert.equal(fresh.stale, true)
+  assert.equal(fresh.ok, true)
+  assert.equal(typeof fresh.failures, 'number')
+})
+
 test('a failed snapshot marks freshness false and backs off instead of reporting zeros', async () => {
   const ports = fakePorts({ snapshotFails: 1 })
   const probe = new Probe({ ports, config, clock: () => T0 })

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { budgetSignal, evaluateSnapshot, failureStreakSignal, stallSignal } from '../src/signals.js'
+import { budgetSignal, evaluateSnapshot, failureStreakSignal, sourceUnavailableSignal, stallSignal } from '../src/signals.js'
 
 const thresholds = {
   budgetPressure: 0.8,
@@ -27,6 +27,14 @@ test('budget pressure and hard pause have stable codes', () => {
 
   assert.equal(budgetSignal({ used: 100, limit: 1_000 }, thresholds), null)
   assert.equal(budgetSignal({ used: 10, limit: 0 }, thresholds), null)
+})
+
+test('source unavailability is a stable L2 signal after three failures', () => {
+  assert.equal(sourceUnavailableSignal({ failures: 2 }), null)
+  const signal = sourceUnavailableSignal({ source: 'swarm', failures: 3, error: 'HTTP 503', at: '2026-11-14T00:00:00.000Z' })
+  assert.equal(signal.code, 'source_unavailable')
+  assert.equal(signal.severity, 'L2')
+  assert.equal(signal.evidence.observed.failures, 3)
 })
 
 test('failure streaks and stalls need a real threshold crossing', () => {

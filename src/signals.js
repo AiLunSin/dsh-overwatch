@@ -215,6 +215,33 @@ export function eventGapSignal(input = {}) {
 }
 
 /**
+ * The swarm source has failed repeatedly. This is L2: it opens a case and
+ * blocks model-driven actions until the source recovers; it is not an abort.
+ * @param {{ source?: string, failures: number, error?: string | null, at?: string, ref?: unknown }} input
+ * @param {number} [threshold]
+ * @returns {Signal | null}
+ */
+export function sourceUnavailableSignal(input, threshold = 3) {
+  if (!(input.failures >= threshold)) return null
+  const source = input.source ?? 'swarm'
+  const at = input.at ?? new Date(0).toISOString()
+  return {
+    code: 'source_unavailable',
+    severity: 'L2',
+    summary: `${source} source unavailable (${input.failures} consecutive failures)`,
+    suggestedAction: 'escalate',
+    evidence: {
+      id: evidenceId('watch', 'source_unavailable', `${source}:${input.failures}`),
+      source: 'watch',
+      kind: 'source',
+      at,
+      ref: input.ref ?? { source },
+      observed: { source, failures: input.failures, threshold, error: input.error ?? null },
+    },
+  }
+}
+
+/**
  * The same task keeps failing its gate. L2: stop re-dispatching and escalate,
  * but do not kill the run.
  * @param {{ taskId: string, failures: number, at?: string }} input

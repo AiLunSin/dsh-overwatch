@@ -133,6 +133,24 @@ test('an elapsed throttle window plans an automatic resume against the same case
   assert.ok(resume.evidenceRefs.length >= 1)
 })
 
+test('a wall-clock deadline plans a hard abort', () => {
+  const h = harness(config({ thresholds: { maxRunMs: 1_000 } }))
+  const input = { ...h.run(0.2), elapsedMs: 1_001 }
+  const result = evaluateGuard(input)
+  assert.equal(result.plans[0].kind, 'abort')
+  assert.equal(result.plans[0].severity, 'L4')
+  assert.equal(result.plans[0].hardLimit, true)
+})
+
+test('a stale swarm source suppresses deterministic budget actions', () => {
+  const h = harness()
+  const input = h.run(0.96)
+  input.snapshot.freshness = { swarm: { ok: true, stale: true, ageMs: 60_000, failures: 0 } }
+  const result = evaluateGuard(input)
+  assert.equal(result.plans.length, 0)
+  assert.ok(result.notices.some(notice => notice.code === 'source_stale'))
+})
+
 test('a recent attempt for the same case is suppressed by the cooldown', () => {
   const h = harness()
   const first = evaluateGuard(h.run(0.81))

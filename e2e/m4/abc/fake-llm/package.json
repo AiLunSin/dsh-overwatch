@@ -1,0 +1,15 @@
+{
+  "name": "dsh-fake-llm-abc",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Scripted root provider for the M4 A/B/C supervision comparison. Test only.",
+  "exports": {
+    ".": "./index.js"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

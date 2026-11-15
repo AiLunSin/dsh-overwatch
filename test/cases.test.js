@@ -88,6 +88,41 @@ test('repeated evidence merges without duplicating signals, and escalation updat
   assert.ok(store.events.some(event => event.type === 'watch/case/updated' && event.payload.escalated === true))
 })
 
+test('a soft case resolves after its signal has been absent for resolveMs', () => {
+  const { cases } = manager({ config: resolveConfig({ policy: { twoSignalRule: false, resolveMs: 1_000 } }) })
+  const opened = cases.reconcile({ signals: [signal()], snapshot: {}, now: Date.parse('2026-11-14T02:00:00.000Z') })
+  assert.equal(opened.opened.length, 1)
+  const result = cases.reconcile({
+    signals: [],
+    snapshot: { freshness: { swarm: { ok: true, stale: false } } },
+    now: Date.parse('2026-11-14T02:00:02.000Z'),
+  })
+  assert.equal(result.closed.length, 1)
+  assert.equal(result.closed[0].state, 'closed')
+  assert.equal(result.closed[0].closeReason, 'resolved')
+})
+
+test('a source outage does not resolve a case', () => {
+  const { cases } = manager({ config: resolveConfig({ policy: { twoSignalRule: false, resolveMs: 1_000 } }) })
+  cases.reconcile({ signals: [signal()], snapshot: {}, now: Date.parse('2026-11-14T02:00:00.000Z') })
+  const result = cases.reconcile({
+    signals: [],
+    snapshot: { freshness: { swarm: { ok: false, stale: true } } },
+    now: Date.parse('2026-11-14T02:00:02.000Z'),
+  })
+  assert.equal(result.closed.length, 0)
+  assert.equal(cases.openCount(), 1)
+})
+
+test('ack generation bump invalidates a late decision and closed cases reject actions', () => {
+  const { cases } = manager({ config: resolveConfig({ policy: { twoSignalRule: false } }) })
+  const record = cases.reconcile({ signals: [signal()], snapshot: {}, now: Date.parse('2026-11-14T02:00:00.000Z') }).opened[0]
+  assert.equal(cases.bumpGeneration(record.id).generation, 2)
+  cases.close(record.id, 'resolved', 'manual')
+  assert.equal(cases.recordAction(record.id, { id: 'act_1', kind: 'coach' }), null)
+  assert.equal(cases.recordDecision(record.id, { verdict: 'late' }), null)
+})
+
 test('a closed case suppresses the same severity inside the cooldown and reopens on escalation', () => {
   const { cases } = manager({ config: resolveConfig({ policy: { twoSignalRule: false, cooldownMs: 60_000 } }) })
   const first = cases.reconcile({ signals: [signal()], snapshot: {}, now: Date.parse('2026-11-14T02:00:00.000Z') })

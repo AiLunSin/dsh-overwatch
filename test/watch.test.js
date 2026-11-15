@@ -119,6 +119,43 @@ test('the officer claims only its named child and applies the restriction synchr
   assert.equal(officer.childId, 'sess_watch')
 })
 
+test('a restriction failure fails closed: no card, no start, no decision', async () => {
+  const { officer, childTools, state } = harness()
+  childTools.restrict = () => {
+    throw new Error('restrict exploded')
+  }
+  const child = { id: 'sess_watch', ctx: { tools: childTools } }
+  assert.equal(officer.handleAgentCreated(child), true)
+  assert.equal(officer.status().state, 'failed')
+  assert.match(String(officer.status().unavailable), /restrict exploded/)
+  assert.deepEqual(childTools.registered, [])
+  const wake = await officer.wake({ caseId: 'case-1', generation: 1, card: {}, timeoutMs: 2_000 })
+  assert.equal(wake.status, 'error')
+  assert.equal(wake.code, 'WATCH_UNRESTRICTED')
+  assert.equal(state.startCalls.length, 0)
+  const tools = officer.getDefinitions()
+  const decide = tools.find(tool => tool.name === 'watch_decide')
+  assert.equal((await decide.execute(decision, { agent: { id: 'sess_watch' } })).code, 'WATCH_UNRESTRICTED')
+})
+
+test('a child without a tools service fails closed', async () => {
+  const { officer, state } = harness()
+  assert.equal(officer.handleAgentCreated({ id: 'sess_watch', ctx: {} }), true)
+  assert.equal(officer.status().state, 'failed')
+  const wake = await officer.wake({ caseId: 'case-1', generation: 1, card: {}, timeoutMs: 2_000 })
+  assert.equal(wake.status, 'error')
+  assert.equal(wake.code, 'WATCH_UNRESTRICTED')
+  assert.equal(state.startCalls.length, 0)
+})
+
+test('an empty inherited tool table fails closed instead of trusting an empty deny-list', async () => {
+  const { officer, childTools } = harness()
+  officer.ctx.tools.schemas = () => []
+  assert.equal(officer.handleAgentCreated({ id: 'sess_watch', ctx: { tools: childTools } }), true)
+  assert.equal(officer.status().state, 'failed')
+  assert.equal(childTools.restricted, null)
+})
+
 test('the first wake starts a caller-delivered depth-1 child with the case card', async () => {
   const { officer, state } = harness()
   const waking = officer.wake({ caseId: 'case-1', generation: 1, card: { caseId: 'case-1' }, timeoutMs: 2_000 })

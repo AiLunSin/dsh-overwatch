@@ -80,10 +80,15 @@ export class SwarmPort {
 
   /**
    * @param {import('../policy.js').Decision} decision
-   * @param {{ actionId: string }} context
+   * @param {{ actionId: string, runId?: string }} context
    */
   async apply(decision, context) {
-    const runId = typeof decision.params.runId === 'string' ? decision.params.runId : decision.target.id
+    // The supervised run is trusted executor context, never a model-chosen
+    // param. This keeps one watch officer from steering another run.
+    const runId = typeof context?.runId === 'string' && context.runId !== ''
+      ? context.runId
+      : decision.target.kind === 'swarm_run' ? decision.target.id : ''
+    if (runId === '') return { ok: false, kind: 'unsupported', error: 'no trusted runId in executor context' }
     const actor = 'overwatch'
     const reason = decision.reason
     /** @type {{ action: string, reason?: string, actor?: string, text?: string, target?: unknown }} */
@@ -110,11 +115,15 @@ export class SwarmPort {
   /**
    * @param {import('../policy.js').Decision} decision
    * @param {{ runId?: string }} result
+   * @param {{ runId?: string }} [context]
    */
-  async verify(decision, result) {
+  async verify(decision, result, context = {}) {
     if (decision.action === 'notice' || decision.action === 'escalate') return { ok: true, detail: { kind: 'record-only' } }
     if (result?.ok !== true) return { ok: false, detail: { reason: 'write failed', error: result?.error ?? null } }
-    const runId = typeof decision.params.runId === 'string' ? decision.params.runId : decision.target.id
+    const runId = typeof context.runId === 'string' && context.runId !== ''
+      ? context.runId
+      : decision.target.kind === 'swarm_run' ? decision.target.id : ''
+    if (runId === '') return { ok: false, detail: { reason: 'no trusted runId in executor context' } }
     const snapshot = await this.run(runId)
     if (!snapshot.ok || snapshot.data === null || typeof snapshot.data !== 'object') {
       // A steer is accepted by the API but may not be reflected by the snapshot.

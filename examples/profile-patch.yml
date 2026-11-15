@@ -18,6 +18,7 @@
       wakeTimeoutMs: 90000
     policy:
       throttleMinutes: 10
+      resolveMs: 60000
       autopilot:
         throttle: true
         pause: false           # watch-officer pause stays human-only
@@ -28,3 +29,4 @@
     thresholds:
       budgetPressure: 0.80
       budgetPause: 0.95
+      maxRunMs: 28800000

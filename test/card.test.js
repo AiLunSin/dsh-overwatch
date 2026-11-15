@@ -85,6 +85,13 @@ test('evidence resolves ids and swarm event refs, and reports unknown refs', () 
   assert.ok(result.bytes > 0)
 })
 
+test('a pathological title cannot push the card past the byte budget', () => {
+  const big = record('L2')
+  big.title = 'x'.repeat(100_000)
+  const card = buildCaseCard({ record: big, snapshot: snapshot(), config })
+  assert.ok(Buffer.byteLength(JSON.stringify(card), 'utf8') <= 8_192)
+})
+
 test('evidence is truncated when the requested refs exceed the byte budget', () => {
   const big = record()
   big.evidence = Array.from({ length: 8 }, (_, index) => ({
@@ -97,4 +104,11 @@ test('evidence is truncated when the requested refs exceed the byte budget', () 
   const result = buildEvidence({ record: big, refs: big.evidence.map(entry => entry.id), maxBytes: 2_000 })
   assert.equal(result.truncated, true)
   assert.ok(result.bytes <= 2_000)
+})
+
+test('a pathological evidence ref cannot push the payload past the byte budget', () => {
+  const big = record()
+  const result = buildEvidence({ record: big, refs: ['r'.repeat(100_000)], maxBytes: 100 })
+  assert.equal(result.truncated, true)
+  assert.ok(result.bytes <= 100)
 })

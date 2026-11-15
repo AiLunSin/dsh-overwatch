@@ -1,0 +1,2241 @@
+{
+  "schemaVersion": 1,
+  "stage": "m4-abc",
+  "startedAt": "2026-11-14T05:29:23.373Z",
+  "finishedAt": "2026-11-14T05:32:18.095Z",
+  "config": {
+    "groups": [
+      "A",
+      "B"
+    ],
+    "scenarios": [
+      "I-1",
+      "I-3",
+      "I-4"
+    ],
+    "repeats": 1,
+    "runBudgetTokens": 100000,
+    "stallMs": {
+      "I-1": 60000,
+      "I-3": 60000,
+      "I-4": 12000
+    },
+    "maxCostCny": 20,
+    "pricing": {
+      "inputCnyPerM": 4,
+      "outputCnyPerM": 16,
+      "method": "all watch tokens priced at the output rate (upper bound)"
+    },
+    "swarmRoot": "C:\\Users\\11403\\Desktop\\em\\dsh-swarm",
+    "members": "scripted hanging runner (no model calls)",
+    "pressure": "scripted per fake member child"
+  },
+  "spendCny": 0,
+  "skippedC": false,
+  "rows": [
+    {
+      "group": "A",
+      "scenario": "I-1",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:29:36.055Z",
+      "runId": "swarm_mwfyuoqo2fa48528d6",
+      "childId": "abc-child-1-e570ede7",
+      "injectedAt": "2026-11-14T05:29:37.299Z",
+      "referenceAt": "2026-11-14T05:29:37.299Z",
+      "stallMs": 60000,
+      "armed": null,
+      "detection": null,
+      "actions": [],
+      "wake": null,
+      "cases": [],
+      "watch": null,
+      "final": {
+        "status": "running",
+        "spent": 102000,
+        "limit": 100000,
+        "ratio": 1.02
+      },
+      "wallMs": 13868,
+      "pass": true,
+      "note": "baseline: no supervision, status=running, ratio=1.020",
+      "verdict": {
+        "pass": true,
+        "note": "baseline: no supervision, status=running, ratio=1.020"
+      }
+    },
+    {
+      "group": "A",
+      "scenario": "I-3",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:30:03.817Z",
+      "runId": "swarm_mwfyva5hdfcd6377c2",
+      "childId": "abc-child-1-64362967",
+      "injectedAt": "2026-11-14T05:30:05.036Z",
+      "referenceAt": "2026-11-14T05:30:05.036Z",
+      "stallMs": 60000,
+      "armed": null,
+      "detection": null,
+      "actions": [],
+      "wake": null,
+      "cases": [],
+      "watch": null,
+      "final": {
+        "status": "running",
+        "spent": 0,
+        "limit": 100000,
+        "ratio": 0
+      },
+      "wallMs": 10224,
+      "pass": true,
+      "note": "baseline: no supervision, status=running, ratio=0.000",
+      "verdict": {
+        "pass": true,
+        "note": "baseline: no supervision, status=running, ratio=0.000"
+      }
+    },
+    {
+      "group": "A",
+      "scenario": "I-4",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:30:27.901Z",
+      "runId": "swarm_mwfyvsqj7ea749e730",
+      "childId": "abc-child-1-3d217cb9",
+      "injectedAt": "2026-11-14T05:30:28.324Z",
+      "referenceAt": "2026-11-14T05:30:28.324Z",
+      "stallMs": 12000,
+      "armed": null,
+      "detection": null,
+      "actions": [],
+      "wake": null,
+      "cases": [],
+      "watch": null,
+      "final": {
+        "status": "running",
+        "spent": 0,
+        "limit": 100000,
+        "ratio": 0
+      },
+      "wallMs": 17434,
+      "pass": true,
+      "note": "baseline: no supervision, status=running, ratio=0.000",
+      "verdict": {
+        "pass": true,
+        "note": "baseline: no supervision, status=running, ratio=0.000"
+      }
+    },
+    {
+      "group": "B",
+      "scenario": "I-1",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:30:59.205Z",
+      "runId": "swarm_mwfywgwa87872c568d",
+      "childId": "abc-child-1-ba0448d5",
+      "injectedAt": "2026-11-14T05:31:00.507Z",
+      "referenceAt": "2026-11-14T05:31:00.507Z",
+      "stallMs": 60000,
+      "armed": null,
+      "detection": {
+        "latencyMs": 208,
+        "at": "2026-11-14T05:31:00.715Z",
+        "caseId": "case_1f2693189aeb463f",
+        "code": "budget_pressure",
+        "severity": "L2",
+        "source": "case"
+      },
+      "actions": [
+        {
+          "kind": "throttle",
+          "ok": true,
+          "at": "2026-11-14T05:31:00.722Z",
+          "actionId": "act_ba415a6ca53b"
+        },
+        {
+          "kind": "abort",
+          "ok": true,
+          "at": "2026-11-14T05:31:04.334Z",
+          "actionId": "act_8c9702199ced"
+        }
+      ],
+      "wake": null,
+      "cases": [
+        {
+          "schemaVersion": 1,
+          "id": "case_1f2693189aeb463f",
+          "runId": "swarm_mwfywgwa87872c568d",
+          "key": "e5865bcd7c88f06b625a37499d4c1e256331172abc125f849abae9f2fa58c84d",
+          "state": "closed",
+          "severity": "L2",
+          "title": "run budget at 81.0% (threshold 80.0%)",
+          "code": "budget_pressure",
+          "generation": 1,
+          "signals": [
+            {
+              "code": "budget_pressure",
+              "severity": "L2",
+              "summary": "run budget at 81.0% (threshold 80.0%)",
+              "value": 0.81,
+              "observed": {
+                "scope": "run",
+                "used": 81000,
+                "limit": 100000,
+                "ratio": 0.81,
+                "threshold": 0.8
+              },
+              "evidenceId": "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "at": "2026-11-14T05:31:00.709Z"
+            },
+            {
+              "code": "budget_pressure",
+              "severity": "L2",
+              "summary": "run budget at 81.0% — pressure threshold",
+              "value": 0.81,
+              "observed": {
+                "scope": "run",
+                "used": 81000,
+                "limit": 100000,
+                "ratio": 0.81,
+                "threshold": 0.8
+              },
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pressure",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "at": "2026-11-14T05:31:00.925Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure",
+              "source": "swarm",
+              "kind": "budget",
+              "at": "2026-11-14T05:31:00.709Z",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "observed": {
+                "scope": "run",
+                "used": 81000,
+                "limit": 100000,
+                "ratio": 0.81,
+                "threshold": 0.8
+              }
+            },
+            {
+              "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pressure",
+              "source": "swarm",
+              "kind": "budget",
+              "at": "2026-11-14T05:31:00.925Z",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "observed": {
+                "scope": "run",
+                "used": 81000,
+                "limit": 100000,
+                "ratio": 0.81,
+                "threshold": 0.8
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [
+            {
+              "id": "act_ba415a6ca53b",
+              "kind": "throttle",
+              "state": "verified",
+              "severity": "L2",
+              "detail": null,
+              "at": "2026-11-14T05:31:00.724Z"
+            }
+          ],
+          "openedAt": "2026-11-14T05:31:00.709Z",
+          "updatedAt": "2026-11-14T05:31:11.142Z",
+          "closedAt": "2026-11-14T05:31:11.142Z",
+          "closeReason": "abandoned",
+          "note": "supervision disarmed: abc run complete",
+          "reopens": null
+        },
+        {
+          "schemaVersion": 1,
+          "id": "case_56e2d31899694ba3",
+          "runId": "swarm_mwfywgwa87872c568d",
+          "key": "5bba08850e95cbdd68a4c69cb96fa44e53ac86e0780cb2cc9df7d02515bed952",
+          "state": "closed",
+          "severity": "L4",
+          "title": "run budget exhausted at 102.0% — hard stop",
+          "code": "budget_exhausted",
+          "generation": 1,
+          "signals": [
+            {
+              "code": "budget_exhausted",
+              "severity": "L4",
+              "summary": "run budget exhausted at 102.0% — hard stop",
+              "value": 1.02,
+              "observed": {
+                "scope": "run",
+                "used": 102000,
+                "limit": 100000,
+                "ratio": 1.02,
+                "threshold": 1
+              },
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "at": "2026-11-14T05:31:04.165Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+              "source": "swarm",
+              "kind": "budget",
+              "at": "2026-11-14T05:31:04.165Z",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "observed": {
+                "scope": "run",
+                "used": 102000,
+                "limit": 100000,
+                "ratio": 1.02,
+                "threshold": 1
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [
+            {
+              "id": "act_8c9702199ced",
+              "kind": "abort",
+              "state": "verified",
+              "severity": "L4",
+              "detail": null,
+              "at": "2026-11-14T05:31:04.336Z"
+            }
+          ],
+          "openedAt": "2026-11-14T05:31:04.165Z",
+          "updatedAt": "2026-11-14T05:31:04.338Z",
+          "closedAt": "2026-11-14T05:31:04.338Z",
+          "closeReason": "escalated",
+          "note": "run aborted by the deterministic guard",
+          "reopens": null
+        },
+        {
+          "schemaVersion": 1,
+          "id": "case_7d62006941274b2b",
+          "runId": "swarm_mwfywgwa87872c568d",
+          "key": "f6146f9e2d88963780e93f5e0ab75ce47c835885842ea6279a9ea35dda53c41f",
+          "state": "closed",
+          "severity": "L3",
+          "title": "run budget at 96.0% — hard pause threshold",
+          "code": "budget_pause",
+          "generation": 1,
+          "signals": [
+            {
+              "code": "budget_pause",
+              "severity": "L3",
+              "summary": "run budget at 96.0% — hard pause threshold",
+              "value": 0.96,
+              "observed": {
+                "scope": "run",
+                "used": 96000,
+                "limit": 100000,
+                "ratio": 0.96,
+                "threshold": 0.95
+              },
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pause",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "at": "2026-11-14T05:31:02.349Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pause",
+              "source": "swarm",
+              "kind": "budget",
+              "at": "2026-11-14T05:31:02.349Z",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "observed": {
+                "scope": "run",
+                "used": 96000,
+                "limit": 100000,
+                "ratio": 0.96,
+                "threshold": 0.95
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [],
+          "openedAt": "2026-11-14T05:31:02.349Z",
+          "updatedAt": "2026-11-14T05:31:11.146Z",
+          "closedAt": "2026-11-14T05:31:11.146Z",
+          "closeReason": "abandoned",
+          "note": "supervision disarmed: abc run complete",
+          "reopens": null
+        },
+        {
+          "schemaVersion": 1,
+          "id": "case_b354fbc7593a4c21",
+          "runId": "swarm_mwfywgwa87872c568d",
+          "key": "5bba08850e95cbdd68a4c69cb96fa44e53ac86e0780cb2cc9df7d02515bed952",
+          "state": "closed",
+          "severity": "L4",
+          "title": "run budget exhausted at 102.0% — hard stop",
+          "code": "budget_exhausted",
+          "generation": 2,
+          "signals": [
+            {
+              "code": "budget_exhausted",
+              "severity": "L4",
+              "summary": "run budget exhausted at 102.0% — hard stop",
+              "value": 1.02,
+              "observed": {
+                "scope": "run",
+                "used": 102000,
+                "limit": 100000,
+                "ratio": 1.02,
+                "threshold": 1
+              },
+              "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "at": "2026-11-14T05:31:04.369Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+              "source": "swarm",
+              "kind": "budget",
+              "at": "2026-11-14T05:31:04.369Z",
+              "ref": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              },
+              "observed": {
+                "scope": "run",
+                "used": 102000,
+                "limit": 100000,
+                "ratio": 1.02,
+                "threshold": 1
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [],
+          "openedAt": "2026-11-14T05:31:04.369Z",
+          "updatedAt": "2026-11-14T05:31:11.148Z",
+          "closedAt": "2026-11-14T05:31:11.148Z",
+          "closeReason": "abandoned",
+          "note": "supervision disarmed: abc run complete",
+          "reopens": "case_56e2d31899694ba3"
+        }
+      ],
+      "watch": {
+        "events": [
+          {
+            "v": 1,
+            "seq": 1,
+            "id": "wev_8d9f2ac0ac0e4b79",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/armed",
+            "at": "2026-11-14T05:30:59.694Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "mode": "guard",
+              "requestedMode": "guard",
+              "runId": "swarm_mwfywgwa87872c568d",
+              "reserve": 5000,
+              "supervisor": "unavailable-m1",
+              "watchName": null,
+              "agentOptions": {},
+              "sampling": {
+                "swarmEventMs": 200,
+                "swarmSnapshotMs": 200,
+                "pressureMs": 200,
+                "fishMs": 60000,
+                "staleMs": 5000,
+                "requestTimeoutMs": 1000,
+                "maxInflight": 2
+              },
+              "capabilities": {
+                "guard": true,
+                "supervisor": false,
+                "write": true
+              }
+            },
+            "prev": "genesis",
+            "hash": "658df392e58aec0075385aeb264e7dbb86c4b50113488409d1a72637ee6bc339"
+          },
+          {
+            "v": 1,
+            "seq": 2,
+            "id": "wev_7d0cccd083cb489b",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:30:59.700Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "running",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 0,
+                "ratio": 0
+              },
+              "cases": {
+                "open": 0
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 9,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 9,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 9,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "658df392e58aec0075385aeb264e7dbb86c4b50113488409d1a72637ee6bc339",
+            "hash": "0c534e7a1a928b34767d20cf6b55771f34edac86ca76d47917097ffa67a10384"
+          },
+          {
+            "v": 1,
+            "seq": 3,
+            "id": "wev_c4a45ce01ff3447d",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:00.715Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfywgwa87872c568d"
+            },
+            "payload": {
+              "caseId": "case_1f2693189aeb463f",
+              "severity": "L2",
+              "code": "budget_pressure",
+              "title": "run budget at 81.0% (threshold 80.0%)",
+              "scope": {
+                "kind": "run",
+                "id": "run"
+              },
+              "evidenceIds": [
+                "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure"
+              ],
+              "reopens": null
+            },
+            "prev": "0c534e7a1a928b34767d20cf6b55771f34edac86ca76d47917097ffa67a10384",
+            "hash": "91521470823f49c37efe2e00f1dab63f63f9ffb3b8c0c106996288e6fe2ea25f"
+          },
+          {
+            "v": 1,
+            "seq": 4,
+            "id": "wev_16eb2f24a31345bf",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/intended",
+            "at": "2026-11-14T05:31:00.716Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_1f2693189aeb463f"
+            },
+            "payload": {
+              "key": "ba415a6ca53b12dcebefad9a0038d123",
+              "actionId": "act_ba415a6ca53b",
+              "kind": "throttle",
+              "target": {
+                "kind": "swarm_run",
+                "id": "swarm_mwfywgwa87872c568d"
+              },
+              "evidenceRefs": [
+                "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure"
+              ],
+              "severity": "L2",
+              "hardLimit": false,
+              "params": {
+                "minutes": 1,
+                "runId": "swarm_mwfywgwa87872c568d"
+              }
+            },
+            "prev": "91521470823f49c37efe2e00f1dab63f63f9ffb3b8c0c106996288e6fe2ea25f",
+            "hash": "a6589f772d91ce7effb29d7db5c91c77bf58f40fe8922e25c695a7ca12941f03"
+          },
+          {
+            "v": 1,
+            "seq": 5,
+            "id": "wev_d5fa5179fd384a32",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/executed",
+            "at": "2026-11-14T05:31:00.722Z",
+            "actor": "executor",
+            "generation": 1,
+            "causationRef": {
+              "kind": "action",
+              "actionId": "act_ba415a6ca53b"
+            },
+            "payload": {
+              "key": "ba415a6ca53b12dcebefad9a0038d123",
+              "actionId": "act_ba415a6ca53b",
+              "kind": "throttle",
+              "ok": true,
+              "result": {
+                "truncated": true,
+                "bytes": 4118
+              }
+            },
+            "prev": "a6589f772d91ce7effb29d7db5c91c77bf58f40fe8922e25c695a7ca12941f03",
+            "hash": "dfcff525cc157301f0dffc9e28999e63a84acf5d7bbb20654fd2640da3b2a8d9"
+          },
+          {
+            "v": 1,
+            "seq": 6,
+            "id": "wev_52a7ab4bb58746d1",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/verified",
+            "at": "2026-11-14T05:31:00.724Z",
+            "actor": "executor",
+            "generation": 1,
+            "causationRef": {
+              "kind": "action",
+              "actionId": "act_ba415a6ca53b"
+            },
+            "payload": {
+              "key": "ba415a6ca53b12dcebefad9a0038d123",
+              "actionId": "act_ba415a6ca53b",
+              "kind": "throttle",
+              "ok": true,
+              "detail": {
+                "status": "paused",
+                "kind": "throttle-as-pause"
+              }
+            },
+            "prev": "dfcff525cc157301f0dffc9e28999e63a84acf5d7bbb20654fd2640da3b2a8d9",
+            "hash": "0fa0d5b3c20d0d434821ad94debb51376ecaf4ebcaff64994e02f6c8da9efce0"
+          },
+          {
+            "v": 1,
+            "seq": 7,
+            "id": "wev_beac89ff86064267",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:00.729Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "running",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 81000,
+                "ratio": 0.81
+              },
+              "cases": {
+                "open": 1
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:00.709Z",
+                  "ageMs": 3,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:00.709Z",
+                  "ageMs": 3,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 1024,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "0fa0d5b3c20d0d434821ad94debb51376ecaf4ebcaff64994e02f6c8da9efce0",
+            "hash": "a0213f50a1e50ec34a61cdbd4e12ce4edb596b1a2d41362b94126aa2d92a80c8"
+          },
+          {
+            "v": 1,
+            "seq": 8,
+            "id": "wev_31f702d3ad6847c2",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/updated",
+            "at": "2026-11-14T05:31:00.931Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfywgwa87872c568d"
+            },
+            "payload": {
+              "caseId": "case_1f2693189aeb463f",
+              "code": "budget_pressure",
+              "addedSignal": {
+                "code": "budget_pressure",
+                "severity": "L2",
+                "summary": "run budget at 81.0% — pressure threshold",
+                "value": 0.81,
+                "observed": {
+                  "scope": "run",
+                  "used": 81000,
+                  "limit": 100000,
+                  "ratio": 0.81,
+                  "threshold": 0.8
+                },
+                "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pressure",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:00.925Z"
+              },
+              "severity": "L2",
+              "escalated": false
+            },
+            "prev": "a0213f50a1e50ec34a61cdbd4e12ce4edb596b1a2d41362b94126aa2d92a80c8",
+            "hash": "904cc64501411bf32a08f288973e038d089db090856e83bbc0cf2a59c02616f4"
+          },
+          {
+            "v": 1,
+            "seq": 9,
+            "id": "wev_b6406336f5ee43f9",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:00.933Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "paused",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 81000,
+                "ratio": 0.81
+              },
+              "cases": {
+                "open": 1
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:00.925Z",
+                  "ageMs": 3,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:00.925Z",
+                  "ageMs": 3,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 1240,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "904cc64501411bf32a08f288973e038d089db090856e83bbc0cf2a59c02616f4",
+            "hash": "a59165726fe964aa36f1b64f1dbacf1646fd45da7927cf126a5be3570bdd50d7"
+          },
+          {
+            "v": 1,
+            "seq": 10,
+            "id": "wev_478f2dcf3b7949e2",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:02.354Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfywgwa87872c568d"
+            },
+            "payload": {
+              "caseId": "case_7d62006941274b2b",
+              "severity": "L3",
+              "code": "budget_pause",
+              "title": "run budget at 96.0% — hard pause threshold",
+              "scope": {
+                "kind": "run",
+                "id": "run"
+              },
+              "evidenceIds": [
+                "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pause"
+              ],
+              "reopens": null
+            },
+            "prev": "a59165726fe964aa36f1b64f1dbacf1646fd45da7927cf126a5be3570bdd50d7",
+            "hash": "45b8468d6cc6bcd30ca5c42e78483fc756a2ea5e8deea3bfcd3dcea2330e2fb5"
+          },
+          {
+            "v": 1,
+            "seq": 11,
+            "id": "wev_23440aea80224541",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/guard/notice",
+            "at": "2026-11-14T05:31:02.355Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "code": "hard_pause_skipped",
+              "reason": "budget hard pause threshold crossed while the run is paused",
+              "caseId": "case_7d62006941274b2b"
+            },
+            "prev": "45b8468d6cc6bcd30ca5c42e78483fc756a2ea5e8deea3bfcd3dcea2330e2fb5",
+            "hash": "c601bfe96cceaf5c7f86e8af7bc019c4ac4bba21999a2a41fec28a75fe40bca5"
+          },
+          {
+            "v": 1,
+            "seq": 12,
+            "id": "wev_7b9f67f79d544b34",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:02.356Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "paused",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 96000,
+                "ratio": 0.96
+              },
+              "cases": {
+                "open": 2
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:02.349Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:02.349Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 2663,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "c601bfe96cceaf5c7f86e8af7bc019c4ac4bba21999a2a41fec28a75fe40bca5",
+            "hash": "8595ce61e9631c1d2f90039ec72810473d9c41b62faea09842c32cc35e9af8ae"
+          },
+          {
+            "v": 1,
+            "seq": 13,
+            "id": "wev_bb0475464c6b477f",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:04.171Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfywgwa87872c568d"
+            },
+            "payload": {
+              "caseId": "case_56e2d31899694ba3",
+              "severity": "L4",
+              "code": "budget_exhausted",
+              "title": "run budget exhausted at 102.0% — hard stop",
+              "scope": {
+                "kind": "run",
+                "id": "run"
+              },
+              "evidenceIds": [
+                "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted"
+              ],
+              "reopens": null
+            },
+            "prev": "8595ce61e9631c1d2f90039ec72810473d9c41b62faea09842c32cc35e9af8ae",
+            "hash": "ffb0827d1f5f130af8aa503c9bfddb00c4ce4925606a1f33d783be1bd5983f24"
+          },
+          {
+            "v": 1,
+            "seq": 14,
+            "id": "wev_c6070060a934468e",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/intended",
+            "at": "2026-11-14T05:31:04.172Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_56e2d31899694ba3"
+            },
+            "payload": {
+              "key": "8c9702199cedec9fd3dad18e4675ca1b",
+              "actionId": "act_8c9702199ced",
+              "kind": "abort",
+              "target": {
+                "kind": "swarm_run",
+                "id": "swarm_mwfywgwa87872c568d"
+              },
+              "evidenceRefs": [
+                "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted"
+              ],
+              "severity": "L4",
+              "hardLimit": true,
+              "params": {
+                "runId": "swarm_mwfywgwa87872c568d"
+              }
+            },
+            "prev": "ffb0827d1f5f130af8aa503c9bfddb00c4ce4925606a1f33d783be1bd5983f24",
+            "hash": "165789745102f43def76527fd451039d8324f82c374ab583bad0d1ffc097ea76"
+          },
+          {
+            "v": 1,
+            "seq": 15,
+            "id": "wev_8198e3232e644e0c",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/executed",
+            "at": "2026-11-14T05:31:04.334Z",
+            "actor": "executor",
+            "generation": 1,
+            "causationRef": {
+              "kind": "action",
+              "actionId": "act_8c9702199ced"
+            },
+            "payload": {
+              "key": "8c9702199cedec9fd3dad18e4675ca1b",
+              "actionId": "act_8c9702199ced",
+              "kind": "abort",
+              "ok": true,
+              "result": {
+                "truncated": true,
+                "bytes": 4368
+              }
+            },
+            "prev": "165789745102f43def76527fd451039d8324f82c374ab583bad0d1ffc097ea76",
+            "hash": "37234e7aacee73c2c4a5f18319c7eaf936d92883cfcd4fb109e801120b19dd00"
+          },
+          {
+            "v": 1,
+            "seq": 16,
+            "id": "wev_a01449feac4246ef",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/action/verified",
+            "at": "2026-11-14T05:31:04.335Z",
+            "actor": "executor",
+            "generation": 1,
+            "causationRef": {
+              "kind": "action",
+              "actionId": "act_8c9702199ced"
+            },
+            "payload": {
+              "key": "8c9702199cedec9fd3dad18e4675ca1b",
+              "actionId": "act_8c9702199ced",
+              "kind": "abort",
+              "ok": true,
+              "detail": {
+                "status": "aborted"
+              }
+            },
+            "prev": "37234e7aacee73c2c4a5f18319c7eaf936d92883cfcd4fb109e801120b19dd00",
+            "hash": "924012c54a887a414d6ace81f741648b40fbbb792d5b7bfd93bd1001ab7efdd2"
+          },
+          {
+            "v": 1,
+            "seq": 17,
+            "id": "wev_82cfe969ed8f4269",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:31:04.340Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_56e2d31899694ba3"
+            },
+            "payload": {
+              "caseId": "case_56e2d31899694ba3",
+              "reason": "escalated",
+              "note": "run aborted by the deterministic guard",
+              "actions": 1
+            },
+            "prev": "924012c54a887a414d6ace81f741648b40fbbb792d5b7bfd93bd1001ab7efdd2",
+            "hash": "f89d10515d83fa9dc103b7bae7125dddd4670f6d4a484e055afefb70e1a0bbf8"
+          },
+          {
+            "v": 1,
+            "seq": 18,
+            "id": "wev_21e541a6857945bd",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:04.341Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "paused",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 102000,
+                "ratio": 1.02
+              },
+              "cases": {
+                "open": 2
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:04.165Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:04.165Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 4479,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "f89d10515d83fa9dc103b7bae7125dddd4670f6d4a484e055afefb70e1a0bbf8",
+            "hash": "bb674f2cbc80c31726cdcb73725e5ff714418c11be4d0a0723f0b3c79507de90"
+          },
+          {
+            "v": 1,
+            "seq": 19,
+            "id": "wev_a6d7a5bc49d04fc8",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:04.377Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfywgwa87872c568d"
+            },
+            "payload": {
+              "caseId": "case_b354fbc7593a4c21",
+              "severity": "L4",
+              "code": "budget_exhausted",
+              "title": "run budget exhausted at 102.0% — hard stop",
+              "scope": {
+                "kind": "run",
+                "id": "run"
+              },
+              "evidenceIds": [
+                "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted"
+              ],
+              "reopens": "case_56e2d31899694ba3"
+            },
+            "prev": "bb674f2cbc80c31726cdcb73725e5ff714418c11be4d0a0723f0b3c79507de90",
+            "hash": "b84d09232027754fa258697caf8406fd0fc1b39a58993a6af531ea762bc9087c"
+          },
+          {
+            "v": 1,
+            "seq": 20,
+            "id": "wev_fd3ca9a297bf45a6",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:04.379Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "aborted",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 102000,
+                "ratio": 1.02
+              },
+              "cases": {
+                "open": 3
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:04.369Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:04.369Z",
+                  "ageMs": 2,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:30:59.688Z",
+                  "ageMs": 4683,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "b84d09232027754fa258697caf8406fd0fc1b39a58993a6af531ea762bc9087c",
+            "hash": "5331670c6e345373b373069beb2c2c9f8a0ab411a07e66c38475f941de0b1036"
+          },
+          {
+            "v": 1,
+            "seq": 21,
+            "id": "wev_1ddf97474a7241ec",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:31:11.145Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_1f2693189aeb463f"
+            },
+            "payload": {
+              "caseId": "case_1f2693189aeb463f",
+              "reason": "abandoned",
+              "note": "supervision disarmed: abc run complete",
+              "actions": 1
+            },
+            "prev": "5331670c6e345373b373069beb2c2c9f8a0ab411a07e66c38475f941de0b1036",
+            "hash": "c4241442080656415809f81f5d84622e14cf71c8410bf922a212d36d4648e246"
+          },
+          {
+            "v": 1,
+            "seq": 22,
+            "id": "wev_ca45f244b4354f7d",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:31:11.148Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_7d62006941274b2b"
+            },
+            "payload": {
+              "caseId": "case_7d62006941274b2b",
+              "reason": "abandoned",
+              "note": "supervision disarmed: abc run complete",
+              "actions": 0
+            },
+            "prev": "c4241442080656415809f81f5d84622e14cf71c8410bf922a212d36d4648e246",
+            "hash": "b8f66df20745f946ee6e8a29332f79f88a536812c2d0194731a855631e8c801b"
+          },
+          {
+            "v": 1,
+            "seq": 23,
+            "id": "wev_af17c9c1bd5e48be",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:31:11.151Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_b354fbc7593a4c21"
+            },
+            "payload": {
+              "caseId": "case_b354fbc7593a4c21",
+              "reason": "abandoned",
+              "note": "supervision disarmed: abc run complete",
+              "actions": 0
+            },
+            "prev": "b8f66df20745f946ee6e8a29332f79f88a536812c2d0194731a855631e8c801b",
+            "hash": "f1a7ee1b16df1d957814ea86e01ed9795e50474c67e85eedbc0d2b17d52e54b3"
+          },
+          {
+            "v": 1,
+            "seq": 24,
+            "id": "wev_2ac02d4fde8e4e30",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/shift",
+            "at": "2026-11-14T05:31:11.153Z",
+            "actor": "system",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "shiftId": "shift-0001",
+              "reason": "abc run complete",
+              "window": {
+                "from": "2026-11-14T05:30:59.694Z",
+                "to": "2026-11-14T05:31:11.152Z"
+              },
+              "summary": {
+                "mode": "guard",
+                "budget": {
+                  "limit": 100000,
+                  "spent": 102000,
+                  "ratio": 1.02,
+                  "reserve": 5000,
+                  "supervisorUsed": 0
+                },
+                "supervisorSpent": 0,
+                "cases": {
+                  "total": 4,
+                  "open": 0
+                },
+                "wakes": 0,
+                "timeouts": 0
+              }
+            },
+            "prev": "f1a7ee1b16df1d957814ea86e01ed9795e50474c67e85eedbc0d2b17d52e54b3",
+            "hash": "c74f70f7819be7daec8f4f74cbd620691d977466e166db6288e089c023bc0f4f"
+          },
+          {
+            "v": 1,
+            "seq": 25,
+            "id": "wev_872bc2869e45432e",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "type": "watch/disarmed",
+            "at": "2026-11-14T05:31:11.154Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "reason": "abc run complete",
+              "closedCases": [
+                "case_1f2693189aeb463f",
+                "case_7d62006941274b2b",
+                "case_b354fbc7593a4c21"
+              ],
+              "shiftId": "shift-0001",
+              "supervisorSpent": 0
+            },
+            "prev": "c74f70f7819be7daec8f4f74cbd620691d977466e166db6288e089c023bc0f4f",
+            "hash": "7317afcd29455b7e3c2d2fbdb68c6db090a38e59773558f201e1c803d8498360"
+          }
+        ],
+        "cases": [
+          {
+            "schemaVersion": 1,
+            "id": "case_1f2693189aeb463f",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "key": "e5865bcd7c88f06b625a37499d4c1e256331172abc125f849abae9f2fa58c84d",
+            "state": "closed",
+            "severity": "L2",
+            "title": "run budget at 81.0% (threshold 80.0%)",
+            "code": "budget_pressure",
+            "generation": 1,
+            "signals": [
+              {
+                "code": "budget_pressure",
+                "severity": "L2",
+                "summary": "run budget at 81.0% (threshold 80.0%)",
+                "value": 0.81,
+                "observed": {
+                  "scope": "run",
+                  "used": 81000,
+                  "limit": 100000,
+                  "ratio": 0.81,
+                  "threshold": 0.8
+                },
+                "evidenceId": "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:00.709Z"
+              },
+              {
+                "code": "budget_pressure",
+                "severity": "L2",
+                "summary": "run budget at 81.0% — pressure threshold",
+                "value": 0.81,
+                "observed": {
+                  "scope": "run",
+                  "used": 81000,
+                  "limit": 100000,
+                  "ratio": 0.81,
+                  "threshold": 0.8
+                },
+                "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pressure",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:00.925Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_budget_run:swarm_mwfywgwa87872c568d:budget_pressure",
+                "source": "swarm",
+                "kind": "budget",
+                "at": "2026-11-14T05:31:00.709Z",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "observed": {
+                  "scope": "run",
+                  "used": 81000,
+                  "limit": 100000,
+                  "ratio": 0.81,
+                  "threshold": 0.8
+                }
+              },
+              {
+                "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pressure",
+                "source": "swarm",
+                "kind": "budget",
+                "at": "2026-11-14T05:31:00.925Z",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "observed": {
+                  "scope": "run",
+                  "used": 81000,
+                  "limit": 100000,
+                  "ratio": 0.81,
+                  "threshold": 0.8
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [
+              {
+                "id": "act_ba415a6ca53b",
+                "kind": "throttle",
+                "state": "verified",
+                "severity": "L2",
+                "detail": null,
+                "at": "2026-11-14T05:31:00.724Z"
+              }
+            ],
+            "openedAt": "2026-11-14T05:31:00.709Z",
+            "updatedAt": "2026-11-14T05:31:11.142Z",
+            "closedAt": "2026-11-14T05:31:11.142Z",
+            "closeReason": "abandoned",
+            "note": "supervision disarmed: abc run complete",
+            "reopens": null
+          },
+          {
+            "schemaVersion": 1,
+            "id": "case_56e2d31899694ba3",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "key": "5bba08850e95cbdd68a4c69cb96fa44e53ac86e0780cb2cc9df7d02515bed952",
+            "state": "closed",
+            "severity": "L4",
+            "title": "run budget exhausted at 102.0% — hard stop",
+            "code": "budget_exhausted",
+            "generation": 1,
+            "signals": [
+              {
+                "code": "budget_exhausted",
+                "severity": "L4",
+                "summary": "run budget exhausted at 102.0% — hard stop",
+                "value": 1.02,
+                "observed": {
+                  "scope": "run",
+                  "used": 102000,
+                  "limit": 100000,
+                  "ratio": 1.02,
+                  "threshold": 1
+                },
+                "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:04.165Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+                "source": "swarm",
+                "kind": "budget",
+                "at": "2026-11-14T05:31:04.165Z",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "observed": {
+                  "scope": "run",
+                  "used": 102000,
+                  "limit": 100000,
+                  "ratio": 1.02,
+                  "threshold": 1
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [
+              {
+                "id": "act_8c9702199ced",
+                "kind": "abort",
+                "state": "verified",
+                "severity": "L4",
+                "detail": null,
+                "at": "2026-11-14T05:31:04.336Z"
+              }
+            ],
+            "openedAt": "2026-11-14T05:31:04.165Z",
+            "updatedAt": "2026-11-14T05:31:04.338Z",
+            "closedAt": "2026-11-14T05:31:04.338Z",
+            "closeReason": "escalated",
+            "note": "run aborted by the deterministic guard",
+            "reopens": null
+          },
+          {
+            "schemaVersion": 1,
+            "id": "case_7d62006941274b2b",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "key": "f6146f9e2d88963780e93f5e0ab75ce47c835885842ea6279a9ea35dda53c41f",
+            "state": "closed",
+            "severity": "L3",
+            "title": "run budget at 96.0% — hard pause threshold",
+            "code": "budget_pause",
+            "generation": 1,
+            "signals": [
+              {
+                "code": "budget_pause",
+                "severity": "L3",
+                "summary": "run budget at 96.0% — hard pause threshold",
+                "value": 0.96,
+                "observed": {
+                  "scope": "run",
+                  "used": 96000,
+                  "limit": 100000,
+                  "ratio": 0.96,
+                  "threshold": 0.95
+                },
+                "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pause",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:02.349Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:pause",
+                "source": "swarm",
+                "kind": "budget",
+                "at": "2026-11-14T05:31:02.349Z",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "observed": {
+                  "scope": "run",
+                  "used": 96000,
+                  "limit": 100000,
+                  "ratio": 0.96,
+                  "threshold": 0.95
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [],
+            "openedAt": "2026-11-14T05:31:02.349Z",
+            "updatedAt": "2026-11-14T05:31:11.146Z",
+            "closedAt": "2026-11-14T05:31:11.146Z",
+            "closeReason": "abandoned",
+            "note": "supervision disarmed: abc run complete",
+            "reopens": null
+          },
+          {
+            "schemaVersion": 1,
+            "id": "case_b354fbc7593a4c21",
+            "runId": "swarm_mwfywgwa87872c568d",
+            "key": "5bba08850e95cbdd68a4c69cb96fa44e53ac86e0780cb2cc9df7d02515bed952",
+            "state": "closed",
+            "severity": "L4",
+            "title": "run budget exhausted at 102.0% — hard stop",
+            "code": "budget_exhausted",
+            "generation": 2,
+            "signals": [
+              {
+                "code": "budget_exhausted",
+                "severity": "L4",
+                "summary": "run budget exhausted at 102.0% — hard stop",
+                "value": 1.02,
+                "observed": {
+                  "scope": "run",
+                  "used": 102000,
+                  "limit": 100000,
+                  "ratio": 1.02,
+                  "threshold": 1
+                },
+                "evidenceId": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "at": "2026-11-14T05:31:04.369Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_budget_run:runId=swarm_mwfywgwa87872c568d:exhausted",
+                "source": "swarm",
+                "kind": "budget",
+                "at": "2026-11-14T05:31:04.369Z",
+                "ref": {
+                  "runId": "swarm_mwfywgwa87872c568d"
+                },
+                "observed": {
+                  "scope": "run",
+                  "used": 102000,
+                  "limit": 100000,
+                  "ratio": 1.02,
+                  "threshold": 1
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [],
+            "openedAt": "2026-11-14T05:31:04.369Z",
+            "updatedAt": "2026-11-14T05:31:11.148Z",
+            "closedAt": "2026-11-14T05:31:11.148Z",
+            "closeReason": "abandoned",
+            "note": "supervision disarmed: abc run complete",
+            "reopens": "case_56e2d31899694ba3"
+          }
+        ],
+        "chain": {
+          "ok": true,
+          "count": 25,
+          "error": null
+        }
+      },
+      "final": {
+        "status": "aborted",
+        "spent": 102000,
+        "limit": 100000,
+        "ratio": 1.02
+      },
+      "wallMs": 11971,
+      "pass": true,
+      "note": "status=aborted ratio=1.020 detection=208ms actions=throttle|abort",
+      "verdict": {
+        "pass": true,
+        "note": "status=aborted ratio=1.020 detection=208ms actions=throttle|abort"
+      }
+    },
+    {
+      "group": "B",
+      "scenario": "I-3",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:31:25.049Z",
+      "runId": "swarm_mwfyx0u257005fdb09",
+      "childId": "abc-child-1-f7db0e6a",
+      "injectedAt": "2026-11-14T05:31:26.297Z",
+      "referenceAt": "2026-11-14T05:31:26.297Z",
+      "stallMs": 60000,
+      "armed": null,
+      "detection": {
+        "latencyMs": 203,
+        "at": "2026-11-14T05:31:26.500Z",
+        "caseId": "case_2cd22f6f85d548ae",
+        "code": "failure_streak",
+        "severity": "L2",
+        "source": "case"
+      },
+      "actions": [],
+      "wake": null,
+      "cases": [
+        {
+          "schemaVersion": 1,
+          "id": "case_2cd22f6f85d548ae",
+          "runId": "swarm_mwfyx0u257005fdb09",
+          "key": "425c00f7273864834e97c00f1db158d3125534ed92a154dd52e6a57fa58dacff",
+          "state": "closed",
+          "severity": "L2",
+          "title": "5 consecutive tool failures (threshold 3)",
+          "code": "failure_streak",
+          "generation": 1,
+          "signals": [
+            {
+              "code": "failure_streak",
+              "severity": "L2",
+              "summary": "5 consecutive tool failures (threshold 3)",
+              "value": null,
+              "observed": {
+                "failures": 5,
+                "threshold": 3
+              },
+              "evidenceId": "ev_swarm_failure_streak_member_mwfyx0u222dfe50439",
+              "ref": {
+                "memberId": "member_mwfyx0u222dfe50439",
+                "sessionId": "abc-child-1-f7db0e6a"
+              },
+              "at": "2026-11-14T05:31:26.297Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_failure_streak_member_mwfyx0u222dfe50439",
+              "source": "swarm",
+              "kind": "failure_streak",
+              "at": "2026-11-14T05:31:26.297Z",
+              "ref": {
+                "memberId": "member_mwfyx0u222dfe50439",
+                "sessionId": "abc-child-1-f7db0e6a"
+              },
+              "observed": {
+                "failures": 5,
+                "threshold": 3
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [],
+          "openedAt": "2026-11-14T05:31:26.496Z",
+          "updatedAt": "2026-11-14T05:31:33.297Z",
+          "closedAt": "2026-11-14T05:31:33.297Z",
+          "closeReason": "abandoned",
+          "note": "supervision disarmed: abc run complete",
+          "reopens": null
+        }
+      ],
+      "watch": {
+        "events": [
+          {
+            "v": 1,
+            "seq": 1,
+            "id": "wev_fcf2b6eb25284a8a",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/armed",
+            "at": "2026-11-14T05:31:25.477Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "mode": "guard",
+              "requestedMode": "guard",
+              "runId": "swarm_mwfyx0u257005fdb09",
+              "reserve": 5000,
+              "supervisor": "unavailable-m1",
+              "watchName": null,
+              "agentOptions": {},
+              "sampling": {
+                "swarmEventMs": 200,
+                "swarmSnapshotMs": 200,
+                "pressureMs": 200,
+                "fishMs": 60000,
+                "staleMs": 5000,
+                "requestTimeoutMs": 1000,
+                "maxInflight": 2
+              },
+              "capabilities": {
+                "guard": true,
+                "supervisor": false,
+                "write": true
+              }
+            },
+            "prev": "genesis",
+            "hash": "ca1d1bd07f9d5053ad7cce81b76c038a9f4e6ba3c44b0cb75aee3f8ddd5e0225"
+          },
+          {
+            "v": 1,
+            "seq": 2,
+            "id": "wev_587c0a66fe5d4203",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:25.480Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "running",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 0,
+                "ratio": 0
+              },
+              "cases": {
+                "open": 0
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:25.475Z",
+                  "ageMs": 4,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:25.475Z",
+                  "ageMs": 4,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:31:25.475Z",
+                  "ageMs": 4,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "ca1d1bd07f9d5053ad7cce81b76c038a9f4e6ba3c44b0cb75aee3f8ddd5e0225",
+            "hash": "78fe72fa14a048d8d0b9fd246693af0b9f6c713f5e659b3c40188a497e297627"
+          },
+          {
+            "v": 1,
+            "seq": 3,
+            "id": "wev_35ba98c3b2f947b1",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:26.500Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "memberId": "member_mwfyx0u222dfe50439",
+              "sessionId": "abc-child-1-f7db0e6a"
+            },
+            "payload": {
+              "caseId": "case_2cd22f6f85d548ae",
+              "severity": "L2",
+              "code": "failure_streak",
+              "title": "5 consecutive tool failures (threshold 3)",
+              "scope": {
+                "kind": "member",
+                "id": "member_mwfyx0u222dfe50439"
+              },
+              "evidenceIds": [
+                "ev_swarm_failure_streak_member_mwfyx0u222dfe50439"
+              ],
+              "reopens": null
+            },
+            "prev": "78fe72fa14a048d8d0b9fd246693af0b9f6c713f5e659b3c40188a497e297627",
+            "hash": "73edc5a7b1e1af3ea006775901363504d8b8fc319bdb8c34aecc9fdc34a8cd2e"
+          },
+          {
+            "v": 1,
+            "seq": 4,
+            "id": "wev_7718ce99439e4911",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:31:33.300Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_2cd22f6f85d548ae"
+            },
+            "payload": {
+              "caseId": "case_2cd22f6f85d548ae",
+              "reason": "abandoned",
+              "note": "supervision disarmed: abc run complete",
+              "actions": 0
+            },
+            "prev": "73edc5a7b1e1af3ea006775901363504d8b8fc319bdb8c34aecc9fdc34a8cd2e",
+            "hash": "235c5f709a84197a044858701087bc4b8abb830ee95e1f226a827941764dfdcc"
+          },
+          {
+            "v": 1,
+            "seq": 5,
+            "id": "wev_199cd83da8ab4b2f",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/shift",
+            "at": "2026-11-14T05:31:33.302Z",
+            "actor": "system",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "shiftId": "shift-0001",
+              "reason": "abc run complete",
+              "window": {
+                "from": "2026-11-14T05:31:25.477Z",
+                "to": "2026-11-14T05:31:33.301Z"
+              },
+              "summary": {
+                "mode": "guard",
+                "budget": {
+                  "limit": 100000,
+                  "spent": 0,
+                  "ratio": 0,
+                  "reserve": 5000,
+                  "supervisorUsed": 0
+                },
+                "supervisorSpent": 0,
+                "cases": {
+                  "total": 1,
+                  "open": 0
+                },
+                "wakes": 0,
+                "timeouts": 0
+              }
+            },
+            "prev": "235c5f709a84197a044858701087bc4b8abb830ee95e1f226a827941764dfdcc",
+            "hash": "c5cde3612bfba32c07fdade7220c282984ec32987ca8ff7398448c044a8a4857"
+          },
+          {
+            "v": 1,
+            "seq": 6,
+            "id": "wev_4bf15fd0f68f423e",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "type": "watch/disarmed",
+            "at": "2026-11-14T05:31:33.303Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "reason": "abc run complete",
+              "closedCases": [
+                "case_2cd22f6f85d548ae"
+              ],
+              "shiftId": "shift-0001",
+              "supervisorSpent": 0
+            },
+            "prev": "c5cde3612bfba32c07fdade7220c282984ec32987ca8ff7398448c044a8a4857",
+            "hash": "57bfbdd8b69e6a80b4439bdb897992645a187952387da7e3f3cb9e5e249d2d8f"
+          }
+        ],
+        "cases": [
+          {
+            "schemaVersion": 1,
+            "id": "case_2cd22f6f85d548ae",
+            "runId": "swarm_mwfyx0u257005fdb09",
+            "key": "425c00f7273864834e97c00f1db158d3125534ed92a154dd52e6a57fa58dacff",
+            "state": "closed",
+            "severity": "L2",
+            "title": "5 consecutive tool failures (threshold 3)",
+            "code": "failure_streak",
+            "generation": 1,
+            "signals": [
+              {
+                "code": "failure_streak",
+                "severity": "L2",
+                "summary": "5 consecutive tool failures (threshold 3)",
+                "value": null,
+                "observed": {
+                  "failures": 5,
+                  "threshold": 3
+                },
+                "evidenceId": "ev_swarm_failure_streak_member_mwfyx0u222dfe50439",
+                "ref": {
+                  "memberId": "member_mwfyx0u222dfe50439",
+                  "sessionId": "abc-child-1-f7db0e6a"
+                },
+                "at": "2026-11-14T05:31:26.297Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_failure_streak_member_mwfyx0u222dfe50439",
+                "source": "swarm",
+                "kind": "failure_streak",
+                "at": "2026-11-14T05:31:26.297Z",
+                "ref": {
+                  "memberId": "member_mwfyx0u222dfe50439",
+                  "sessionId": "abc-child-1-f7db0e6a"
+                },
+                "observed": {
+                  "failures": 5,
+                  "threshold": 3
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [],
+            "openedAt": "2026-11-14T05:31:26.496Z",
+            "updatedAt": "2026-11-14T05:31:33.297Z",
+            "closedAt": "2026-11-14T05:31:33.297Z",
+            "closeReason": "abandoned",
+            "note": "supervision disarmed: abc run complete",
+            "reopens": null
+          }
+        ],
+        "chain": {
+          "ok": true,
+          "count": 6,
+          "error": null
+        }
+      },
+      "final": {
+        "status": "running",
+        "spent": 0,
+        "limit": 100000,
+        "ratio": 0
+      },
+      "wallMs": 8274,
+      "pass": true,
+      "note": "detection=203ms case=failure_streak actions=none",
+      "verdict": {
+        "pass": true,
+        "note": "detection=203ms case=failure_streak actions=none"
+      }
+    },
+    {
+      "group": "B",
+      "scenario": "I-4",
+      "repeat": 1,
+      "startedAt": "2026-11-14T05:31:47.244Z",
+      "runId": "swarm_mwfyxhyxfebf929b6f",
+      "childId": "abc-child-1-87ac3fdd",
+      "injectedAt": "2026-11-14T05:31:47.730Z",
+      "referenceAt": "2026-11-14T05:31:47.730Z",
+      "stallMs": 12000,
+      "armed": null,
+      "detection": {
+        "latencyMs": 12187,
+        "at": "2026-11-14T05:31:59.917Z",
+        "caseId": "case_10149961b44045fc",
+        "code": "stalled_dispatch",
+        "severity": "L2",
+        "source": "case"
+      },
+      "actions": [],
+      "wake": null,
+      "cases": [
+        {
+          "schemaVersion": 1,
+          "id": "case_10149961b44045fc",
+          "runId": "swarm_mwfyxhyxfebf929b6f",
+          "key": "5dec0714c56776e11e136a1b7e4a650de5787ea5d792b0bdeb8243473f52c712",
+          "state": "closed",
+          "severity": "L2",
+          "title": "no event for 12s (threshold 12s)",
+          "code": "stalled_dispatch",
+          "generation": 1,
+          "signals": [
+            {
+              "code": "stalled_dispatch",
+              "severity": "L2",
+              "summary": "no event for 12s (threshold 12s)",
+              "value": null,
+              "observed": {
+                "status": "running",
+                "lastEventAt": "2026-11-14T05:31:47.710Z",
+                "quietMs": 12203,
+                "threshold": 12000
+              },
+              "evidenceId": "ev_swarm_stall_runId=swarm_mwfyxhyxfebf929b6f:149552858",
+              "ref": {
+                "runId": "swarm_mwfyxhyxfebf929b6f"
+              },
+              "at": "2026-11-14T05:31:59.913Z"
+            }
+          ],
+          "evidence": [
+            {
+              "id": "ev_swarm_stall_runId=swarm_mwfyxhyxfebf929b6f:149552858",
+              "source": "swarm",
+              "kind": "stall",
+              "at": "2026-11-14T05:31:59.913Z",
+              "ref": {
+                "runId": "swarm_mwfyxhyxfebf929b6f"
+              },
+              "observed": {
+                "status": "running",
+                "lastEventAt": "2026-11-14T05:31:47.710Z",
+                "quietMs": 12203,
+                "threshold": 12000
+              }
+            }
+          ],
+          "decisions": [],
+          "actions": [],
+          "openedAt": "2026-11-14T05:31:59.913Z",
+          "updatedAt": "2026-11-14T05:32:04.733Z",
+          "closedAt": "2026-11-14T05:32:04.733Z",
+          "closeReason": "abandoned",
+          "note": "supervision disarmed: abc run complete",
+          "reopens": null
+        }
+      ],
+      "watch": {
+        "events": [
+          {
+            "v": 1,
+            "seq": 1,
+            "id": "wev_885b96a245ce4155",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/armed",
+            "at": "2026-11-14T05:31:47.724Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "mode": "guard",
+              "requestedMode": "guard",
+              "runId": "swarm_mwfyxhyxfebf929b6f",
+              "reserve": 5000,
+              "supervisor": "unavailable-m1",
+              "watchName": null,
+              "agentOptions": {},
+              "sampling": {
+                "swarmEventMs": 200,
+                "swarmSnapshotMs": 200,
+                "pressureMs": 200,
+                "fishMs": 60000,
+                "staleMs": 5000,
+                "requestTimeoutMs": 1000,
+                "maxInflight": 2
+              },
+              "capabilities": {
+                "guard": true,
+                "supervisor": false,
+                "write": true
+              }
+            },
+            "prev": "genesis",
+            "hash": "8a6754d2756f05450d209db490e7982adb97252c9f6bb9b8b50aca87c826e500"
+          },
+          {
+            "v": 1,
+            "seq": 2,
+            "id": "wev_cdd103816e7f4cc4",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/sample",
+            "at": "2026-11-14T05:31:47.727Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "status": "running",
+              "round": 1,
+              "budget": {
+                "limit": 100000,
+                "spent": 0,
+                "ratio": 0
+              },
+              "cases": {
+                "open": 0
+              },
+              "freshness": {
+                "swarm": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:47.722Z",
+                  "ageMs": 4,
+                  "error": null
+                },
+                "pressure": {
+                  "ok": true,
+                  "at": "2026-11-14T05:31:47.722Z",
+                  "ageMs": 4,
+                  "error": null
+                },
+                "fish": {
+                  "ok": false,
+                  "at": "2026-11-14T05:31:47.722Z",
+                  "ageMs": 4,
+                  "error": "HTTP 404"
+                }
+              }
+            },
+            "prev": "8a6754d2756f05450d209db490e7982adb97252c9f6bb9b8b50aca87c826e500",
+            "hash": "2b40d857cb68b4be1a522b1032b0040b422f698e47d6ce98652306fba069d884"
+          },
+          {
+            "v": 1,
+            "seq": 3,
+            "id": "wev_92e3e83bb3bc49c9",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/case/opened",
+            "at": "2026-11-14T05:31:59.917Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "runId": "swarm_mwfyxhyxfebf929b6f"
+            },
+            "payload": {
+              "caseId": "case_10149961b44045fc",
+              "severity": "L2",
+              "code": "stalled_dispatch",
+              "title": "no event for 12s (threshold 12s)",
+              "scope": {
+                "kind": "run",
+                "id": "run"
+              },
+              "evidenceIds": [
+                "ev_swarm_stall_runId=swarm_mwfyxhyxfebf929b6f:149552858"
+              ],
+              "reopens": null
+            },
+            "prev": "2b40d857cb68b4be1a522b1032b0040b422f698e47d6ce98652306fba069d884",
+            "hash": "8f37ceff9f23e4f3eda74388600a1ef1b27bbee1ba2dd2ca4e1d0d9879946124"
+          },
+          {
+            "v": 1,
+            "seq": 4,
+            "id": "wev_3f5e0c0bc99145a1",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/case/closed",
+            "at": "2026-11-14T05:32:04.737Z",
+            "actor": "guard",
+            "generation": 1,
+            "causationRef": {
+              "kind": "case",
+              "caseId": "case_10149961b44045fc"
+            },
+            "payload": {
+              "caseId": "case_10149961b44045fc",
+              "reason": "abandoned",
+              "note": "supervision disarmed: abc run complete",
+              "actions": 0
+            },
+            "prev": "8f37ceff9f23e4f3eda74388600a1ef1b27bbee1ba2dd2ca4e1d0d9879946124",
+            "hash": "012d0e98f80543e78c896a119b319ee5f1041a3a04883ec1f7abe81b51a03d28"
+          },
+          {
+            "v": 1,
+            "seq": 5,
+            "id": "wev_26e2695da0904678",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/shift",
+            "at": "2026-11-14T05:32:04.739Z",
+            "actor": "system",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "shiftId": "shift-0001",
+              "reason": "abc run complete",
+              "window": {
+                "from": "2026-11-14T05:31:47.724Z",
+                "to": "2026-11-14T05:32:04.737Z"
+              },
+              "summary": {
+                "mode": "guard",
+                "budget": {
+                  "limit": 100000,
+                  "spent": 0,
+                  "ratio": 0,
+                  "reserve": 5000,
+                  "supervisorUsed": 0
+                },
+                "supervisorSpent": 0,
+                "cases": {
+                  "total": 1,
+                  "open": 0
+                },
+                "wakes": 0,
+                "timeouts": 0
+              }
+            },
+            "prev": "012d0e98f80543e78c896a119b319ee5f1041a3a04883ec1f7abe81b51a03d28",
+            "hash": "4088af7393c266023eb8a16f6931f65614d8790cf9f31881462fdef6c0b9c2f1"
+          },
+          {
+            "v": 1,
+            "seq": 6,
+            "id": "wev_dfd4543495f94648",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "type": "watch/disarmed",
+            "at": "2026-11-14T05:32:04.739Z",
+            "actor": "human",
+            "generation": 1,
+            "causationRef": null,
+            "payload": {
+              "reason": "abc run complete",
+              "closedCases": [
+                "case_10149961b44045fc"
+              ],
+              "shiftId": "shift-0001",
+              "supervisorSpent": 0
+            },
+            "prev": "4088af7393c266023eb8a16f6931f65614d8790cf9f31881462fdef6c0b9c2f1",
+            "hash": "17ed871a45b7606fa9ba6c1a65b90a42a0c4ef8705eb5250d1627b12dfe66115"
+          }
+        ],
+        "cases": [
+          {
+            "schemaVersion": 1,
+            "id": "case_10149961b44045fc",
+            "runId": "swarm_mwfyxhyxfebf929b6f",
+            "key": "5dec0714c56776e11e136a1b7e4a650de5787ea5d792b0bdeb8243473f52c712",
+            "state": "closed",
+            "severity": "L2",
+            "title": "no event for 12s (threshold 12s)",
+            "code": "stalled_dispatch",
+            "generation": 1,
+            "signals": [
+              {
+                "code": "stalled_dispatch",
+                "severity": "L2",
+                "summary": "no event for 12s (threshold 12s)",
+                "value": null,
+                "observed": {
+                  "status": "running",
+                  "lastEventAt": "2026-11-14T05:31:47.710Z",
+                  "quietMs": 12203,
+                  "threshold": 12000
+                },
+                "evidenceId": "ev_swarm_stall_runId=swarm_mwfyxhyxfebf929b6f:149552858",
+                "ref": {
+                  "runId": "swarm_mwfyxhyxfebf929b6f"
+                },
+                "at": "2026-11-14T05:31:59.913Z"
+              }
+            ],
+            "evidence": [
+              {
+                "id": "ev_swarm_stall_runId=swarm_mwfyxhyxfebf929b6f:149552858",
+                "source": "swarm",
+                "kind": "stall",
+                "at": "2026-11-14T05:31:59.913Z",
+                "ref": {
+                  "runId": "swarm_mwfyxhyxfebf929b6f"
+                },
+                "observed": {
+                  "status": "running",
+                  "lastEventAt": "2026-11-14T05:31:47.710Z",
+                  "quietMs": 12203,
+                  "threshold": 12000
+                }
+              }
+            ],
+            "decisions": [],
+            "actions": [],
+            "openedAt": "2026-11-14T05:31:59.913Z",
+            "updatedAt": "2026-11-14T05:32:04.733Z",
+            "closedAt": "2026-11-14T05:32:04.733Z",
+            "closeReason": "abandoned",
+            "note": "supervision disarmed: abc run complete",
+            "reopens": null
+          }
+        ],
+        "chain": {
+          "ok": true,
+          "count": 6,
+          "error": null
+        }
+      },
+      "final": {
+        "status": "running",
+        "spent": 0,
+        "limit": 100000,
+        "ratio": 0
+      },
+      "wallMs": 17513,
+      "pass": true,
+      "note": "detection=12187ms case=stalled_dispatch actions=none",
+      "verdict": {
+        "pass": true,
+        "note": "detection=12187ms case=stalled_dispatch actions=none"
+      }
+    }
+  ]
+}

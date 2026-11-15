@@ -7,7 +7,7 @@
  * @module dsh-overwatch/policy
  */
 
-import { sha256 } from './util.js'
+import { canonicalJson, sha256 } from './util.js'
 
 /** Actions the v1 watch officer may choose. */
 export const ACTIONS = Object.freeze(['notice', 'coach', 'throttle', 'pause', 'abort', 'escalate'])
@@ -48,7 +48,7 @@ export const DECISION_VERSION = 1
 /**
  * Validate an untrusted decision value.
  * @param {unknown} raw
- * @param {{ caseId?: string, evidenceIds?: ReadonlySet<string> | readonly string[], maxReasonBytes?: number }} [context]
+ * @param {{ caseId?: string, runId?: string, evidenceIds?: ReadonlySet<string> | readonly string[], maxReasonBytes?: number }} [context]
  * @returns {{ ok: true, decision: Decision } | { ok: false, errors: string[] }}
  */
 export function validateDecision(raw, context = {}) {
@@ -68,8 +68,28 @@ export function validateDecision(raw, context = {}) {
     const target = /** @type {Record<string, unknown>} */ (decision.target)
     if (typeof target.kind !== 'string' || !TARGET_KINDS.includes(target.kind)) errors.push(`target.kind must be one of ${TARGET_KINDS.join(', ')}`)
     if (typeof target.id !== 'string' || target.id === '') errors.push('target.id must be a non-empty string')
+    else if (target.id.length > 200) errors.push('target.id must be at most 200 characters')
+    else if (context.runId !== undefined && target.kind === 'swarm_run' && target.id !== context.runId) {
+      errors.push('target.id must be the supervised runId')
+    }
   }
   if (decision.params !== undefined && !isPlainObject(decision.params)) errors.push('params must be an object when present')
+  else if (isPlainObject(decision.params)) {
+    const params = /** @type {Record<string, unknown>} */ (decision.params)
+    if (params.runId !== undefined) {
+      if (typeof params.runId !== 'string' || params.runId === '') errors.push('params.runId must be a non-empty string')
+      else if (context.runId !== undefined && params.runId !== context.runId) errors.push('params.runId must be the supervised runId')
+    }
+    if (params.text !== undefined) {
+      if (typeof params.text !== 'string') errors.push('params.text must be a string')
+      else if (Buffer.byteLength(params.text, 'utf8') > 280) errors.push('params.text must be at most 280 bytes')
+    }
+    if (decision.action === 'throttle' && params.minutes !== undefined) {
+      if (!Number.isSafeInteger(params.minutes) || params.minutes < 1 || params.minutes > 30) {
+        errors.push('throttle params.minutes must be an integer between 1 and 30')
+      }
+    }
+  }
   if (!Array.isArray(decision.evidenceRefs)) errors.push('evidenceRefs must be an array')
   else {
     if (!decision.evidenceRefs.every(ref => typeof ref === 'string' && ref !== '')) errors.push('evidenceRefs must contain non-empty strings')
@@ -153,6 +173,31 @@ export function authorizeDecision(decision, context) {
   return allow('autopilot allows this action')
 }
 
+/**
+ * Authorization after a human approved a queued L3/L4 request. A human approval
+ * overrides the autopilot matrix, but never observe mode (which exists to record
+ * only) and never guard mode for model decisions (the guard alone may act there).
+ * @param {Decision} decision
+ * @param {{ mode: 'observe' | 'guard' | 'supervised' }} context
+ * @returns {{ allowed: boolean, requiresHuman: boolean, reason: string }}
+ */
+export function authorizeHumanDecision(decision, context) {
+  if (context.mode === 'observe') return deny('observe mode never executes actions, even after approval')
+  if (context.mode === 'guard') return deny('guard mode has no watch officer; only the deterministic guard may act')
+  return allow(`human approved ${decision.action}`)
+}
+
+/**
+ * Authorization after a human approved a queued guard plan.
+ * @param {GuardPlanInput} plan
+ * @param {{ mode: 'observe' | 'guard' | 'supervised' }} context
+ * @returns {{ allowed: boolean, requiresHuman: boolean, reason: string }}
+ */
+export function authorizeHumanPlan(plan, context) {
+  if (context.mode === 'observe') return deny('observe mode never executes actions, even after approval')
+  return allow(`human approved guard ${plan.kind}`)
+}
+
 /** @param {string} reason @returns {{ allowed: true, requiresHuman: false, reason: string }} */
 function allow(reason) {
   return { allowed: true, requiresHuman: false, reason }
@@ -171,7 +216,7 @@ function deny(reason) {
  * @returns {string}
  */
 export function idempotencyKey(decision) {
-  return sha256(JSON.stringify({
+  return sha256(canonicalJson({
     caseId: decision.caseId,
     action: decision.action,
     target: decision.target,
@@ -244,6 +289,9 @@ export function validatePlan(raw, context = {}) {
     const params = /** @type {Record<string, unknown>} */ (plan.params)
     const runId = context.runId ?? params.runId
     if (typeof runId !== 'string' || runId === '') errors.push('params.runId must be a non-empty string')
+    if (context.runId !== undefined && params.runId !== undefined && params.runId !== context.runId) {
+      errors.push('params.runId must be the supervised runId')
+    }
     if (plan.kind === 'throttle') {
       if (!Number.isSafeInteger(params.minutes) || params.minutes < 1 || params.minutes > 30) {
         errors.push('throttle requires integer params.minutes between 1 and 30')
@@ -312,7 +360,7 @@ export function authorizePlan(plan, context) {
  * @returns {string}
  */
 export function planKey(plan, runId) {
-  return sha256(JSON.stringify({
+  return sha256(canonicalJson({
     runId,
     caseId: plan.caseId,
     kind: plan.kind,

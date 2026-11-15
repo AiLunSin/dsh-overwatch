@@ -1,6 +1,7 @@
 {
   "name": "dsh-overwatch",
   "version": "0.1.0",
+  "private": true,
   "description": "Supervised swarm for DeepSeek Harness: a watch officer agent, deterministic hard guards, and cross-source evidence.",
   "license": "MIT",
   "author": "dsh-overwatch contributors",
@@ -45,6 +46,7 @@
     "m2": "node e2e/m2/run.mjs",
     "m4:real": "node e2e/m4/run.mjs",
     "m4:browser": "node e2e/m4/browser/run.mjs",
+    "m4:abc": "node e2e/m4/abc/run.mjs",
     "build:release": "node scripts/build-release.mjs --name @ailunsin/dsh-overwatch",
     "smoke:install": "node scripts/smoke-install.mjs"
   },

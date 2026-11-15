@@ -51,7 +51,7 @@ window.__ModuleLoader__.load({
         tokenMemoryOnly: 'sessionStorage is unavailable; the token is kept in memory for this page only.',
         tokenRequired: 'Enter and save the overwatch token first.',
         writeDisabledHint: 'If the server has no write token, writes are rejected (403 WRITE_DISABLED).',
-        writeGuardOnly: 'Writes: arm, disarm, and case acknowledgement.',
+        writeGuardOnly: 'Writes: arm, disarm, close, resume, purge, and human approvals.',
         loading: 'Loading…',
         noData: 'No data',
         unknown: 'unknown',
@@ -192,6 +192,7 @@ window.__ModuleLoader__.load({
         caseListUnavailable: 'Case list unavailable.',
         casesLimitNote: 'Showing up to the first 100 cases.',
         selectCaseHint: 'Select a row to see details.',
+        openCaseA11y: 'Open case {severity} {code} {title}, {state}',
         untitled: '(untitled)',
         caseDetail: 'Case detail',
         caseMeta: 'Details',
@@ -248,6 +249,33 @@ window.__ModuleLoader__.load({
         armAlready: 'This run is already armed.',
         disarmNotArmed: 'This run is not armed.',
         writeRunRequired: 'Select a run first.',
+        closeCase: 'Close case',
+        closeReason: 'Close reason',
+        closeReasonResolved: 'resolved',
+        closeReasonMitigated: 'mitigated',
+        closeReasonEscalated: 'escalated',
+        closeReasonFalsePositive: 'false positive',
+        closeConfirm: 'Close this case?',
+        closeSuccess: 'Case closed.',
+        closePending: 'Closing…',
+        resumeRun: 'Resume run',
+        resumeConfirm: 'Resume this paused or throttled run?',
+        resumeSuccess: 'Run resumed.',
+        purgeRun: 'Purge archived run',
+        purgeConfirm: 'Permanently purge the archives of {runId}?',
+        purgeSuccess: 'Archived run purged.',
+        purgePending: 'Purging…',
+        approvals: 'Pending approvals',
+        noApprovals: 'No request is waiting for a human.',
+        approvalReason: 'Reason',
+        approvalExpires: 'Expires {time}',
+        approvalApprove: 'Approve and execute',
+        approvalReject: 'Reject',
+        approvalPending: 'Approving…',
+        approvalRejectPending: 'Rejecting…',
+        approvalSuccess: 'Approved and executed once.',
+        approvalRejected: 'Request rejected.',
+        approvalLocked: 'Show writes and set a token to decide approvals.',
         writePending: 'Working…',
         writeError: 'Write failed',
         'mode.guard': 'guard · hard guard',
@@ -649,6 +677,7 @@ window.__ModuleLoader__.load({
         caseListUnavailable: '事件单列表不可用。',
         casesLimitNote: '最多显示前 100 条。',
         selectCaseHint: '点击一行查看详情。',
+        openCaseA11y: '打开事件单 {severity} {code} {title}，{state}',
         untitled: '（无标题）',
         caseDetail: '事件单详情',
         caseMeta: '基本信息',
@@ -705,6 +734,33 @@ window.__ModuleLoader__.load({
         armAlready: '该运行已编队。',
         disarmNotArmed: '该运行未编队。',
         writeRunRequired: '先选择一个运行。',
+        closeCase: '关闭事件单',
+        closeReason: '关闭原因',
+        closeReasonResolved: '已解决',
+        closeReasonMitigated: '已缓解',
+        closeReasonEscalated: '已升级',
+        closeReasonFalsePositive: '误报',
+        closeConfirm: '确认关闭这张事件单？',
+        closeSuccess: '事件单已关闭。',
+        closePending: '关闭中…',
+        resumeRun: '恢复运行',
+        resumeConfirm: '恢复这次已暂停或被限流的运行？',
+        resumeSuccess: '运行已恢复。',
+        purgeRun: '清除归档运行',
+        purgeConfirm: '永久清除 {runId} 的归档？',
+        purgeSuccess: '归档运行已清除。',
+        purgePending: '清除中…',
+        approvals: '待批准请求',
+        noApprovals: '当前没有等待人工决定的请求。',
+        approvalReason: '原因',
+        approvalExpires: '过期时间 {time}',
+        approvalApprove: '批准并执行',
+        approvalReject: '拒绝',
+        approvalPending: '批准中…',
+        approvalRejectPending: '拒绝中…',
+        approvalSuccess: '已批准并执行一次。',
+        approvalRejected: '请求已拒绝。',
+        approvalLocked: '展开写面板并设置令牌后才能处理批准。',
         writePending: '处理中…',
         writeError: '写操作失败',
         'mode.guard': 'guard · 硬闸门',
@@ -1276,7 +1332,7 @@ window.__ModuleLoader__.load({
       })
     }
 
-    function apiPost(path, body, token, signal) {
+    function apiPost(path, body, token, signal, keepalive = false) {
       return requestJson(path, {
         method: 'POST',
         headers: {
@@ -1287,6 +1343,7 @@ window.__ModuleLoader__.load({
         credentials: 'same-origin',
         body: JSON.stringify(body ?? {}),
         signal,
+        ...(keepalive ? { keepalive: true } : {}),
       })
     }
 
@@ -1420,11 +1477,13 @@ window.__ModuleLoader__.load({
       useEffect(() => {
         if (key === null || key === undefined) return undefined
         let disposed = false
+        let running = false
         let timer = null
         let controller = null
         const tick = async () => {
-          if (disposed) return
+          if (disposed || running) return
           if (typeof document !== 'undefined' && document.hidden) return
+          running = true
           if (controller !== null) controller.abort()
           controller = new AbortController()
           const signal = controller.signal
@@ -1435,8 +1494,10 @@ window.__ModuleLoader__.load({
               // Tasks own their error state; unexpected failures are ignored so
               // one bad poll cannot stop the loop.
             }
+          } finally {
+            running = false
+            if (!disposed) timer = setTimeout(tick, intervalMs)
           }
-          if (!disposed) timer = setTimeout(tick, intervalMs)
         }
         const onVisibility = () => {
           if (typeof document === 'undefined') return
@@ -1446,7 +1507,7 @@ window.__ModuleLoader__.load({
             return
           }
           clearTimeout(timer)
-          tick()
+          if (!running) tick()
         }
         tick()
         if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility)
@@ -1492,6 +1553,7 @@ window.__ModuleLoader__.load({
       const declared = typeof freshness.state === 'string' ? freshness.state.toLowerCase() : ''
       if (declared === 'ok' || declared === 'stale' || declared === 'unavailable') return declared
       if (freshness.ok !== true) return 'unavailable'
+      if (freshness.stale === true) return 'stale'
       if (typeof freshness.ageMs === 'number' && Number.isFinite(freshness.ageMs) && freshness.ageMs > STALE_MS) return 'stale'
       return 'ok'
     }
@@ -2685,20 +2747,28 @@ window.__ModuleLoader__.load({
                     )),
                     h('tbody', null, list.map((entry) => h('tr', {
                       key: String(entry.id),
-                      tabIndex: 0,
                       onClick: () => onOpenCase(entry),
-                      onKeyDown: (event) => {
-                        if (event.key === 'Enter' || event.key === ' ') {
-                          event.preventDefault()
-                          onOpenCase(entry)
-                        }
-                      },
-                      'aria-label': `${severityText(t, entry.severity)} · ${entry.code ?? ''} · ${entry.title ?? t('untitled')} · ${translateCode(t, 'caseState', entry.state)}`,
                     },
                       h('td', null, severityCell(t, entry.severity)),
                       h('td', { className: 'ow-cell-time', title: formatTime(entry.openedAt) }, formatTime(entry.openedAt)),
                       h('td', null, h('code', { className: 'ow-code' }, entry.code ?? '—')),
-                      h('td', { className: 'ow-cell-title' }, entry.title ?? t('untitled')),
+                      h('td', { className: 'ow-cell-title' },
+                        h('button', {
+                          type: 'button',
+                          className: 'ow-row-open',
+                          'aria-haspopup': 'dialog',
+                          'aria-label': t('openCaseA11y', {
+                            severity: severityText(t, entry.severity),
+                            code: entry.code ?? '—',
+                            title: entry.title ?? t('untitled'),
+                            state: translateCode(t, 'caseState', entry.state),
+                          }),
+                          onClick: (event) => {
+                            event.stopPropagation()
+                            onOpenCase(entry)
+                          },
+                        }, entry.title ?? t('untitled')),
+                      ),
                       h('td', null, translateCode(t, 'caseState', entry.state)),
                     ))),
                   ),
@@ -2731,6 +2801,12 @@ window.__ModuleLoader__.load({
       onAckStart,
       onAckCancel,
       onAck,
+      closeReason,
+      closeConfirm,
+      onCloseReason,
+      onCloseStart,
+      onCloseCancel,
+      onCloseCase,
       onClose,
       t,
     }) {
@@ -2747,14 +2823,14 @@ window.__ModuleLoader__.load({
         className: 'ow-drawer',
         role: 'dialog',
         'aria-modal': 'true',
-        'aria-label': `${t('caseDetail')} · ${title}`,
+        'aria-labelledby': 'ow-drawer-title',
         tabIndex: -1,
         ref: drawerRef,
         onClick: (event) => event.stopPropagation(),
       },
         h('div', { className: 'ow-drawer-head' },
           h('div', null,
-            h('h2', { className: 'ow-drawer-title' }, title),
+            h('h2', { id: 'ow-drawer-title', className: 'ow-drawer-title' }, title),
             h('p', { className: 'ow-drawer-sub' },
               h('code', { className: 'ow-code' }, data?.code ?? '—'),
               ' · ',
@@ -2867,6 +2943,40 @@ window.__ModuleLoader__.load({
           ackNotice ? h('p', { className: 'ow-notice', role: 'status' }, ackNotice) : null,
           ackError ? h(ErrorNotice, { error: ackError, title: t('writeError'), t }) : null,
         ),
+        h('section', { className: 'ow-ack' },
+          h('h3', null, t('closeCase')),
+          !isOpen
+            ? h('p', { className: 'ow-muted ow-small' }, t('ackClosed'))
+            : canWrite
+              ? h('div', { className: 'ow-ack-form' },
+                  h('label', { className: 'ow-field' },
+                    h('span', null, t('closeReason')),
+                    h('select', {
+                      className: 'ow-select',
+                      value: closeReason,
+                      onChange: (event) => onCloseReason(event.target.value),
+                    },
+                      h('option', { value: 'resolved' }, t('closeReasonResolved')),
+                      h('option', { value: 'mitigated' }, t('closeReasonMitigated')),
+                      h('option', { value: 'escalated' }, t('closeReasonEscalated')),
+                      h('option', { value: 'false_positive' }, t('closeReasonFalsePositive')),
+                    ),
+                  ),
+                  closeConfirm
+                    ? h('div', { className: 'ow-confirm' },
+                        h('span', null, t('closeConfirm')),
+                        h('button', { type: 'button', className: 'ow-btn ow-btn-primary ow-btn-small', disabled: writeBusy !== null, onClick: onCloseCase }, writeBusy !== null ? t('closePending') : t('confirm')),
+                        h('button', { type: 'button', className: 'ow-btn ow-btn-small', disabled: writeBusy !== null, onClick: onCloseCancel }, t('cancel')),
+                      )
+                    : h('button', {
+                        type: 'button',
+                        className: 'ow-btn ow-btn-danger ow-btn-small',
+                        disabled: writeBusy !== null,
+                        onClick: onCloseStart,
+                      }, t('closeCase')),
+                )
+              : h('p', { className: 'ow-muted ow-small' }, t('ackLocked')),
+        ),
       )
     }
 
@@ -2889,11 +2999,18 @@ window.__ModuleLoader__.load({
       confirmAction,
       onRequestArm,
       onRequestDisarm,
+      onRequestResume,
+      onRequestPurge,
       onConfirm,
       onCancelConfirm,
       writeBusy,
       writeNotice,
       writeError,
+      runStatus,
+      runThrottle,
+      approvals = [],
+      onApproveApproval,
+      onRejectApproval,
       t,
     }) {
       const busy = writeBusy !== null
@@ -2990,15 +3107,72 @@ window.__ModuleLoader__.load({
                         }, busy ? t('writePending') : t('arm')),
                       ),
                 ),
+          h('div', { className: 'ow-write-group' },
+            h('div', { className: 'ow-actions-row' },
+              runArmed && (String(runStatus) === 'paused' || runThrottle !== null)
+                ? h('button', {
+                    type: 'button',
+                    className: 'ow-btn ow-btn-primary ow-btn-small',
+                    disabled: busy,
+                    onClick: onRequestResume,
+                  }, t('resumeRun'))
+                : null,
+              !runArmed
+                ? h('button', {
+                    type: 'button',
+                    className: 'ow-btn ow-btn-danger ow-btn-small',
+                    disabled: busy,
+                    onClick: onRequestPurge,
+                  }, t('purgeRun'))
+                : null,
+            ),
+          ),
           confirmAction !== null
             ? h('div', { className: 'ow-confirm', role: 'group', 'aria-label': t('confirm') },
                 h('span', null, confirmAction.kind === 'arm'
                   ? t('armConfirm', { mode: armModeLabel(t, confirmAction.mode) })
-                  : t('disarmConfirm')),
+                  : confirmAction.kind === 'disarm'
+                    ? t('disarmConfirm')
+                    : confirmAction.kind === 'resume'
+                      ? t('resumeConfirm')
+                      : t('purgeConfirm', { runId: selectedRun?.runId ?? '' })),
                 h('button', { type: 'button', className: 'ow-btn ow-btn-primary ow-btn-small', disabled: busy, onClick: onConfirm }, t('confirm')),
                 h('button', { type: 'button', className: 'ow-btn ow-btn-small', disabled: busy, onClick: onCancelConfirm }, t('cancel')),
               )
             : null,
+          h('div', { className: 'ow-write-ops' },
+            h('h3', null, t('approvals')),
+            !tokenSet
+              ? h('p', { className: 'ow-muted ow-small' }, t('approvalLocked'))
+              : approvals.length === 0
+                ? h('p', { className: 'ow-muted ow-small' }, t('noApprovals'))
+                : h('ul', { className: 'ow-signal-list' },
+                    approvals.map((approval) => h('li', { key: approval.id, className: 'ow-signal' },
+                      h('div', { className: 'ow-actions-row' },
+                        h(Badge, { tone: 'warn' }, approval.action),
+                        h('code', { className: 'ow-code' }, approval.caseId ?? '—'),
+                      ),
+                      h('span', null, `${t('approvalReason')}: ${approval.reason ?? '—'}`),
+                      h('span', { className: 'ow-muted ow-small' }, t('approvalExpires', { time: formatTime(approval.expiresAt) })),
+                      h('div', { className: 'ow-actions-row' },
+                        h('button', {
+                          type: 'button',
+                          className: 'ow-btn ow-btn-primary ow-btn-small',
+                          disabled: busy,
+                          'aria-label': `${t('approvalApprove')} ${approval.action} ${approval.caseId ?? ''}`.trim(),
+                          onClick: () => onApproveApproval(approval.id),
+                        }, busy ? t('approvalPending') : t('approvalApprove')),
+                        h('button', {
+                          type: 'button',
+                          className: 'ow-btn ow-btn-small',
+                          disabled: busy,
+                          'aria-label': `${t('approvalReject')} ${approval.action} ${approval.caseId ?? ''}`.trim(),
+                          onClick: () => onRejectApproval(approval.id),
+                        }, t('approvalReject')),
+                      ),
+                    )),
+                  ),
+          ),
           writeNotice ? h('p', { className: 'ow-notice', role: 'status' }, writeNotice) : null,
           writeError ? h(ErrorNotice, { error: writeError, title: t('writeError'), t }) : null,
         ),
@@ -3045,6 +3219,10 @@ window.__ModuleLoader__.load({
       const [ackConfirm, setAckConfirm] = useState(false)
       const [ackError, setAckError] = useState(null)
       const [ackNotice, setAckNotice] = useState(null)
+      const [closeReason, setCloseReason] = useState('resolved')
+      const [closeConfirm, setCloseConfirm] = useState(false)
+      const [approvals, setApprovals] = useState([])
+      const [approvalsRefresh, setApprovalsRefresh] = useState(0)
       const [refreshKey, setRefreshKey] = useState(0)
       const [doctor, setDoctor] = useState(null)
       const [doctorError, setDoctorError] = useState(null)
@@ -3143,7 +3321,28 @@ window.__ModuleLoader__.load({
         setAckConfirm(false)
         setAckError(null)
         setAckNotice(null)
+        setCloseReason('resolved')
+        setCloseConfirm(false)
       }, [selectedCaseId])
+
+      // The approval queue is live for an armed run and read-only for archives.
+      // Poll it independently so a guard-queued L3/L4 request surfaces quickly.
+      usePolling(async (signal) => {
+        try {
+          const payload = await apiGet(
+            `/runs/${encodeURIComponent(selectedRunId)}/approvals?state=pending`,
+            signal,
+          )
+          setApprovals(asArray(payload?.data?.approvals))
+        } catch {
+          // A read-only or archived run may not expose a live queue; keep the
+          // last known list instead of flashing an error in the write panel.
+        }
+      }, 5000, selectedRunId === null ? null : `${selectedRunId}:${approvalsRefresh}`)
+
+      useEffect(() => {
+        if (selectedRunId === null) setApprovals([])
+      }, [selectedRunId])
 
       // Keep a valid selection when the run list changes. Prefer an armed run.
       useEffect(() => {
@@ -3590,9 +3789,9 @@ window.__ModuleLoader__.load({
         writeAbortRef.current = controller
         setWriteBusy(key)
         try {
-          await apiPost(path, body, token, controller.signal)
+          const payload = await apiPost(path, body, token, controller.signal)
           if (!aliveRef.current) return { ok: false, aborted: true, error: null }
-          return { ok: true, aborted: false, error: null }
+          return { ok: true, aborted: false, error: null, data: payload?.data ?? null }
         } catch (error) {
           if (controller.signal.aborted || isAbort(error)) return { ok: false, aborted: true, error: null }
           if (error?.status === 401) forgetToken()
@@ -3609,23 +3808,46 @@ window.__ModuleLoader__.load({
         setConfirmAction(null)
         setWriteError(null)
         setWriteNotice(null)
+        const base = `/runs/${encodeURIComponent(selectedRunId)}`
         const result = action.kind === 'arm'
-          ? await runWrite('arm', `/runs/${encodeURIComponent(selectedRunId)}/arm`, { mode: action.mode })
-          : await runWrite('disarm', `/runs/${encodeURIComponent(selectedRunId)}/disarm`, {
-              reason: disarmReason.trim() === '' ? undefined : disarmReason.trim(),
-            })
+          ? await runWrite('arm', `${base}/arm`, { mode: action.mode })
+          : action.kind === 'disarm'
+            ? await runWrite('disarm', `${base}/disarm`, {
+                reason: disarmReason.trim() === '' ? undefined : disarmReason.trim(),
+              })
+            : action.kind === 'resume'
+              ? await runWrite('resume', `${base}/resume`, { reason: 'resumed from the panel' })
+              : await runWrite('purge', `${base}/purge`, {
+                  confirm: `PURGE ${selectedRunId}`,
+                  reason: 'purged from the panel',
+                })
         if (result.aborted) return
         if (result.ok) {
-          setWriteNotice(action.kind === 'arm' ? t('armSuccess') : t('disarmSuccess'))
+          setWriteNotice(action.kind === 'arm'
+            ? t('armSuccess')
+            : action.kind === 'disarm'
+              ? t('disarmSuccess')
+              : action.kind === 'resume'
+                ? t('resumeSuccess')
+                : t('purgeSuccess'))
           if (action.kind === 'disarm') setDisarmReason('')
-          // Reflect the accepted write immediately; the next /runs poll is
-          // authoritative and will correct any optimistic mismatch.
-          setRuns((current) => current.map((run) => String(run.runId) === String(selectedRunId)
-            ? { ...run, armed: action.kind === 'arm', state: action.kind === 'arm' ? 'watching' : 'disarmed' }
-            : run))
-          setRunDetail((current) => current !== null && String(current.runId) === String(selectedRunId)
-            ? { ...current, armed: action.kind === 'arm', state: action.kind === 'arm' ? 'watching' : 'disarmed' }
-            : current)
+          if (action.kind === 'purge') {
+            setRuns((current) => current.filter((run) => String(run.runId) !== String(selectedRunId)))
+            setSelectedRunId(null)
+            setSelectedCase(null)
+            setApprovals([])
+          } else {
+            // Reflect the accepted write immediately; the next /runs poll is
+            // authoritative and will correct any optimistic mismatch.
+            const armed = action.kind === 'arm'
+            const state = action.kind === 'resume' ? 'watching' : armed ? 'watching' : 'disarmed'
+            setRuns((current) => current.map((run) => String(run.runId) === String(selectedRunId)
+              ? { ...run, armed, state, throttle: action.kind === 'resume' ? null : run.throttle }
+              : run))
+            setRunDetail((current) => current !== null && String(current.runId) === String(selectedRunId)
+              ? { ...current, armed, state, throttle: action.kind === 'resume' ? null : current.throttle }
+              : current)
+          }
           setRefreshKey((value) => value + 1)
         } else {
           setWriteError(result.error)
@@ -3655,13 +3877,89 @@ window.__ModuleLoader__.load({
           setAckNote('')
           // The ack route may only mark the case as acknowledged, not closed.
           // Hide the action immediately so the operator cannot double-submit.
-          setSelectedCase((current) => current === null ? current : { ...current, state: 'acknowledged' })
-          setCaseDetail((current) => current === null
+          setSelectedCase((current) => current === null || String(current.id ?? '') !== caseId
+            ? current
+            : { ...current, state: 'acknowledged' })
+          setCaseDetail((current) => current === null || String(current.case?.id ?? '') !== caseId
             ? current
             : { ...current, case: { ...(current.case ?? {}), state: 'acknowledged' } })
           setRefreshKey((value) => value + 1)
         } else {
           setAckError(result.error)
+        }
+      }
+
+      const startCloseCase = () => {
+        if (selectedCase === null || selectedRunId === null || writeBusy !== null) return
+        setCloseConfirm(true)
+      }
+
+      const confirmCloseCase = async () => {
+        if (selectedCase === null || selectedRunId === null || writeBusy !== null) return
+        const caseId = selectedCaseId
+        if (caseId === null) return
+        setCloseConfirm(false)
+        setAckError(null)
+        setAckNotice(null)
+        const result = await runWrite(
+          `close:${caseId}`,
+          `/runs/${encodeURIComponent(selectedRunId)}/cases/${encodeURIComponent(caseId)}/close`,
+          {
+            reason: closeReason,
+            note: ackNote.trim() === '' ? undefined : ackNote.trim(),
+          },
+        )
+        if (result.aborted) return
+        if (result.ok) {
+          setAckNotice(t('closeSuccess'))
+          setAckNote('')
+          setSelectedCase((current) => current === null || String(current.id ?? '') !== caseId
+            ? current
+            : { ...current, state: 'closed' })
+          setCaseDetail((current) => current === null || String(current.case?.id ?? '') !== caseId
+            ? current
+            : { ...current, case: { ...(current.case ?? {}), state: 'closed' } })
+          setRefreshKey((value) => value + 1)
+        } else {
+          setAckError(result.error)
+        }
+      }
+
+      const decideApproval = async (approvalId, action) => {
+        if (token === null || selectedRunId === null || writeBusy !== null) return
+        setWriteError(null)
+        setWriteNotice(null)
+        const base = `/runs/${encodeURIComponent(selectedRunId)}/approvals/${encodeURIComponent(approvalId)}`
+        if (writeAbortRef.current !== null) writeAbortRef.current.abort()
+        const controller = new AbortController()
+        writeAbortRef.current = controller
+        setWriteBusy(`${action}:${approvalId}`)
+        try {
+          const note = ackNote.trim() === '' ? undefined : ackNote.trim()
+          if (action === 'approve') {
+            // The one-time token is minted for this approval, kept in memory, and
+            // consumed immediately by the approve call; it never touches storage.
+            const challenge = await apiPost(`${base}/challenge`, {}, token, controller.signal)
+            const oneTime = challenge?.data?.token
+            if (typeof oneTime !== 'string' || oneTime === '') {
+              throw Object.assign(new Error('the server did not return a one-time token'), { code: 'APPROVAL_TOKEN_REQUIRED' })
+            }
+            await apiPost(`${base}/approve`, { token: oneTime, note }, token, controller.signal)
+          } else {
+            await apiPost(`${base}/reject`, { reason: note ?? 'rejected from the panel' }, token, controller.signal)
+          }
+          if (!aliveRef.current) return
+          setWriteNotice(action === 'approve' ? t('approvalSuccess') : t('approvalRejected'))
+          setApprovals((current) => current.filter((approval) => String(approval.id) !== String(approvalId)))
+          setApprovalsRefresh((value) => value + 1)
+          setRefreshKey((value) => value + 1)
+        } catch (error) {
+          if (controller.signal.aborted || isAbort(error)) return
+          if (error?.status === 401) forgetToken()
+          if (aliveRef.current) setWriteError(error)
+        } finally {
+          if (writeAbortRef.current === controller) writeAbortRef.current = null
+          if (aliveRef.current) setWriteBusy(null)
         }
       }
 
@@ -3715,7 +4013,13 @@ window.__ModuleLoader__.load({
           }
         }
         try {
-          await apiPost(`/runs/${encodeURIComponent(selectedRunId)}/restores`, body, token, controller.signal)
+          // The restore already ran: a result record must survive tab unload or
+          // navigation, so it is sent with keepalive and without the abort signal.
+          if (phase === 'result') {
+            await apiPost(`/runs/${encodeURIComponent(selectedRunId)}/restores`, body, token, undefined, true)
+          } else {
+            await apiPost(`/runs/${encodeURIComponent(selectedRunId)}/restores`, body, token, controller.signal)
+          }
         } catch (error) {
           if (error?.status === 401) forgetToken()
           throw error
@@ -4199,11 +4503,18 @@ window.__ModuleLoader__.load({
               confirmAction,
               onRequestArm: () => setConfirmAction({ kind: 'arm', mode: armMode }),
               onRequestDisarm: () => setConfirmAction({ kind: 'disarm' }),
+              onRequestResume: () => setConfirmAction({ kind: 'resume' }),
+              onRequestPurge: () => setConfirmAction({ kind: 'purge' }),
               onConfirm: confirmWrite,
               onCancelConfirm: () => setConfirmAction(null),
               writeBusy,
               writeNotice,
               writeError,
+              runStatus: selectedDetail?.status ?? selectedRun?.status ?? null,
+              runThrottle: selectedDetail?.throttle ?? selectedRun?.throttle ?? null,
+              approvals,
+              onApproveApproval: (approvalId) => { void decideApproval(approvalId, 'approve') },
+              onRejectApproval: (approvalId) => { void decideApproval(approvalId, 'reject') },
               t,
             })
           : null,
@@ -4250,6 +4561,12 @@ window.__ModuleLoader__.load({
                 onAckStart: startAck,
                 onAckCancel: () => setAckConfirm(false),
                 onAck: confirmAck,
+                closeReason,
+                closeConfirm,
+                onCloseReason: setCloseReason,
+                onCloseStart: startCloseCase,
+                onCloseCancel: () => setCloseConfirm(false),
+                onCloseCase: confirmCloseCase,
                 onClose: () => setSelectedCase(null),
                 t,
               }),
@@ -4409,12 +4726,15 @@ window.__ModuleLoader__.load({
 .ow-table th { text-align: left; padding: 7px 8px; background: var(--dsw-alias-bg-layer-2); color: var(--dsw-alias-label-secondary); font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; border-bottom: 1px solid var(--dsw-alias-border-l1); }
 .ow-table td { padding: 7px 8px; border-bottom: 1px solid var(--dsw-alias-border-l1); vertical-align: top; }
 .ow-table tbody tr:last-child td { border-bottom: none; }
-.ow-table tbody tr[tabindex] { cursor: pointer; }
-.ow-table tbody tr[tabindex]:hover { background: var(--dsw-alias-bg-layer-2); }
-.ow-table tbody tr[tabindex]:focus-visible { outline: 2px solid var(--dsw-focus-ring-color, var(--dsw-alias-brand-primary)); outline-offset: -2px; }
+.ow-table tbody tr { cursor: pointer; }
+.ow-table tbody tr:hover { background: var(--dsw-alias-bg-layer-2); }
+.ow-table tbody tr:focus-within { background: var(--dsw-alias-bg-layer-2); }
 .ow-cell-time { white-space: nowrap; color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; }
 .ow-cell-seq { color: var(--dsw-alias-label-secondary); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .ow-cell-title { min-width: 150px; }
+.ow-row-open { appearance: none; border: 0; padding: 0; margin: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; text-decoration: underline; text-decoration-color: color-mix(in srgb, currentcolor 35%, transparent); text-underline-offset: 2px; }
+.ow-row-open:hover { text-decoration-color: currentcolor; }
+.ow-row-open:focus-visible { outline: 2px solid var(--dsw-focus-ring-color, var(--dsw-alias-brand-primary)); outline-offset: 2px; border-radius: 3px; }
 .ow-cell-summary { max-width: 460px; overflow-wrap: anywhere; }
 .ow-case-table { padding-top: 12px; }
 .ow-cases { display: flex; flex-direction: column; gap: 12px; }

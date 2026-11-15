@@ -5,6 +5,66 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — human approval queue and panel actions
+
+- `ApprovalQueue` (`src/approvals.js`): `requiresHuman` decisions and guard plans
+  are persisted under `<run>/approvals/<id>.json` instead of being dropped, with
+  idempotent pending dedupe and lifecycle events
+  `watch/approval/requested|challenged|approved|rejected|executed|failed|expired`.
+- Two-step approval: `challenge` mints a high-entropy one-time token whose
+  SHA-256 (bound to the approval id) is stored, never the plaintext; `approve`
+  consumes it with `timingSafeEqual` and replays the stored decision/plan through
+  the same `Executor` with `approvedBy: "human"` and `approvalId`.
+- Human approval never crosses `observe` and cannot approve model decisions in
+  `guard`; `policy.approvalTtlMs` (default 1h) bounds pending records, and
+  challenge tokens expire after 5 minutes.
+- HTTP: `GET /runs/:id/approvals`, `GET /runs/:id/approvals/:approvalId`, and
+  token-protected `challenge`/`approve`/`reject`.
+- Panel: close-case section (reason select), resume and purge buttons (with
+  explicit `PURGE <runId>` confirmation), and a pending-approvals list with
+  approve/reject and expiry. Restore-result recording now uses `keepalive` and no
+  abort signal so an unload cannot cancel it.
+- Table/dialog a11y: case titles are real buttons with `aria-haspopup="dialog"`
+  and action-specific labels; the case drawer is `aria-labelledby` its heading;
+  approval buttons name the action and case.
+
+### Added — chain and storage hardening
+
+- Optional `OVERWATCH_CHAIN_KEY` switches new events to HMAC-SHA256
+  (`alg: "hmac-sha256"`); keyless reads fail (`EHMACKEY`) and HMAC→plain
+  downgrade is rejected (`EALG`).
+- External anchors at `<dataDir>/anchors/<runId>.jsonl` are written every 64
+  appends and on close; `verifyAnchor`/`doctor` detect truncation or rewrites.
+- Owner-only `0700` directories and `0600` files; `watch.jsonl` and lock files
+  refuse symlinks (`ESYMLINK` / `ELOCKSYMLINK`); stale-lock takeover re-reads the
+  moved owner nonce to close the TOCTOU window.
+- `storage.retentionDays` now drives an automatic sweep on service open and every
+  6 hours, purging only archived, unlocked, chain-valid runs older than the
+  cutoff and writing `watch/service/retention` before deletion.
+
+### Fixed — supervision hardening
+
+- The watch officer now fails closed when its child cannot be proven to have
+  only `watch_case`/`watch_evidence`/`watch_decide`; a restriction failure
+  disposes the activation and degrades to the deterministic guard.
+- Decisions are bound to the supervised run: `target.id`/`params.runId` cannot
+  point at another run, and the swarm port uses executor context, not model
+  params. Throttle minutes, coach text and target ids are bounded.
+- `watch.jsonl` tail repair now uses byte offsets and physical line numbers;
+  torn CJK tails, mid-file corruption without a final newline, and a complete
+  last line missing its newline are handled without losing committed evidence.
+- Executor recovery rebuilds idempotency outcomes, marks incomplete actions
+  `unknown`, and prevents replay after restart.
+- Added wall-clock hard abort (`thresholds.maxRunMs`), stale-source gating,
+  `source_unavailable` cases, automatic soft-case resolution, human case close,
+  human resume, explicit tombstoned purge, and acknowledgement generation bumps.
+- Removed the undefined `summar` debug path; unrelated `agent/created` events
+  are now metadata-only and never store prompts, headers or options.
+- Hardened card/evidence byte caps, upstream redirect handling, HTTP Host
+  validation, malformed percent-encoding handling and release `--out` guards.
+- Case materialized files and snapshots now use the same scrub rules as the
+  hash-chained log.
+
 ### Added — M4 real-model watch validation
 
 - `e2e/m4`: scripted root + real DeepSeek account watch child, one wake within a

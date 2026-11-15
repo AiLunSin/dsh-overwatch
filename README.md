@@ -4,8 +4,8 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M0–M4 发布候选（值班员 experimental；真实模型单次唤醒已验证，完整
-A/B/C、浏览器恢复演练与 npm 发布受外部条件阻塞）。** 仓库包含 Host + Web 面板、
+**状态：M0–M4 发布候选（值班员 experimental；真实模型单次唤醒、真实 Edge 恢复演练
+与 GitHub Release 已验证；完整 A/B/C 与 npm 发布仍受外部条件阻塞）。** 仓库包含 Host + Web 面板、
 真实 DSH 0.2.2-rc.3 上的 M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例、
 一次真实 DeepSeek 模型的值班员唤醒，以及 scoped 发布产物。
 `supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
@@ -33,8 +33,9 @@ A/B/C、浏览器恢复演练与 npm 发布受外部条件阻塞）。** 仓库�
 | `src/run.js` | ✅ | 每 run 状态机、锁、采样、Guard+Watch 调度、disarm 归档与交接班 |
 | `src/service.js` | ✅ | 多 run 注册、arm/disarm、历史归档、agent/created 与 usage 转发 |
 | `src/tools.js` | ✅ | 根 agent 的 `watch_arm/disarm/status/report` |
-| `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/restores；doctor |
-| `client.js` | ✅ M3 | 值班室、事件单、鱼缸（检查点/恢复）、回放时间轴、doctor |
+| `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/close/resume/purge/approvals/restores；doctor |
+| `src/approvals.js` | ✅ | 持久 approve 队列：一次性令牌、TTL、去重、生命周期事件 |
+| `client.js` | ✅ M3 | 值班室、事件单（close）、鱼缸（检查点/恢复）、回放时间轴、doctor、resume/purge/approve 按钮 |
 | 发布产物 | ✅ M4 | scoped 构建、目录/tarball 安装冒烟、CI；npm 发布待 OTP |
 | 真实模型 | ✅ 单次 / ⛔ A/B | 值班员单次唤醒 9,958 tokens PASS；完整 A/B/C 见 docs/m4.md |
 
@@ -43,8 +44,13 @@ A/B/C、浏览器恢复演练与 npm 发布受外部条件阻塞）。** 仓库�
 | 条件 | 动作 | 执行者 |
 | --- | --- | --- |
 | 预算 ≥ 80% / ≥95% / ≥100% | throttle（10 分钟后自动 resume）/ pause / abort | Guard（无模型） |
-| swarm 事件 seq 缺口或日志损坏 | abort | Guard |
+| 墙钟 ≥ `thresholds.maxRunMs`（默认 8h） | abort | Guard |
+| 事件流缺口或日志损坏 | abort | Guard |
+| swarm 源不可用/过期 | 只记录 source_unavailable，暂停确定性动作与模型变更 | Guard + policy |
 | L2+ 事件单 | 懒启动值班员，读案情卡 + ≤3 次证据，提交 `notice/coach/throttle/pause/escalate` | Watch + Executor |
+| 软信号持续 `policy.resolveMs` 不出现 | 案件自动 resolve | CaseManager |
+| 操作员 ack/close/resume/purge | 通过受 token 保护的 HTTP；ack 会使在途决定失效，purge 需 `PURGE <runId>` 确认 | Human |
+| `requiresHuman` 决定/计划 | 持久入队 → 人工 challenge 取一次性令牌 → approve 后原样重放执行 | Human + Executor |
 | 值班员超时/崩溃 2 次 | 降级为 guard-only，写 `watch/degraded` | Supervisor |
 | 值班员 token 达到预留 R | 不再唤醒，Guard 继续 | Supervisor |
 | 成员失败连击 / 上下文压力 / 停滞 | 开 L2/L1 事件单 | 确定性信号 |
@@ -132,17 +138,57 @@ curl http://127.0.0.1:PORT/overwatch/api/fish
 curl http://127.0.0.1:PORT/overwatch/api/doctor
 ```
 
-写接口需 `x-overwatch-token`：arm/disarm/ack/restores。面板会展示值班员状态、
+写接口需 `x-overwatch-token`：arm/disarm/ack/close/resume/purge/approvals/restores。面板会展示值班员状态、
 唤醒次数、S/R token、超时和子会话，并区分 guard-only / supervised 横幅；
 鱼缸页展示检查点/审计与恢复流程，回放页展示合并时间轴。
+
+### 人工批准队列
+
+`requiresHuman` 不再直接拒绝，而是把决定/guard plan 写入
+`<run>/approvals/<id>.json` 并记 `watch/approval/requested`。批准分两步：
+
+```powershell
+# 1) 读取待批准项（只读）
+curl 'http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/approvals?state=pending'
+# 2) 取一次性令牌（写 token）；令牌只返回一次，服务端只存 SHA-256
+curl -X POST -H "x-overwatch-token: $env:OW_TOKEN" -H 'content-type: application/json' \
+  -d '{}' http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/approvals/apv_xxx/challenge
+# 3) 批准并执行；令牌单次有效，默认 5 分钟过期
+curl -X POST -H "x-overwatch-token: $env:OW_TOKEN" -H 'content-type: application/json' \
+  -d '{"token":"<one-time>","note":"..."}' \
+  http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/approvals/apv_xxx/approve
+# 或拒绝
+curl -X POST -H "x-overwatch-token: $env:OW_TOKEN" -H 'content-type: application/json' \
+  -d '{"reason":"not now"}' http://127.0.0.1:PORT/overwatch/api/runs/swarm_xxx/approvals/apv_xxx/reject
+```
+
+- 同样的 pending 请求按幂等键去重，不会因每个 tick 重复入队。
+- 人工批准**不能**越过 `observe`；模型决定在 `guard` 下也不能被人工批准（只有确定性
+  guard 可动作）。`guard`/`supervised` 下人工批准的 guard plan 可执行。
+- 执行走同一个 `Executor`，账本带 `approvedBy: "human"` 与 `approvalId`，并写
+  `watch/approval/executed|failed`；重复批准返回冲突。
+- 队列有 TTL（`policy.approvalTtlMs`，默认 1 小时），过期写 `watch/approval/expired`。
+
+### 链完整性与存储硬化
+
+- 设置 `OVERWATCH_CHAIN_KEY` 后所有新事件用 HMAC-SHA256 链；事件带
+  `alg: "hmac-sha256"`，无密钥读取 HMAC 链会失败（`EHMACKEY`），从 HMAC
+  降级到普通哈希会被拒绝（`EALG`）。
+- 外部锚点 `<dataDir>/anchors/<runId>.jsonl` 每 64 次追加与 close 时写入，
+  `doctor` 会用已验证事件比对最新锚点，能发现截断/重写。
+- 目录 `0700`、文件 `0600`；`watch.jsonl` 与锁文件拒绝 symlink（`ESYMLINK` /
+  `ELOCKSYMLINK`）；接管陈旧锁时重读被移动的 owner nonce，避免 TOCTOU。
+- `storage.retentionDays` 现在会自动扫描：服务打开时与每 6 小时清理一次，只删
+  已归档、未加锁、链完好且超过保留期的 run；删除前先写
+  `watch/service/retention` tombstone。
 
 ---
 
 ## 4. 验证
 
 ```powershell
-npm test        # 124 个测试：链/锁/场景/信号/事件单/Guard/Watch/卡/鱼缸/执行器/HTTP/服务/面板
-npm run lint    # node --check 48 个源文件
+npm test        # 164 个测试：链/锁/场景/信号/事件单/Guard/Watch/卡/鱼缸/执行器/批准队列/HTTP/服务/面板
+npm run lint    # node --check 64 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1/M3 web 端到端（33/33）
 npm run m2      # M2 值班员 headless 端到端（12/12）
@@ -177,15 +223,20 @@ case `mitigated`、交接班 `shift-0001`、13 条 watch 哈希链全连续。
   真实 swarm，不能把单次唤醒当成质量结论。
 - **教练不保证送达**：`coach`/`throttle` 的文本只写 swarm `steer` 事件，上游不投递
   成员 inbox；v1 文案必须写"可能不送达"。
-- **M1/M2 不自动恢复**：`pause` 需人工 resume；`throttle` 只在"由我们暂停"时按
-  到期 resume。没有"人类 resume"HTTP 路由（M3 面板动作）。
+- **墙钟/新鲜度**：`thresholds.maxRunMs` 默认 8 小时，0 表示关闭；`sampling.staleMs`
+  过期后 guard 不再执行预算类动作，值班员只能 notice/escalate。
+- **暂停需要人工恢复**：`pause` 不再自动 resume；操作员可用
+  `POST /overwatch/api/runs/:id/resume`（需写 token），面板写操作区在运行 paused/被
+  throttle 时提供「恢复运行」按钮。`throttle` 只在"由我们暂停"时按到期自动 resume。
+- **人工批准不等于放行一切**：批准队列只重放原始决定/计划；`observe` 永不执行，
+  `guard` 下模型决定仍被拒绝。一次性令牌只在 challenge 响应中出现一次。
 - **"0 超支"以监管层存活为前提**：总支出上界是 `B + S`（S ≤ 5% × B）。
 - **值班员只做判断**：不写代码、不合并、不修 bug；没有 swarm/fs/bash/subagent 工具。
 - **鱼数据自动检查点/恢复仍是 P1**：fishkeeper 写路由只在浏览器面，Host fetch 401；
-  面板的浏览器恢复流程已实现，但**真实恢复演练未验收**（本环境没有可自动化的浏览器）。
+  面板的浏览器恢复流程已实现，并且 M4 已用真实 Edge 走通恢复/键盘/AX 验收。
 - **回放时间轴**只合并有 `at` 的 swarm/pressure/watch 条目；fishkeeper 的日记审计
   在鱼缸页单独展示，未强绑到 run。
-- **面板未做真实浏览器自动化验收**（headless Edge 在本机会挂起）；HTTP 面有端到端。
+- **面板的浏览器验收**见 M4 的 Edge 恢复/键盘/AX 结果；HTTP 面另有端到端。
 - **fake swarm 不是 dsh-swarm**：M1/M2 e2e 只验证 overwatch 的读写契约。
 
 ---

@@ -76,6 +76,8 @@ export class WatchOfficer {
     this.lastStop = null
     this.startedAt = null
     this.disposed = false
+    /** Non-null once the child could not be proven to have only the three watch tools. */
+    this.unavailable = /** @type {string | null} */ (null)
     /** Agents (not ids) already restricted: a cold resume is a new Agent object
      * with the same child id, and must be restricted/registered again. */
     this.attached = new WeakSet()
@@ -113,22 +115,29 @@ export class WatchOfficer {
   #attach(agent) {
     const id = String(agent?.id ?? '')
     if (id === '' || this.attached.has(agent)) return
+    if (this.unavailable !== null) return
     const childTools = agent?.ctx?.tools
     if (childTools === undefined || childTools === null || typeof childTools.register !== 'function') {
-      this.#error('child agent has no tools service; refusing to run unrestricted')
+      this.#markUnavailable('child agent has no tools service; refusing to run unrestricted')
       return
     }
+    let inherited = []
     try {
-      const inherited = (this.ctx.tools?.schemas?.() ?? []).map(schema => String(schema.name))
-      if (inherited.length > 0) childTools.restrict({ deny: inherited })
+      const tools = this.ctx.tools
+      if (tools === null || tools === undefined || typeof tools.schemas !== 'function') throw new Error('tools.schemas is unavailable')
+      inherited = (tools.schemas() ?? []).map(schema => String(schema.name))
+      if (inherited.length === 0) throw new Error('no inherited tool table was visible; refusing to trust an empty deny-list')
+      childTools.restrict({ deny: inherited })
     } catch (error) {
-      this.#error(`could not restrict the watch child: ${messageOf(error)}`)
+      this.#markUnavailable(`could not restrict the watch child: ${messageOf(error)}`)
+      return
     }
     for (const definition of this.#toolDefinitions()) {
       try {
         childTools.register(definition)
       } catch (error) {
-        this.#error(`could not register ${definition.name}: ${messageOf(error)}`)
+        this.#markUnavailable(`could not register ${definition.name}: ${messageOf(error)}`)
+        return
       }
     }
     this.attached.add(agent)
@@ -136,10 +145,29 @@ export class WatchOfficer {
     this.callbacks.record?.('watch/attach', {
       agentId: id,
       name: this.name,
-      inherited: (this.ctx.tools?.schemas?.() ?? []).length,
+      inherited: inherited.length,
       registered: this.#toolDefinitions().map(definition => definition.name),
     })
     this.logger?.info?.(`[overwatch] watch child ${this.name} attached (${id.slice(0, 12)})`)
+  }
+
+  /**
+   * Fail closed: an officer that cannot prove it was restricted must never
+   * receive a case card or a decision. The supervisor will degrade to the
+   * deterministic guard after the second wake error.
+   * @param {string} reason
+   */
+  #markUnavailable(reason) {
+    if (this.unavailable !== null) return
+    this.unavailable = reason
+    this.state = 'failed'
+    try {
+      this.controller?.abort()
+    } catch {
+      // best effort
+    }
+    this.#error(reason)
+    this.callbacks.record?.('watch/unavailable', { reason: reason.slice(0, 300), name: this.name })
   }
 
   /**
@@ -149,6 +177,7 @@ export class WatchOfficer {
    */
   async wake(input) {
     if (this.disposed) return { status: 'disposed' }
+    if (this.unavailable !== null) return { status: 'error', code: 'WATCH_UNRESTRICTED', error: this.unavailable }
     if (this.pending !== null) return { status: 'busy' }
     if (this.childId === null && this.parentAgent === null) return { status: 'error', error: 'no parent agent' }
     /** @type {any} */
@@ -192,7 +221,7 @@ export class WatchOfficer {
       if (timer !== null) clearTimeout(timer)
       this.pending = null
       this.controller = null
-      this.state = this.disposed ? 'stopped' : this.childId === null ? 'absent' : 'idle'
+      this.state = this.disposed ? 'stopped' : this.unavailable !== null ? 'failed' : this.childId === null ? 'absent' : 'idle'
     }
   }
 
@@ -229,8 +258,26 @@ export class WatchOfficer {
     this.childId = String(activation.childId)
     this.startedAt = Date.now()
     this.state = 'waking'
+    if (this.unavailable !== null) {
+      this.activation = null
+      try {
+        await activation.dispose?.()
+      } catch {
+        // The officer is already failed; disposal is best effort.
+      }
+      throw new Error(this.unavailable)
+    }
     const live = this.ctx.get?.('agents')?.get?.(this.childId)
     if (live !== undefined && live !== null) this.#attach(live)
+    if (this.unavailable !== null) {
+      this.activation = null
+      try {
+        await activation.dispose?.()
+      } catch {
+        // best effort; the officer is already failed
+      }
+      throw new Error(this.unavailable)
+    }
     void activation.result.then(result => {
       this.lastStop = result?.stopReason ?? null
       if (this.pending !== null && this.pending.decided !== true) {
@@ -246,10 +293,19 @@ export class WatchOfficer {
 
   /** @param {string} cardText */
   async #send(cardText) {
+    if (this.unavailable !== null) throw new Error(this.unavailable)
     const subagents = this.ctx.get?.('subagents')
     if (subagents === undefined || subagents === null) throw new Error('subagents service is unavailable')
     if (this.parentAgent === null || this.childId === null) throw new Error('watch officer is not started')
     await subagents.sendMessage(this.parentAgent, this.childId, [textBlock(cardText)], { signal: this.controller.signal })
+    if (this.unavailable !== null) {
+      try {
+        this.controller?.abort()
+      } catch {
+        // best effort
+      }
+      throw new Error(this.unavailable)
+    }
   }
 
   /** Test/observability view of the scoped tool definitions. */
@@ -355,6 +411,9 @@ export class WatchOfficer {
 
   /** @param {any} args @param {any} exec */
   async #decideTool(args, exec) {
+    if (this.unavailable !== null) {
+      return { ok: false, code: 'WATCH_UNRESTRICTED', message: this.unavailable }
+    }
     const pending = this.pending
     if (pending === null) return { ok: false, code: 'NO_ACTIVE_CASE', message: 'no case is awaiting a decision' }
     if (pending.decided === true) return { ok: false, code: 'ALREADY_DECIDED', message: 'this case already received a decision' }
@@ -404,6 +463,7 @@ export class WatchOfficer {
       errors: this.errors,
       lastError: this.lastError,
       lastStop: this.lastStop,
+      unavailable: this.unavailable,
       startedAt: this.startedAt === null ? null : new Date(this.startedAt).toISOString(),
       activeCaseId: this.pending?.caseId ?? null,
     }

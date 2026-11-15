@@ -39,13 +39,13 @@ export function registerTools(ctx, service, config) {
 
   ctx.tools.register({
     name: 'watch_arm',
-    description: 'Start deterministic supervision (hard budget log integrity guard) of a live dsh-swarm run. M1 is guard-only: it never starts a watch officer. Requires the root agent.',
+    description: 'Start deterministic supervision (hard budget/log integrity guard) of a live dsh-swarm run; supervised mode lazily starts the tool-restricted watch officer. Requires the root agent.',
     parameters: {
       type: 'object',
       additionalProperties: false,
       properties: {
         runId: { type: 'string', description: 'Swarm run id, [A-Za-z0-9_-]{1,200}.' },
-        mode: { type: 'string', enum: ['observe', 'guard', 'supervised'], description: 'Defaults to the profile mode. supervised is unavailable in M1.' },
+        mode: { type: 'string', enum: ['observe', 'guard', 'supervised'], description: 'Defaults to the profile mode; supervised requires the root agent and a write token.' },
       },
       required: ['runId'],
     },
@@ -133,8 +133,9 @@ export function registerTools(ctx, service, config) {
     isConcurrencySafe() {
       return true
     },
-    async execute(args) {
+    async execute(args, exec) {
       try {
+        if (isSubagent(exec)) return { ok: false, code: 'ROOT_ONLY', message: 'only the root agent may read supervision state' }
         if (typeof args?.runId === 'string' && args.runId !== '') {
           const view = service.getRun(args.runId)
           if (view === null) return { ok: false, code: 'RUN_NOT_FOUND', message: `run ${args.runId} not found` }
@@ -169,8 +170,9 @@ export function registerTools(ctx, service, config) {
     isConcurrencySafe() {
       return true
     },
-    async execute(args) {
+    async execute(args, exec) {
       try {
+        if (isSubagent(exec)) return { ok: false, code: 'ROOT_ONLY', message: 'only the root agent may read the watch report' }
         const runId = String(args?.runId ?? '')
         const format = args?.format === 'json' ? 'json' : 'md'
         const report = service.report(runId)

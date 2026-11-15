@@ -30,6 +30,7 @@
         policy:
           cooldownMs: 900000
           maxAutoInterventions: 5
+          resolveMs: 60000
           twoSignalRule: true
           throttleMinutes: 10
           autopilot:
@@ -49,6 +50,7 @@
           reviewDeadlockMs: 900000
           maxResultTokens: 12000
           maxOpenCases: 20
+          maxRunMs: 28800000
         storage:
           dataDir: ''
           retentionDays: 90
