@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "case_6d5c7895a3b14baf",
+  "runId": "swarm_mwhe2e7d1c85e10a5f",
+  "key": "d51032bbba7df5e23883dca018ab5615acde9dbf9235127d3aaf79ff48870a24",
+  "state": "closed",
+  "severity": "L2",
+  "title": "5 consecutive tool failures (threshold 3)",
+  "code": "failure_streak",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "failure_streak",
+      "severity": "L2",
+      "summary": "5 consecutive tool failures (threshold 3)",
+      "value": null,
+      "observed": {
+        "failures": 5,
+        "threshold": 3
+      },
+      "evidenceId": "ev_swarm_failure_streak_member_mwhe2e7d5d8c60c696",
+      "ref": {
+        "memberId": "member_mwhe2e7d5d8c60c696",
+        "sessionId": "abc-child-1-154b2a6c"
+      },
+      "at": "2026-11-15T05:23:19.849Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_failure_streak_member_mwhe2e7d5d8c60c696",
+      "source": "swarm",
+      "kind": "failure_streak",
+      "at": "2026-11-15T05:23:19.849Z",
+      "ref": {
+        "memberId": "member_mwhe2e7d5d8c60c696",
+        "sessionId": "abc-child-1-154b2a6c"
+      },
+      "observed": {
+        "failures": 5,
+        "threshold": 3
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "generation": 1,
+      "actor": "watch",
+      "verdict": "coach",
+      "action": "coach",
+      "confidence": 0.62,
+      "reason": "worker-1 hit 5 consecutive tool failures vs threshold 3, within ~3.5s of the single task being dispatched. Budget spend is 0 and context is 0.55, so this is a repeated failing call rather than cost or context exhaustion. Evidence carries no error text, so cause is unconfirmed. Run is in round 1 with",
+      "accepted": true,
+      "code": null
+    }
+  ],
+  "actions": [
+    {
+      "id": "act_767feb869594",
+      "kind": "coach",
+      "state": "verified",
+      "detail": null,
+      "at": "2026-11-15T05:23:29.658Z"
+    }
+  ],
+  "openedAt": "2026-11-15T05:23:19.849Z",
+  "updatedAt": "2026-11-15T05:23:29.665Z",
+  "lastSeenAt": "2026-11-15T05:23:29.615Z",
+  "closedAt": "2026-11-15T05:23:29.665Z",
+  "closeReason": "mitigated",
+  "note": "watch officer issued coach",
+  "reopens": null
+}

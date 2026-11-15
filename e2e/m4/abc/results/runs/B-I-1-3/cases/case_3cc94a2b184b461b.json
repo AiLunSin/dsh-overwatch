@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 1,
+  "id": "case_3cc94a2b184b461b",
+  "runId": "swarm_mwhdzl543fe6d589b1",
+  "key": "092ef7eb91d18205a6591c56249ef77fb7d6bc37c993acfb1b90558398dd50a9",
+  "state": "closed",
+  "severity": "L2",
+  "title": "run budget at 81.0% (threshold 80.0%)",
+  "code": "budget_pressure",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "budget_pressure",
+      "severity": "L2",
+      "summary": "run budget at 81.0% (threshold 80.0%)",
+      "value": 0.81,
+      "observed": {
+        "scope": "run",
+        "used": 81000,
+        "limit": 100000,
+        "ratio": 0.81,
+        "threshold": 0.8
+      },
+      "evidenceId": "ev_swarm_budget_run:swarm_mwhdzl543fe6d589b1:budget_pressure",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "at": "2026-11-15T05:21:06.214Z"
+    },
+    {
+      "code": "budget_pressure",
+      "severity": "L2",
+      "summary": "run budget at 81.0% — pressure threshold",
+      "value": 0.81,
+      "observed": {
+        "scope": "run",
+        "used": 81000,
+        "limit": 100000,
+        "ratio": 0.81,
+        "threshold": 0.8
+      },
+      "evidenceId": "ev_swarm_budget_run:runId=swarm_mwhdzl543fe6d589b1:pressure",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "at": "2026-11-15T05:21:06.416Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_budget_run:swarm_mwhdzl543fe6d589b1:budget_pressure",
+      "source": "swarm",
+      "kind": "budget",
+      "at": "2026-11-15T05:21:06.214Z",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "observed": {
+        "scope": "run",
+        "used": 81000,
+        "limit": 100000,
+        "ratio": 0.81,
+        "threshold": 0.8
+      }
+    },
+    {
+      "id": "ev_swarm_budget_run:runId=swarm_mwhdzl543fe6d589b1:pressure",
+      "source": "swarm",
+      "kind": "budget",
+      "at": "2026-11-15T05:21:06.416Z",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "observed": {
+        "scope": "run",
+        "used": 81000,
+        "limit": 100000,
+        "ratio": 0.81,
+        "threshold": 0.8
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [
+    {
+      "id": "act_b441355c696a",
+      "kind": "throttle",
+      "state": "verified",
+      "severity": "L2",
+      "detail": null,
+      "at": "2026-11-15T05:21:06.220Z"
+    }
+  ],
+  "openedAt": "2026-11-15T05:21:06.214Z",
+  "updatedAt": "2026-11-15T05:21:16.839Z",
+  "lastSeenAt": "2026-11-15T05:21:07.853Z",
+  "closedAt": "2026-11-15T05:21:16.839Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: abc run complete",
+  "reopens": null
+}

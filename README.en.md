@@ -8,9 +8,10 @@
 half and a Web panel, with real-DeepSeek-Harness 0.2.2-rc.3 probes for capability
 (M0), guard-only supervision (M1), the watch officer (M2), fish tank / replay / doctor
 / restore evidence (M3), eight-scenario hardening plus release tooling (M4), and one
-real DeepSeek account watch wake (9,958 tokens, accepted `coach` decision).
-The full A/B/C benchmark, browser restore drill, and npm publication still depend on
-external budget/credentials/approval; `npm publish` currently stops at EOTP.
+real DeepSeek account watch wake (9,958 tokens, accepted `coach` decision), a full
+A/B/C comparison (27/27 PASS, 135,346 watch tokens, ¥2.1655), and real dsh-swarm
+I-5/I-6/I-7 signal runs (3/3 PASS). `@ailunsin/dsh-overwatch@1.0.0` is published;
+the M4.1 `1.0.1` release waits for the account holder's OTP.
 
 ## What it does
 
@@ -65,29 +66,35 @@ Key configuration (`examples/profile-patch.yml` has a full example):
 ## Verify
 
 ```powershell
-npm test        # 124 tests incl. the eight incident scenarios
+npm test        # 164 tests incl. the eight incident scenarios
 npm run lint
 npm run m0      # capability probe
 npm run m1      # M1/M3 web end-to-end (33 checks)
 npm run m2      # M2 watch officer headless end-to-end (12 checks)
 npm run m4:real # one real-model watch wake (account credentials, 80k cap)
+npm run m4:abc  # full A/B/C: real watch officer, scripted swarm members (¥10 cap)
+npm run m4:swarm # real dsh-swarm I-5/I-6/I-7 (no model cost)
 npm run build:release
 npm run smoke:install
 ```
 
-See [docs/m4.md](./docs/m4.md) for the hardening matrix and remaining
-external gates (real-model A/B, browser restore drill, npm publish).
+See [docs/m4.md](./docs/m4.md) for the hardening matrix, the A/B/C and real-swarm
+results, and the remaining external gate (npm 1.0.1 OTP + tag/push).
 
 ## Boundaries
 
-- The watch officer's judgment quality is not yet measured with a real model.
+- A/B/C measures a real watch officer over a scripted swarm (no model-cost
+  members); it is not a real-model worker productivity benchmark.
+- Real dsh-swarm I-5/I-6/I-7 exercises the real market/review/gate/merge
+  machinery with scripted worker edits, not model workers.
 - `coach`/`throttle` text is recorded as a swarm `steer` event; upstream does not
   guarantee delivery to a member inbox.
 - `pause` needs a human resume; `throttle` resumes only when overwatch paused.
 - Fish data checkpoints/restores run in the browser; the Host is read-only and
   never stores fishkeeper confirm tokens.
 - Total spend can reach `B + S` (S ≤ 5% of B) if overwatch crashes.
-- The panel has no automated real-browser acceptance yet.
+- The panel's real-browser restore/keyboard/AX drill is recorded in
+  `e2e/m4/browser/results/`; CI still runs only the offline tests.
 
 ## License
 

@@ -5,6 +5,35 @@ publishes; until then the minor version tracks milestones.
 
 ## [Unreleased]
 
+### Added — full A/B/C supervision run
+
+- `e2e/m4/abc` now runs the complete A/B/C comparison against a real local
+  dsh-swarm: C uses the real DSH Desktop host and a real
+  `deepseek-account/deepseek-flash` watch officer (reasoning off, maxTokens
+  2048); swarm members and pressure are scripted so only the watch wake costs
+  tokens.
+- Result (2026-11-15): 27/27 PASS over I-1/I-3/I-4 ×3 repeats; 9 C wakes used
+  135,346 tokens (about ¥2.1655 at the runner's upper-bound price); C produced
+  `abort`, `coach` and `notice` decisions. Evidence under
+  `e2e/m4/abc/results/`.
+
+### Added — real dsh-swarm I-5/I-6/I-7
+
+- New `e2e/m4/swarm-signals` runner drives the real `SwarmService`, real task
+  market, review state, git worktrees, gate commands and merge conflicts, then
+  checks the real overwatch probe/case path.
+- Result: `review_deadlock` (1,370ms), `gate_pingpong` (310ms) and
+  `conflict_storm` (307ms) all PASS; one real merge and three real conflicts.
+  Evidence under `e2e/m4/swarm-signals/results/`.
+
+### Added — OTP release helper
+
+- `scripts/publish-otp.ps1` checks the npm identity and existing versions,
+  bumps the version, builds and smoke-installs the scoped package, then asks
+  for the 6-digit OTP locally and publishes. `@ailunsin/dsh-overwatch@1.0.0`
+  was already published on 2026-11-14; this helper targets the M4.1 `1.0.1`
+  release.
+
 ### Added — human approval queue and panel actions
 
 - `ApprovalQueue` (`src/approvals.js`): `requiresHuman` decisions and guard plans

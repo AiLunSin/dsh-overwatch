@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "case_9e8c8c1bbeb94638",
+  "runId": "swarm_mwhe3kpz1c7d475381",
+  "key": "c7cf186d1cf5bb61ee24152d312262ea5eab703805ca16128aaf409371059caa",
+  "state": "closed",
+  "severity": "L2",
+  "title": "no event for 12s (threshold 12s)",
+  "code": "stalled_dispatch",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "stalled_dispatch",
+      "severity": "L2",
+      "summary": "no event for 12s (threshold 12s)",
+      "value": null,
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:24:11.430Z",
+        "quietMs": 12266,
+        "threshold": 12000
+      },
+      "evidenceId": "ev_swarm_stall_runId=swarm_mwhe3kpz1c7d475381:149560020",
+      "ref": {
+        "runId": "swarm_mwhe3kpz1c7d475381"
+      },
+      "at": "2026-11-15T05:24:23.696Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_stall_runId=swarm_mwhe3kpz1c7d475381:149560020",
+      "source": "swarm",
+      "kind": "stall",
+      "at": "2026-11-15T05:24:23.696Z",
+      "ref": {
+        "runId": "swarm_mwhe3kpz1c7d475381"
+      },
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:24:11.430Z",
+        "quietMs": 12266,
+        "threshold": 12000
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "generation": 1,
+      "actor": "watch",
+      "verdict": "notice",
+      "action": "notice",
+      "confidence": 0.72,
+      "reason": "Quiet time is 12266ms vs a 12000ms threshold, a 266ms overshoot. The last event was dispatch/started for the first task, awarded to worker-1, which is still busy with 0 failures. Budget is untouched and nothing is blocked or failed, so this is normal first-task work, not a stall.",
+      "accepted": true,
+      "code": null
+    }
+  ],
+  "actions": [
+    {
+      "id": "act_8eb0c1b512a3",
+      "kind": "notice",
+      "state": "verified",
+      "detail": null,
+      "at": "2026-11-15T05:24:33.708Z"
+    }
+  ],
+  "openedAt": "2026-11-15T05:24:23.696Z",
+  "updatedAt": "2026-11-15T05:24:34.125Z",
+  "lastSeenAt": "2026-11-15T05:24:34.104Z",
+  "closedAt": "2026-11-15T05:24:34.125Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: A/B/C run complete",
+  "reopens": null
+}

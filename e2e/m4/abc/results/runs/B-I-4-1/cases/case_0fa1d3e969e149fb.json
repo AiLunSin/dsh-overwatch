@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "id": "case_0fa1d3e969e149fb",
+  "runId": "swarm_mwhe0dxa6155859aeb",
+  "key": "977e8567ee937aa2c0873f3d94f10df12f8496208375c2a9849e907504633393",
+  "state": "closed",
+  "severity": "L2",
+  "title": "no event for 12s (threshold 12s)",
+  "code": "stalled_dispatch",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "stalled_dispatch",
+      "severity": "L2",
+      "summary": "no event for 12s (threshold 12s)",
+      "value": null,
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:21:42.665Z",
+        "quietMs": 12205,
+        "threshold": 12000
+      },
+      "evidenceId": "ev_swarm_stall_runId=swarm_mwhe0dxa6155859aeb:149560008",
+      "ref": {
+        "runId": "swarm_mwhe0dxa6155859aeb"
+      },
+      "at": "2026-11-15T05:21:54.870Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_stall_runId=swarm_mwhe0dxa6155859aeb:149560008",
+      "source": "swarm",
+      "kind": "stall",
+      "at": "2026-11-15T05:21:54.870Z",
+      "ref": {
+        "runId": "swarm_mwhe0dxa6155859aeb"
+      },
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:21:42.665Z",
+        "quietMs": 12205,
+        "threshold": 12000
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:21:54.870Z",
+  "updatedAt": "2026-11-15T05:21:59.688Z",
+  "lastSeenAt": "2026-11-15T05:21:59.579Z",
+  "closedAt": "2026-11-15T05:21:59.688Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: abc run complete",
+  "reopens": null
+}

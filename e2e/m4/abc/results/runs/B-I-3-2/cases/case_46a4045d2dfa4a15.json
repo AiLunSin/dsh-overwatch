@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "case_46a4045d2dfa4a15",
+  "runId": "swarm_mwhe00yb1a09af3d3b",
+  "key": "054dc3f6d33f6c7af0c3a5bf48a59ba59889cb34a154369833d55ce57f52e728",
+  "state": "closed",
+  "severity": "L2",
+  "title": "5 consecutive tool failures (threshold 3)",
+  "code": "failure_streak",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "failure_streak",
+      "severity": "L2",
+      "summary": "5 consecutive tool failures (threshold 3)",
+      "value": null,
+      "observed": {
+        "failures": 5,
+        "threshold": 3
+      },
+      "evidenceId": "ev_swarm_failure_streak_member_mwhe00yba8c744719d",
+      "ref": {
+        "memberId": "member_mwhe00yba8c744719d",
+        "sessionId": "abc-child-1-2a3c6aa5"
+      },
+      "at": "2026-11-15T05:21:26.890Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_failure_streak_member_mwhe00yba8c744719d",
+      "source": "swarm",
+      "kind": "failure_streak",
+      "at": "2026-11-15T05:21:26.890Z",
+      "ref": {
+        "memberId": "member_mwhe00yba8c744719d",
+        "sessionId": "abc-child-1-2a3c6aa5"
+      },
+      "observed": {
+        "failures": 5,
+        "threshold": 3
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:21:26.890Z",
+  "updatedAt": "2026-11-15T05:21:33.700Z",
+  "lastSeenAt": "2026-11-15T05:21:33.621Z",
+  "closedAt": "2026-11-15T05:21:33.700Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: abc run complete",
+  "reopens": null
+}

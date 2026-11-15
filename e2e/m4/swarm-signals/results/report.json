@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 1,
+  "stage": "m4-swarm-signals",
+  "startedAt": "2026-11-15T05:26:47.656Z",
+  "finishedAt": "2026-11-15T05:26:56.011Z",
+  "mode": "real dsh-swarm service + real git worktrees/reviews/merges; scripted worker edits (no model calls)",
+  "swarmRoot": "C:\\Users\\11403\\Desktop\\em\\dsh-swarm",
+  "node": "v26.13.0",
+  "platform": "win32",
+  "pass": true,
+  "scenarios": [
+    {
+      "scenario": "I-5",
+      "pass": true,
+      "note": "task=reviewing reviewers=1 votes=0 case=review_deadlock",
+      "detectionMs": 1370,
+      "case": {
+        "id": "case_94f9aa5e256b4ae1",
+        "code": "review_deadlock",
+        "severity": "L2",
+        "state": "open",
+        "evidence": [
+          "ev_swarm_review_deadlock_patch_mwhe6xuyc24b82b902:1"
+        ],
+        "observed": {
+          "patchId": "patch_mwhe6xuyc24b82b902",
+          "taskId": "task_mwhe6xnzc844373d03",
+          "ageMs": 1367,
+          "reviewers": 1,
+          "votes": 0,
+          "threshold": 1000
+        }
+      },
+      "watchChain": {
+        "ok": true,
+        "count": 3,
+        "error": null
+      },
+      "swarm": {
+        "total": 11,
+        "lastSeq": 11,
+        "reviewOpened": 1,
+        "votes": 0,
+        "gateFailures": 0,
+        "conflicts": 0,
+        "merged": 0
+      },
+      "taskState": "reviewing",
+      "patchId": "patch_mwhe6xuyc24b82b902",
+      "at": "2026-11-15T05:26:49.948Z"
+    },
+    {
+      "scenario": "I-6",
+      "pass": true,
+      "note": "gateFailures=3 task=working cycles=GATE_FAILED,GATE_FAILED,GATE_FAILED case=gate_pingpong",
+      "detectionMs": 310,
+      "case": {
+        "id": "case_a1ddf519c3fa4dd2",
+        "code": "gate_pingpong",
+        "severity": "L2",
+        "state": "open",
+        "evidence": [
+          "ev_swarm_gate_pingpong_task_mwhe6zerbb01a4903c:3"
+        ],
+        "observed": {
+          "taskId": "task_mwhe6zerbb01a4903c",
+          "failures": 3,
+          "threshold": 3
+        }
+      },
+      "watchChain": {
+        "ok": true,
+        "count": 3,
+        "error": null
+      },
+      "swarm": {
+        "total": 27,
+        "lastSeq": 27,
+        "reviewOpened": 3,
+        "votes": 3,
+        "gateFailures": 3,
+        "conflicts": 0,
+        "merged": 0
+      },
+      "taskState": "working",
+      "cycles": [
+        {
+          "cycle": 1,
+          "patchId": "patch_mwhe6zlk4be4219ff9",
+          "mergeCode": "GATE_FAILED",
+          "mergeOk": false
+        },
+        {
+          "cycle": 2,
+          "patchId": "patch_mwhe6zwn5df172e668",
+          "mergeCode": "GATE_FAILED",
+          "mergeOk": false
+        },
+        {
+          "cycle": 3,
+          "patchId": "patch_mwhe707s6b94ea7c06",
+          "mergeCode": "GATE_FAILED",
+          "mergeOk": false
+        }
+      ],
+      "at": "2026-11-15T05:26:52.036Z"
+    },
+    {
+      "scenario": "I-7",
+      "pass": true,
+      "note": "conflicts=3 merged=1 firstMerge=d38b5820 case=conflict_storm",
+      "detectionMs": 307,
+      "case": {
+        "id": "case_fa2cd97f33824529",
+        "code": "conflict_storm",
+        "severity": "L2",
+        "state": "open",
+        "evidence": [
+          "ev_swarm_conflict_storm_3:src/shared.js"
+        ],
+        "observed": {
+          "count": 3,
+          "files": [
+            "src/shared.js"
+          ],
+          "threshold": 3
+        }
+      },
+      "watchChain": {
+        "ok": true,
+        "count": 3,
+        "error": null
+      },
+      "swarm": {
+        "total": 55,
+        "lastSeq": 55,
+        "reviewOpened": 4,
+        "votes": 4,
+        "gateFailures": 0,
+        "conflicts": 3,
+        "merged": 1
+      },
+      "tasks": [
+        {
+          "taskId": "task_mwhe711i24f48818e6",
+          "state": "merged",
+          "patchId": "patch_mwhe71ii1c82040f0a"
+        },
+        {
+          "taskId": "task_mwhe71596de00910e2",
+          "state": "working",
+          "patchId": "patch_mwhe71rh6a9502d47f"
+        },
+        {
+          "taskId": "task_mwhe718l6680ea88dc",
+          "state": "working",
+          "patchId": "patch_mwhe720i9f0865b46f"
+        },
+        {
+          "taskId": "task_mwhe71c0f9580568b1",
+          "state": "working",
+          "patchId": "patch_mwhe7297bd4ad92ef7"
+        }
+      ],
+      "conflicts": [
+        {
+          "patchId": "patch_mwhe71rh6a9502d47f",
+          "ok": false,
+          "code": "MERGE_CONFLICT",
+          "files": [
+            "src/shared.js"
+          ]
+        },
+        {
+          "patchId": "patch_mwhe720i9f0865b46f",
+          "ok": false,
+          "code": "MERGE_CONFLICT",
+          "files": [
+            "src/shared.js"
+          ]
+        },
+        {
+          "patchId": "patch_mwhe7297bd4ad92ef7",
+          "ok": false,
+          "code": "MERGE_CONFLICT",
+          "files": [
+            "src/shared.js"
+          ]
+        }
+      ],
+      "firstMergeCommit": "d38b5820c61b6437a0d773794d9ef315ff83d9da",
+      "at": "2026-11-15T05:26:55.982Z"
+    }
+  ]
+}

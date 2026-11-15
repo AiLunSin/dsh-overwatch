@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "case_4881b94aabba41fe",
+  "runId": "swarm_mwhe1ilk6f2b339d1d",
+  "key": "21bf3a5eb7b1b81f8e6b38f9fe6d745d2ee701e3d906e8b1b241b46f35cf39c7",
+  "state": "closed",
+  "severity": "L3",
+  "title": "run budget at 96.0% — hard pause threshold",
+  "code": "budget_pause",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "budget_pause",
+      "severity": "L3",
+      "summary": "run budget at 96.0% — hard pause threshold",
+      "value": 0.96,
+      "observed": {
+        "scope": "run",
+        "used": 96000,
+        "limit": 100000,
+        "ratio": 0.96,
+        "threshold": 0.95
+      },
+      "evidenceId": "ev_swarm_budget_run:runId=swarm_mwhe1ilk6f2b339d1d:pause",
+      "ref": {
+        "runId": "swarm_mwhe1ilk6f2b339d1d"
+      },
+      "at": "2026-11-15T05:22:40.850Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_budget_run:runId=swarm_mwhe1ilk6f2b339d1d:pause",
+      "source": "swarm",
+      "kind": "budget",
+      "at": "2026-11-15T05:22:40.850Z",
+      "ref": {
+        "runId": "swarm_mwhe1ilk6f2b339d1d"
+      },
+      "observed": {
+        "scope": "run",
+        "used": 96000,
+        "limit": 100000,
+        "ratio": 0.96,
+        "threshold": 0.95
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:22:40.850Z",
+  "updatedAt": "2026-11-15T05:22:48.479Z",
+  "lastSeenAt": "2026-11-15T05:22:42.462Z",
+  "closedAt": "2026-11-15T05:22:48.479Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: A/B/C run complete",
+  "reopens": null
+}

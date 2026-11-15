@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "id": "case_af72490a085f4075",
+  "runId": "swarm_mwhdzl543fe6d589b1",
+  "key": "7feb342d30d70b585283de0a9b4ee090487fcc2922d157f8f216813e300ada54",
+  "state": "closed",
+  "severity": "L4",
+  "title": "run budget exhausted at 102.0% — hard stop",
+  "code": "budget_exhausted",
+  "generation": 2,
+  "signals": [
+    {
+      "code": "budget_exhausted",
+      "severity": "L4",
+      "summary": "run budget exhausted at 102.0% — hard stop",
+      "value": 1.02,
+      "observed": {
+        "scope": "run",
+        "used": 102000,
+        "limit": 100000,
+        "ratio": 1.02,
+        "threshold": 1
+      },
+      "evidenceId": "ev_swarm_budget_run:runId=swarm_mwhdzl543fe6d589b1:exhausted",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "at": "2026-11-15T05:21:10.130Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_budget_run:runId=swarm_mwhdzl543fe6d589b1:exhausted",
+      "source": "swarm",
+      "kind": "budget",
+      "at": "2026-11-15T05:21:10.130Z",
+      "ref": {
+        "runId": "swarm_mwhdzl543fe6d589b1"
+      },
+      "observed": {
+        "scope": "run",
+        "used": 102000,
+        "limit": 100000,
+        "ratio": 1.02,
+        "threshold": 1
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:21:10.130Z",
+  "updatedAt": "2026-11-15T05:21:16.843Z",
+  "lastSeenAt": "2026-11-15T05:21:16.698Z",
+  "closedAt": "2026-11-15T05:21:16.843Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: abc run complete",
+  "reopens": "case_3e4a30937eeb458d"
+}

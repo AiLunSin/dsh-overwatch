@@ -1,0 +1,115 @@
+{
+  "swarmId": "swarm_mwhdxa09f5d9f2483f",
+  "runId": "swarm_mwhdxa09f5d9f2483f",
+  "goal": "A/B/C I-3 A",
+  "repo": "C:\\Users\\11403\\AppData\\Local\\Temp\\overwatch-abc-A-I-3-etmazX\\repo",
+  "topology": "mesh",
+  "mode": "swarm",
+  "status": "running",
+  "round": 1,
+  "concurrencyLimit": 2,
+  "createdAt": 1794719957483,
+  "updatedAt": 1794719957486,
+  "endedAt": 0,
+  "recovered": false,
+  "convergedReason": null,
+  "baseCommit": "c73d0ed85dbe0fd045ee5fdc4084af25c0ab4aa3",
+  "gateCommands": [
+    "node -e \"process.exit(0)\""
+  ],
+  "workspace": {
+    "enabled": true,
+    "integrationBranch": "swarm/swarm_mwhdxa09f5d9f2483f/integration",
+    "degraded": 0,
+    "conflicts": 0
+  },
+  "dispatch": {
+    "auto": false,
+    "active": 0,
+    "parentBound": true
+  },
+  "preflight": {
+    "ok": true,
+    "checks": [],
+    "fixes": [],
+    "gitRoot": "C:/Users/11403/AppData/Local/Temp/overwatch-abc-A-I-3-etmazX/repo",
+    "baseCommit": "c73d0ed85dbe0fd045ee5fdc4084af25c0ab4aa3"
+  },
+  "convergence": {
+    "converged": false,
+    "openTasks": 0,
+    "budgetRatio": 0,
+    "budgetExhausted": false
+  },
+  "stats": {
+    "members": 2,
+    "tasks": 0,
+    "merged": 0,
+    "failed": 0,
+    "active": 0,
+    "boardEntries": 0,
+    "events": 0
+  },
+  "budget": {
+    "limits": {
+      "runTokens": 100000,
+      "runUsd": 0,
+      "runWallMs": 0,
+      "taskTokens": 1000000,
+      "memberTokens": 1000000
+    },
+    "run": {
+      "tokens": 0,
+      "reservedTokens": 0,
+      "calls": 0,
+      "usd": 0,
+      "reservedUsd": 0,
+      "wallMs": 0
+    },
+    "tasks": {},
+    "members": {},
+    "reservations": 0
+  },
+  "members": [
+    {
+      "id": "member_mwhdxa09d52a31d7d9",
+      "name": "queen",
+      "role": "queen",
+      "model": "strong",
+      "status": "idle",
+      "load": 0,
+      "stats": {
+        "won": 0,
+        "done": 0,
+        "failed": 0
+      },
+      "joinedAt": 1794719957481,
+      "lastWinRound": 0,
+      "skills": []
+    },
+    {
+      "id": "member_mwhdxa09b8f52db5d2",
+      "name": "worker-1",
+      "role": "worker",
+      "model": "fast",
+      "status": "idle",
+      "load": 0,
+      "stats": {
+        "won": 0,
+        "done": 0,
+        "failed": 0
+      },
+      "joinedAt": 1794719957481,
+      "lastWinRound": 0,
+      "skills": [
+        ".js",
+        ".ts",
+        ".tsx",
+        ".jsx",
+        ".py",
+        ".md"
+      ]
+    }
+  ],
+  "tasks": []
+}

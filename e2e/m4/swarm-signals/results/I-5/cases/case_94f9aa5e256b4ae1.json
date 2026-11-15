@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "case_94f9aa5e256b4ae1",
+  "runId": "swarm_mwhe6xmn667a55ab3e",
+  "key": "deb536ca2a554e6057d2664f1e7e36e779a75e1789fdcd528edf58bdb574baef",
+  "state": "open",
+  "severity": "L2",
+  "title": "review patch_mwhe6xuyc24b82b902 has been open 1s (0/1 votes)",
+  "code": "review_deadlock",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "review_deadlock",
+      "severity": "L2",
+      "summary": "review patch_mwhe6xuyc24b82b902 has been open 1s (0/1 votes)",
+      "value": null,
+      "observed": {
+        "patchId": "patch_mwhe6xuyc24b82b902",
+        "taskId": "task_mwhe6xnzc844373d03",
+        "ageMs": 1367,
+        "reviewers": 1,
+        "votes": 0,
+        "threshold": 1000
+      },
+      "evidenceId": "ev_swarm_review_deadlock_patch_mwhe6xuyc24b82b902:1",
+      "ref": {
+        "patchId": "patch_mwhe6xuyc24b82b902",
+        "taskId": "task_mwhe6xnzc844373d03"
+      },
+      "at": "2026-11-15T05:26:48.515Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_review_deadlock_patch_mwhe6xuyc24b82b902:1",
+      "source": "swarm",
+      "kind": "review",
+      "at": "2026-11-15T05:26:48.515Z",
+      "ref": {
+        "patchId": "patch_mwhe6xuyc24b82b902",
+        "taskId": "task_mwhe6xnzc844373d03"
+      },
+      "observed": {
+        "patchId": "patch_mwhe6xuyc24b82b902",
+        "taskId": "task_mwhe6xnzc844373d03",
+        "ageMs": 1367,
+        "reviewers": 1,
+        "votes": 0,
+        "threshold": 1000
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:26:49.882Z",
+  "updatedAt": "2026-11-15T05:26:49.882Z",
+  "lastSeenAt": "2026-11-15T05:26:49.882Z",
+  "closedAt": null,
+  "closeReason": null,
+  "note": null,
+  "reopens": null
+}

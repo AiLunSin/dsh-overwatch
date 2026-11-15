@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "case_521113e4692e4136",
+  "runId": "swarm_mwhe42sfde2088c6da",
+  "key": "e1c986c1d9e81e683e3736bde6d98341f39c8db94d7d6c0c60370e607eae0dc7",
+  "state": "closed",
+  "severity": "L2",
+  "title": "no event for 12s (threshold 12s)",
+  "code": "stalled_dispatch",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "stalled_dispatch",
+      "severity": "L2",
+      "summary": "no event for 12s (threshold 12s)",
+      "value": null,
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:24:34.861Z",
+        "quietMs": 12228,
+        "threshold": 12000
+      },
+      "evidenceId": "ev_swarm_stall_runId=swarm_mwhe42sfde2088c6da:149560022",
+      "ref": {
+        "runId": "swarm_mwhe42sfde2088c6da"
+      },
+      "at": "2026-11-15T05:24:47.089Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_stall_runId=swarm_mwhe42sfde2088c6da:149560022",
+      "source": "swarm",
+      "kind": "stall",
+      "at": "2026-11-15T05:24:47.089Z",
+      "ref": {
+        "runId": "swarm_mwhe42sfde2088c6da"
+      },
+      "observed": {
+        "status": "running",
+        "lastEventAt": "2026-11-15T05:24:34.861Z",
+        "quietMs": 12228,
+        "threshold": 12000
+      }
+    }
+  ],
+  "decisions": [
+    {
+      "generation": 1,
+      "actor": "watch",
+      "verdict": "notice",
+      "action": "notice",
+      "confidence": 0.8,
+      "reason": "Only 12.2s quiet, barely over the 12s threshold, on a swarm started ~13s ago. The single task was awarded and dispatched to worker-1 at 05:24:34.861 (exactly lastEventAt); worker-1 is busy, context 0.42, 0 failures, budget spend 0. Silence is consistent with active work, so the smallest sufficient a",
+      "accepted": true,
+      "code": null
+    }
+  ],
+  "actions": [
+    {
+      "id": "act_282710fc5d41",
+      "kind": "notice",
+      "state": "verified",
+      "detail": null,
+      "at": "2026-11-15T05:24:54.390Z"
+    }
+  ],
+  "openedAt": "2026-11-15T05:24:47.089Z",
+  "updatedAt": "2026-11-15T05:24:55.080Z",
+  "lastSeenAt": "2026-11-15T05:24:55.007Z",
+  "closedAt": "2026-11-15T05:24:55.080Z",
+  "closeReason": "abandoned",
+  "note": "supervision disarmed: A/B/C run complete",
+  "reopens": null
+}

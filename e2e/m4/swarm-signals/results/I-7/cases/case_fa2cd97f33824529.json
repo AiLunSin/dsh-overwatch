@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "id": "case_fa2cd97f33824529",
+  "runId": "swarm_mwhe710zc75858a0c6",
+  "key": "4c007a2378381589dad95ee0737d74effdc6ba9f1a9443f48ad9904dc65aaf9f",
+  "state": "open",
+  "severity": "L2",
+  "title": "3 merge conflicts (threshold 3)",
+  "code": "conflict_storm",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "conflict_storm",
+      "severity": "L2",
+      "summary": "3 merge conflicts (threshold 3)",
+      "value": null,
+      "observed": {
+        "count": 3,
+        "files": [
+          "src/shared.js"
+        ],
+        "threshold": 3
+      },
+      "evidenceId": "ev_swarm_conflict_storm_3:src/shared.js",
+      "ref": {
+        "files": [
+          "src/shared.js"
+        ]
+      },
+      "at": "2026-11-15T05:26:55.566Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_conflict_storm_3:src/shared.js",
+      "source": "swarm",
+      "kind": "merge_conflict",
+      "at": "2026-11-15T05:26:55.566Z",
+      "ref": {
+        "files": [
+          "src/shared.js"
+        ]
+      },
+      "observed": {
+        "count": 3,
+        "files": [
+          "src/shared.js"
+        ],
+        "threshold": 3
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:26:55.870Z",
+  "updatedAt": "2026-11-15T05:26:55.870Z",
+  "lastSeenAt": "2026-11-15T05:26:55.870Z",
+  "closedAt": null,
+  "closeReason": null,
+  "note": null,
+  "reopens": null
+}

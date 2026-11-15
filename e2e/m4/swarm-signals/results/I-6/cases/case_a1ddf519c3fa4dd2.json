@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "id": "case_a1ddf519c3fa4dd2",
+  "runId": "swarm_mwhe6zec0491793d83",
+  "key": "6d8ebb74494c45eb803c6e0dee8854b0c701d8791606470ecd79cdc4bd703b6c",
+  "state": "open",
+  "severity": "L2",
+  "title": "task task_mwhe6zerbb01a4903c failed its gate 3 times (threshold 3)",
+  "code": "gate_pingpong",
+  "generation": 1,
+  "signals": [
+    {
+      "code": "gate_pingpong",
+      "severity": "L2",
+      "summary": "task task_mwhe6zerbb01a4903c failed its gate 3 times (threshold 3)",
+      "value": null,
+      "observed": {
+        "taskId": "task_mwhe6zerbb01a4903c",
+        "failures": 3,
+        "threshold": 3
+      },
+      "evidenceId": "ev_swarm_gate_pingpong_task_mwhe6zerbb01a4903c:3",
+      "ref": {
+        "taskId": "task_mwhe6zerbb01a4903c"
+      },
+      "at": "2026-11-15T05:26:51.615Z"
+    }
+  ],
+  "evidence": [
+    {
+      "id": "ev_swarm_gate_pingpong_task_mwhe6zerbb01a4903c:3",
+      "source": "swarm",
+      "kind": "gate",
+      "at": "2026-11-15T05:26:51.615Z",
+      "ref": {
+        "taskId": "task_mwhe6zerbb01a4903c"
+      },
+      "observed": {
+        "taskId": "task_mwhe6zerbb01a4903c",
+        "failures": 3,
+        "threshold": 3
+      }
+    }
+  ],
+  "decisions": [],
+  "actions": [],
+  "openedAt": "2026-11-15T05:26:51.923Z",
+  "updatedAt": "2026-11-15T05:26:51.923Z",
+  "lastSeenAt": "2026-11-15T05:26:51.923Z",
+  "closedAt": null,
+  "closeReason": null,
+  "note": null,
+  "reopens": null
+}

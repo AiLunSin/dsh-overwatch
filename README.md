@@ -4,8 +4,9 @@
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
 
-**状态：M0–M4 发布候选（值班员 experimental；真实模型单次唤醒、真实 Edge 恢复演练
-与 GitHub Release 已验证；完整 A/B/C 与 npm 发布仍受外部条件阻塞）。** 仓库包含 Host + Web 面板、
+**状态：M0–M4 发布候选（值班员 experimental；真实模型单次唤醒、完整 A/B/C 27/27、
+真实 dsh-swarm I-5/6/7、真实 Edge 恢复演练与 GitHub Release 已验证；npm 1.0.0 已发布，
+M4.1（1.0.1）待账号持有人 OTP）。** 仓库包含 Host + Web 面板、
 真实 DSH 0.2.2-rc.3 上的 M0/M1/M2/M3 探针、8 个事故场景回归、混沌/安全用例、
 一次真实 DeepSeek 模型的值班员唤醒，以及 scoped 发布产物。
 `supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
@@ -36,8 +37,9 @@
 | `src/http.js` | ✅ | `/overwatch/api/*` 只读 API + 受 token 保护的 arm/disarm/ack/close/resume/purge/approvals/restores；doctor |
 | `src/approvals.js` | ✅ | 持久 approve 队列：一次性令牌、TTL、去重、生命周期事件 |
 | `client.js` | ✅ M3 | 值班室、事件单（close）、鱼缸（检查点/恢复）、回放时间轴、doctor、resume/purge/approve 按钮 |
-| 发布产物 | ✅ M4 | scoped 构建、目录/tarball 安装冒烟、CI；npm 发布待 OTP |
-| 真实模型 | ✅ 单次 / ⛔ A/B | 值班员单次唤醒 9,958 tokens PASS；完整 A/B/C 见 docs/m4.md |
+| 发布产物 | ✅ M4 | scoped 构建、目录/tarball 安装冒烟、CI；npm 1.0.0 已发布，1.0.1 待 OTP |
+| 真实模型 | ✅ 单次 + A/B/C | 单次唤醒 9,958 tokens PASS；A/B/C 27/27、9 次唤醒 135,346 tokens / ¥2.1655 |
+| 真实 swarm | ✅ I-5/6/7 | 真实 SwarmService/worktree/评审/门禁/合并，3/3 PASS（脚本化 worker，无模型费用） |
 
 ### 两层如何分工
 
@@ -188,11 +190,13 @@ curl -X POST -H "x-overwatch-token: $env:OW_TOKEN" -H 'content-type: application
 
 ```powershell
 npm test        # 164 个测试：链/锁/场景/信号/事件单/Guard/Watch/卡/鱼缸/执行器/批准队列/HTTP/服务/面板
-npm run lint    # node --check 64 个源文件
+npm run lint    # node --check 65 个源文件
 npm run m0      # M0 能力探针（真实 DSH，脚本化 provider）
 npm run m1      # M1/M3 web 端到端（33/33）
 npm run m2      # M2 值班员 headless 端到端（12/12）
 npm run m4:real # 一次真实模型值班员唤醒（需账号凭据；token 上限 80k）
+npm run m4:abc  # 完整 A/B/C；真值班员 + 脚本化 swarm 成员（默认 ¥10 cap）
+npm run m4:swarm # 真实 dsh-swarm I-5/I-6/I-7（无模型费用）
 npm run build:release   # scoped 发布副本
 npm run smoke:install   # 目录安装冒烟（tarball 见 docs/m4.md）
 ```
@@ -205,6 +209,8 @@ npm run smoke:install   # 目录安装冒烟（tarball 见 docs/m4.md）
 - M3 证据：`e2e/m1/results/`（33 项含 doctor/fish/timeline/restore）；
   结论 [docs/m3.md](./docs/m3.md)。
 - M4 硬化与发布：[docs/m4.md](./docs/m4.md)。
+- A/B/C 证据：`e2e/m4/abc/results/`（27 行 27 PASS，¥2.1655）。
+- 真实 swarm I-5/6/7 证据：`e2e/m4/swarm-signals/results/`。
 
 配置、兼容与排障：[docs/config.md](./docs/config.md)、
 [docs/compatibility.md](./docs/compatibility.md)、
@@ -218,9 +224,12 @@ case `mitigated`、交接班 `shift-0001`、13 条 watch 哈希链全连续。
 
 ## 5. 设计边界（不要过度承诺）
 
-- **完整模型 A/B/C 未做**：已用 2 元预算验证**一次**真实值班员唤醒
-  （9,958 tokens，`coach` 0.82 被执行器接受）；三组 ×3 场景的对比需要更多预算与
-  真实 swarm，不能把单次唤醒当成质量结论。
+- **A/B/C 已做，但不是工蜂质量基准**：真实 DSH Desktop + 真实
+  `deepseek-account/deepseek-flash` 值班员，I-1/I-3/I-4 ×3 共 27/27 PASS，
+  9 次唤醒 135,346 tokens / ¥2.1655。swarm 成员是脚本化 hanging runner（无模型
+  费用），所以结论覆盖监管与值班判断，不覆盖真实模型工蜂的生产力。
+- **真实 swarm I-5/6/7 已做**：真实 `SwarmService`、worktree、评审、门禁与合并，
+  3/3 PASS；worker 改动由脚本写入，无模型调用。
 - **教练不保证送达**：`coach`/`throttle` 的文本只写 swarm `steer` 事件，上游不投递
   成员 inbox；v1 文案必须写"可能不送达"。
 - **墙钟/新鲜度**：`thresholds.maxRunMs` 默认 8 小时，0 表示关闭；`sampling.staleMs`
