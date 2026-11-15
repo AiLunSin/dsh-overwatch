@@ -1,0 +1,46 @@
+name: 功能建议
+description: 提出改进或新能力
+title: "[feat] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: 要解决的问题
+      description: 当前哪里不够用，最好给出具体场景
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 期望方案
+    validations:
+      required: true
+  - type: dropdown
+    id: layer
+    attributes:
+      label: 所在层
+      options:
+        - Guard（确定性硬闸门）
+        - Watch（值班员）
+        - Evidence（证据账 / 哈希链）
+        - 面板 / HTTP API
+        - 发布 / 工程
+        - 其他
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 备选方案
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundary
+    attributes:
+      label: 设计边界
+      options:
+        - label: 该建议不要求模型直接执行动作（执行仍走确定性 Guard 或 Executor）
+          required: false
+        - label: 我愿意提交 PR 实现
+          required: false

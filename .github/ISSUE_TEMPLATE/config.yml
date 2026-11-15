@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 安全问题（私密）
+    url: https://github.com/AiLunSin/dsh-overwatch/security/advisories/new
+    about: 请通过私密安全公告报告漏洞，不要开公开 issue。
+  - name: 使用文档
+    url: https://github.com/AiLunSin/dsh-overwatch/tree/main/docs
+    about: 配置、兼容性、排障与各里程碑证据先看 docs/。

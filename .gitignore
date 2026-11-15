@@ -4,6 +4,7 @@ dist/
 *.log
 coverage/
 .DS_Store
+.trae/
 
 # The web run log contains a launch token URL; never commit it.
 e2e/m0/results/web-run.log

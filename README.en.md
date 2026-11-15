@@ -1,5 +1,14 @@
 # dsh-overwatch
 
+[![ci](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@ailunsin/dsh-overwatch?label=npm)](https://www.npmjs.com/package/@ailunsin/dsh-overwatch)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D22-339933.svg)](./package.json)
+[![dsh](https://img.shields.io/badge/dsh-0.2.2--rc.3-4f46e5.svg)](./docs/compatibility.md)
+[![tests](https://img.shields.io/badge/tests-164-2ea44f.svg)](./README.en.md#verify)
+
+[简体中文](./README.md) | English
+
 > Supervised swarms for DeepSeek Harness: a **model-free hard guard** plus a **tool-restricted watch officer**, backed by an independent, hash-chained evidence log.
 >
 > Memory hook: **the model may judge but never act; hard limits never depend on a model; no evidence, no action.**
@@ -13,6 +22,8 @@ A/B/C comparison (27/27 PASS, 135,346 watch tokens, ¥2.1655), and real dsh-swar
 I-5/I-6/I-7 signal runs (3/3 PASS). `@ailunsin/dsh-overwatch@1.0.0` is published;
 the M4.1 `1.0.1` release waits for the account holder's OTP.
 
+![Overwatch: swarm events pass through the hard guard and watch officer into a hash-chained evidence ledger](./docs/preview.svg)
+
 ## What it does
 
 | Layer | Responsibility |
@@ -25,7 +36,16 @@ The watch officer never sees `bash`, `write`, `subagent`, `swarm_*` or merge
 tools. Restrictions are applied synchronously in the serial `agent/created`
 listener and re-applied on cold resume.
 
-## Install (local directory)
+## Install
+
+`@ailunsin/dsh-overwatch@1.0.0` is on npm. DSH 0.2.2-rc.3 has no public plugin
+index, so package installs need a profile that can reach the registry:
+
+```powershell
+dsh plugin --profile ow add @ailunsin/dsh-overwatch@1.0.0
+```
+
+For development, install from a local directory:
 
 ```powershell
 $env:DSH_HOME = "$env:TEMP\dsh-overwatch-try"
@@ -35,6 +55,10 @@ dsh plugin --profile ow add C:\path\to\dsh-overwatch
 
 The panel appears in the sidebar as “Overwatch”. `GET /overwatch/api/health`
 reports version, mode, chain state and source freshness.
+
+![Watch room: budget, open cases, source freshness and log self-check](./docs/images/panel-room.png)
+
+![Fish tank: checkpoints, the fishkeeper browser surface and the restore entry](./docs/images/panel-fish.png)
 
 ## Use
 
@@ -99,3 +123,6 @@ results, and the remaining external gate (npm 1.0.1 OTP + tag/push).
 ## License
 
 MIT
+
+Contributions: see [CONTRIBUTING.md](./CONTRIBUTING.md). For security issues,
+use a private advisory as described in [SECURITY.md](./SECURITY.md).

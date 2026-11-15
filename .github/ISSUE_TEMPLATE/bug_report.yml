@@ -1,0 +1,75 @@
+name: Bug 报告
+description: 报告可复现的缺陷（安全问题请走私密渠道）
+title: "[bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。**安全漏洞请不要开公开 issue**，请按 [SECURITY.md](../../SECURITY.md)
+        通过私密安全公告报告。
+  - type: input
+    id: version
+    attributes:
+      label: 插件版本
+      description: watch_status 返回的 version，或 package.json 中的 version
+      placeholder: 1.0.1
+    validations:
+      required: true
+  - type: input
+    id: dsh
+    attributes:
+      label: DSH 版本
+      placeholder: 0.2.2-rc.3
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: 运行模式
+      options:
+        - guard
+        - observe
+        - supervised
+        - 不确定
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 命令、配置片段（去掉 token）以及触发的事件单或信号
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望行为
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 附 doctor 输出或 watch.jsonl 的相关片段；提交前请脱敏
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: 环境
+      description: 操作系统、Node 版本、安装方式（目录 / npm）、相关上游版本（dsh-swarm / dsh-pressure / fishkeeper）
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: 确认
+      options:
+        - label: 我已搜索现有 issue，未发现重复
+          required: true
+        - label: 我已移除日志中的 token、密钥、账号与私密路径
+          required: true

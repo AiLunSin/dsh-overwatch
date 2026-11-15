@@ -1,5 +1,14 @@
 # dsh-overwatch（瞭望塔）
 
+[![ci](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml)
+[![npm](https://img.shields.io/npm/v/@ailunsin/dsh-overwatch?label=npm)](https://www.npmjs.com/package/@ailunsin/dsh-overwatch)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
+[![node](https://img.shields.io/badge/node-%3E%3D22-339933.svg)](./package.json)
+[![dsh](https://img.shields.io/badge/dsh-0.2.2--rc.3-4f46e5.svg)](./docs/compatibility.md)
+[![tests](https://img.shields.io/badge/tests-164-2ea44f.svg)](./README.md#4-验证)
+
+简体中文 | [English](./README.en.md)
+
 > 给 DeepSeek Harness 的受控蜂群加两层监管：**无模型的硬闸门（Guard）** + **受工具限制的值班员（Watch）**，再配一本**跨源证据账**（独立 `watch.jsonl` 哈希链）。
 >
 > 一句话记忆点：**模型可以判，不能动手；硬闸门不靠模型；没有证据不动作。**
@@ -12,6 +21,8 @@ M4.1（1.0.1）待账号持有人 OTP）。** 仓库包含 Host + Web 面板、
 `supervised` 编队会在第一个 L2+ 事件单到来时懒启动一个**只能看案情卡和取证据**的
 子代理；它提交结构化决定，由代码校验、执行、验证并记账。硬限（预算 80/95/100%、
 事件流缺口）始终由确定性 Guard 执行，不经过模型。
+
+![Overwatch 架构：蜂群事件经硬闸门与值班员写入哈希链证据账](./docs/preview.svg)
 
 ---
 
@@ -75,13 +86,22 @@ M4.1（1.0.1）待账号持有人 OTP）。** 仓库包含 Host + Web 面板、
 
 ---
 
-## 2. 安装（本地目录）
+## 2. 安装
+
+`@ailunsin/dsh-overwatch@1.0.0` 已发布到 npm。DSH 0.2.2-rc.3 没有官方公共插件索引，
+包名安装需要 profile 能访问 registry：
+
+```powershell
+dsh plugin --profile ow add @ailunsin/dsh-overwatch@1.0.0
+```
+
+也可以从本地目录安装（开发时推荐）：
 
 ```powershell
 # 建议先使用临时 profile 与独立 DSH_HOME，不要直接动主力 profile
 $env:DSH_HOME = "$env:TEMP\dsh-overwatch-try"
 dsh --profile ow --from-default-profile headless --dump-config
-dsh plugin --profile ow add C:\Users\11403\Desktop\overwatch
+dsh plugin --profile ow add C:\path\to\dsh-overwatch
 ```
 
 Web 面板需要 web profile；装好后侧边栏出现「瞭望塔」，
@@ -161,6 +181,10 @@ curl http://127.0.0.1:PORT/overwatch/api/doctor
 写接口需 `x-overwatch-token`：arm/disarm/ack/close/resume/purge/approvals/restores。面板会展示值班员状态、
 唤醒次数、S/R token、超时和子会话，并区分 guard-only / supervised 横幅；
 鱼缸页展示检查点/审计与恢复流程，回放页展示合并时间轴。
+
+![值班室：预算/未决事件单/源新鲜度/锁与日志自检](./docs/images/panel-room.png)
+
+![鱼缸页：检查点、fishkeeper 浏览器面与恢复入口](./docs/images/panel-fish.png)
 
 ### 人工批准队列
 
@@ -278,7 +302,8 @@ overwatch/
 ├── e2e/m1/              # M1/M3 假 swarm + web 探针 + 结果
 ├── e2e/m2/              # M2 进程内假 swarm + 脚本化 provider + headless runner + 结果
 ├── test/                # 单元/路由/服务/装配/面板测试
-├── docs/                # spike-m0.md、m1.md、m2.md、m3.md、DETAIL*.md、preview.svg
+├── docs/                # spike-m0.md、m1.md、m2.md、m3.md、DETAIL*.md、preview.svg、images/
+├── .github/             # CI、issue / PR 模板
 ├── cordis.patch.yml     # 组合包 patch 层
 └── scripts/             # 语法检查入口
 ```
@@ -296,3 +321,6 @@ overwatch/
 ## 7. License
 
 MIT
+
+参与贡献见 [CONTRIBUTING.md](./CONTRIBUTING.md)；安全问题请按 [SECURITY.md](./SECURITY.md)
+走私密安全公告。
