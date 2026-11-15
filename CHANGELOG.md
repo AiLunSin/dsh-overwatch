@@ -3,7 +3,7 @@
 All notable changes are recorded here. The project follows SemVer once it
 publishes; until then the minor version tracks milestones.
 
-## [Unreleased]
+## [1.0.1] - 2026-11-15
 
 ### Added — full A/B/C supervision run
 

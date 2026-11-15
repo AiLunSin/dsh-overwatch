@@ -48,9 +48,14 @@ if (Test-Path (Join-Path $root '.git')) {
   }
 }
 
-Write-Host "==> bump package.json to $Version"
-npm version $Version --no-git-tag-version
-if ($LASTEXITCODE -ne 0) { throw 'npm version failed' }
+$current = (Get-Content (Join-Path $root 'package.json') -Raw | ConvertFrom-Json).version
+if ($current -eq $Version) {
+  Write-Host "==> package.json already at $Version"
+} else {
+  Write-Host "==> bump package.json $current -> $Version"
+  npm version $Version --no-git-tag-version
+  if ($LASTEXITCODE -ne 0) { throw 'npm version failed' }
+}
 
 Write-Host '==> build scoped release'
 npm run build:release -- --version $Version

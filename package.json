@@ -1,6 +1,6 @@
 {
   "name": "dsh-overwatch",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Supervised swarm for DeepSeek Harness: a watch officer agent, deterministic hard guards, and cross-source evidence.",
   "license": "MIT",
