@@ -26,6 +26,19 @@ publishes; until then the minor version tracks milestones.
   `conflict_storm` (307ms) all PASS; one real merge and three real conflicts.
   Evidence under `e2e/m4/swarm-signals/results/`.
 
+### Added — DSH plugin listing
+
+- Localized `meta.title` / `meta.description` now state the supervision
+  capability, data read, model-token use in supervised mode, and what disabling
+  the plugin does.
+- The plugin detail page is a single feature image:
+  `docs/DETAIL.md`, `docs/DETAIL.zh.md` and `docs/preview.svg`; the old long
+  overview is no longer referenced by `meta.detail`.
+- Installed `@ailunsin/dsh-overwatch@1.0.1` into the local `desktop` profile as a
+  bundle (temporary `dist` link). `watch_status` reports 1.0.1 / guard, and
+  `GET /overwatch/api/health` returns 200; the Web panel still needs a page
+  refresh for visual verification.
+
 ### Added — OTP release helper
 
 - `scripts/publish-otp.ps1` checks the npm identity and existing versions,

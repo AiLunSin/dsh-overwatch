@@ -87,6 +87,24 @@ dsh plugin --profile ow add C:\Users\11403\Desktop\overwatch
 Web 面板需要 web profile；装好后侧边栏出现「瞭望塔」，
 `GET http://127.0.0.1:<port>/overwatch/api/health` 返回版本、模式、链校验与源状态。
 
+### 2.1 已安装到本机 DSH Desktop
+
+`@ailunsin/dsh-overwatch@1.0.1` 已作为 `desktop` profile 的 bundle 安装并启用
+（本地 `dist/ailunsin--dsh-overwatch` link），与 `dsh-swarm` / `dsh-pressure` /
+`dsh-fishkeeper` 并列。安装后验证：
+
+- `watch_status` 返回 `version: 1.0.1`、`mode: guard`、`http.write: false`；
+- `GET http://127.0.0.1:54161/overwatch/api/health` → 200，swarm/pressure/fish
+  三个 Port 均可用；
+- `list_plugins` 出现 `include:dsh-overwatch`（`@ailunsin/dsh-overwatch`，active）。
+
+刷新 Web 页面后侧边栏出现「瞭望塔」，Plugins 详情页使用
+`docs/DETAIL.md` / `docs/DETAIL.zh.md` 与 `docs/preview.svg` 的单图说明。
+DSH `0.2.2-rc.3` **没有官方公共插件索引**；`Discover` 是 experimental 的自建
+index（`@deepseek-ai/dsh-experimental-plugin-market-bundle`），所以这里的
+“上架”指装入本机 profile 的 Plugins 列表。npm `1.0.1` 发布后可改用 registry
+安装，避免依赖本地 `dist/` 目录。
+
 配置在 profile 的 `cordis.patch.yml` 中按行 id 覆盖（完整示例
 [examples/profile-patch.yml](./examples/profile-patch.yml)）：
 
@@ -260,7 +278,7 @@ overwatch/
 ├── e2e/m1/              # M1/M3 假 swarm + web 探针 + 结果
 ├── e2e/m2/              # M2 进程内假 swarm + 脚本化 provider + headless runner + 结果
 ├── test/                # 单元/路由/服务/装配/面板测试
-├── docs/                # spike-m0.md、m1.md、m2.md、m3.md、DETAIL.md
+├── docs/                # spike-m0.md、m1.md、m2.md、m3.md、DETAIL*.md、preview.svg
 ├── cordis.patch.yml     # 组合包 patch 层
 └── scripts/             # 语法检查入口
 ```

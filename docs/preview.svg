@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="300" viewBox="0 0 640 300" role="img" aria-label="Overwatch: swarm events pass through a hard guard and a watch officer into a hash-chained evidence ledger">
+  <defs>
+    <linearGradient id="ow-bg" x1="0" y1="0" x2="640" y2="300" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0b1220"/>
+      <stop offset="1" stop-color="#111827"/>
+    </linearGradient>
+    <linearGradient id="ow-shield" x1="290" y1="86" x2="350" y2="222" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="ow-gauge" x1="294" y1="168" x2="346" y2="168" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#f59e0b"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="640" height="300" rx="24" fill="url(#ow-bg)"/>
+  <rect x="16" y="16" width="608" height="268" rx="18" fill="none" stroke="#1f2937" stroke-width="2"/>
+
+  <g fill="#1f2937">
+    <circle cx="58" cy="54" r="2.4"/><circle cx="92" cy="54" r="2.4"/><circle cx="126" cy="54" r="2.4"/>
+    <circle cx="514" cy="246" r="2.4"/><circle cx="548" cy="246" r="2.4"/><circle cx="582" cy="246" r="2.4"/>
+  </g>
+
+  <!-- Swarm: one hub, four members, live edges. -->
+  <g stroke="#38bdf8" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round">
+    <path d="M146 150 L92 108"/>
+    <path d="M146 150 L84 190"/>
+    <path d="M146 150 L118 218"/>
+    <path d="M146 150 L188 214"/>
+  </g>
+  <g fill="#0ea5e9">
+    <circle cx="92" cy="108" r="10"/>
+    <circle cx="84" cy="190" r="10"/>
+    <circle cx="118" cy="218" r="10"/>
+    <circle cx="188" cy="214" r="10"/>
+  </g>
+  <path d="M146 126 L167 138 L167 162 L146 174 L125 162 L125 138 Z" fill="#0f172a" stroke="#38bdf8" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="146" cy="150" r="7" fill="#7dd3fc"/>
+
+  <!-- Hand-off arrow. -->
+  <path d="M224 150 H252" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M250 142 L262 150 L250 158 Z" fill="#64748b"/>
+
+  <!-- Guard + watch officer: shield, gauge and eye. -->
+  <path d="M320 76 L372 98 V150 C372 190 348 213 320 226 C292 213 268 190 268 150 V98 Z" fill="url(#ow-shield)" stroke="#f59e0b" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M320 76 L372 98 V150 C372 190 348 213 320 226 C292 213 268 190 268 150 V98 Z" fill="none" stroke="#fbbf24" stroke-opacity="0.35" stroke-width="8" stroke-linejoin="round"/>
+  <path d="M294 170 A26 26 0 0 1 346 170" fill="none" stroke="url(#ow-gauge)" stroke-width="5" stroke-linecap="round"/>
+  <path d="M320 170 L335 151" stroke="#fbbf24" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="320" cy="170" r="5" fill="#fbbf24"/>
+  <path d="M302 118 Q320 104 338 118 Q320 132 302 118 Z" fill="#0f172a" stroke="#7dd3fc" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="320" cy="118" r="5.5" fill="#7dd3fc"/>
+  <path d="M294 198 H346" stroke="#38bdf8" stroke-opacity="0.5" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M302 208 H338" stroke="#38bdf8" stroke-opacity="0.25" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Hand-off arrow. -->
+  <path d="M384 150 H412" stroke="#64748b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M410 142 L422 150 L410 158 Z" fill="#64748b"/>
+
+  <!-- Evidence ledger: hash-linked entries. -->
+  <g stroke="#34d399" stroke-opacity="0.55" stroke-width="2.5">
+    <path d="M462 112 V132"/>
+    <path d="M462 162 V182"/>
+  </g>
+  <g>
+    <rect x="424" y="78" width="150" height="42" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="2.5"/>
+    <rect x="424" y="128" width="150" height="42" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="2.5"/>
+    <rect x="424" y="178" width="150" height="42" rx="10" fill="#0f172a" stroke="#34d399" stroke-width="2.5"/>
+    <g fill="none" stroke="#6ee7b7" stroke-width="2.5" stroke-linecap="round">
+      <path d="M444 92 h14"/><path d="M444 100 h24"/><path d="M444 108 h9"/>
+      <path d="M444 142 h14"/><path d="M444 150 h24"/><path d="M444 158 h9"/>
+      <path d="M444 192 h14"/><path d="M444 200 h24"/><path d="M444 208 h9"/>
+    </g>
+    <g fill="#34d399">
+      <circle cx="550" cy="99" r="9"/><circle cx="550" cy="149" r="9"/><circle cx="550" cy="199" r="9"/>
+    </g>
+    <g fill="#0b1220">
+      <circle cx="547" cy="99" r="3.4"/><circle cx="553" cy="99" r="3.4"/>
+      <circle cx="547" cy="149" r="3.4"/><circle cx="553" cy="149" r="3.4"/>
+      <circle cx="547" cy="199" r="3.4"/><circle cx="553" cy="199" r="3.4"/>
+    </g>
+  </g>
+
+  <!-- Severity dots: notice / guarded / stop. -->
+  <g>
+    <circle cx="266" cy="246" r="5" fill="#38bdf8"/>
+    <circle cx="320" cy="246" r="5" fill="#fbbf24"/>
+    <circle cx="374" cy="246" r="5" fill="#f87171"/>
+  </g>
+</svg>

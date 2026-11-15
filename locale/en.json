@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "Overwatch",
-    "description": "Supervised swarms for DeepSeek Harness: a model-free hard guard, a tool-restricted watch officer (M2), incident cases, a hash-chained watch log, and a panel.",
+    "description": "Watches a dsh-swarm run: a model-free hard guard, an optional tool-restricted watch officer, incident cases, a local hash-chained evidence log, and a Web panel. Reads swarm, pressure and fishkeeper status; supervised wakes use model tokens; disabling it stops new monitoring but keeps existing logs.",
     "detail": "docs/DETAIL.md"
   }
 }

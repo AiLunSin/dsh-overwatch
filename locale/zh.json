@@ -1,7 +1,7 @@
 {
   "meta": {
     "title": "瞭望塔",
-    "description": "受控蜂群的受监管运行：无模型的硬闸门、受工具限制的值班员（M2）、事件单、哈希链证据账与面板。",
-    "detail": "docs/DETAIL.md"
+    "description": "监管一次 dsh-swarm 运行：无模型硬闸门、可选的值班员、事件单、本地哈希链证据账与 Web 面板。读取 swarm/pressure/fishkeeper 状态；supervised 唤醒消耗模型 token；停用后停止新的监管，已有日志保留。",
+    "detail": "docs/DETAIL.zh.md"
   }
 }
