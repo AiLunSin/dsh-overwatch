@@ -2,6 +2,7 @@
 
 [![ci](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml/badge.svg)](https://github.com/AiLunSin/dsh-overwatch/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/@ailunsin/dsh-overwatch?label=npm)](https://www.npmjs.com/package/@ailunsin/dsh-overwatch)
+[![release](https://img.shields.io/github/v/release/AiLunSin/dsh-overwatch?include_prereleases&label=release)](https://github.com/AiLunSin/dsh-overwatch/releases)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE)
 [![node](https://img.shields.io/badge/node-%3E%3D22-339933.svg)](./package.json)
 [![dsh](https://img.shields.io/badge/dsh-0.2.2--rc.3-4f46e5.svg)](./docs/compatibility.md)
